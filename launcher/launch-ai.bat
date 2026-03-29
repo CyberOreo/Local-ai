@@ -29,8 +29,8 @@ echo [%date% %time%] Launcher started >> "%LOG_FILE%"
 :: ---- Load .env config ----------------------------------------
 set "OLLAMA_PORT=11434"
 set "WEBUI_PORT=3000"
-set "PRIMARY_MODEL=qwen3:8b"
-set "BACKUP_MODEL=qwen3:4b"
+set "PRIMARY_MODEL=qwen3.5:8b"
+set "BACKUP_MODEL=qwen3.5:4b"
 set "AUTO_OPEN_BROWSER=true"
 set "PROFILE=max-performance"
 

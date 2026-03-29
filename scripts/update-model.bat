@@ -11,8 +11,8 @@ color 0B
 set "CONFIG_DIR=%~dp0..\config"
 set "LOG_DIR=%~dp0..\logs"
 set "LOG_FILE=%LOG_DIR%\update.log"
-set "PRIMARY_MODEL=qwen3:8b"
-set "BACKUP_MODEL=qwen3:4b"
+set "PRIMARY_MODEL=qwen3.5:8b"
+set "BACKUP_MODEL=qwen3.5:4b"
 
 :: Load settings from .env if available
 if exist "%CONFIG_DIR%\.env" (
