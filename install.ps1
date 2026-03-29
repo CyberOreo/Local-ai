@@ -410,3 +410,22 @@ Write-Host "  ============================================================" -For
 Write-Host ""
 
 Write-Log "Installation completed successfully." "OK"
+
+# ============================================================
+# STEP 16: Write installed flag so start.bat knows setup is done
+# ============================================================
+$flagFile = Join-Path $ConfigDir ".installed"
+Set-Content -Path $flagFile -Value (Get-Date -Format "yyyy-MM-dd HH:mm:ss") -Encoding UTF8
+Write-Log "Wrote installed flag: $flagFile" "INFO"
+
+# ============================================================
+# STEP 17: Auto-launch after install
+# ============================================================
+Write-Host ""
+Write-Host "  Launching Local AI now..." -ForegroundColor Cyan
+Write-Host ""
+Start-Sleep -Seconds 2
+$launchScript = Join-Path $ProjectRoot "launcher\launch-ai.bat"
+if (Test-Path $launchScript) {
+    Start-Process -FilePath "cmd.exe" -ArgumentList "/c `"$launchScript`""
+}
