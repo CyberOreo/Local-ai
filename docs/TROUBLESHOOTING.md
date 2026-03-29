@@ -35,7 +35,7 @@ It tests all services and shows exactly what is and isn't working.
 1. **Check GPU is being used:** Open CMD and run `nvidia-smi` — look for `ollama` in the list with VRAM usage. If not showing, GPU is not being used.
 2. **Switch to balanced profile:** Edit `config\.env` → set `PROFILE=balanced` → restart
 3. **Switch to safe-mode profile:** Edit `config\.env` → set `PROFILE=safe-mode` → restart
-4. **Use the backup model:** In Open WebUI model selector, choose `qwen2.5:3b` — it runs at ~50–70 tok/s
+4. **Use the backup model:** In Open WebUI model selector, choose `qwen3:4b` — it runs at ~50–70 tok/s
 5. **Close other heavy apps** (games, browsers with many tabs, video editors) before launching
 
 ---
@@ -46,7 +46,7 @@ It tests all services and shows exactly what is and isn't working.
 
 **Fixes:**
 1. Switch to `safe-mode` profile (in `config\.env`)
-2. Use `qwen2.5:3b` instead of 8B
+2. Use `qwen3:4b` instead of 8B
 3. Reduce context: in `config\profiles\safe-mode.env` change `OLLAMA_NUM_CTX=1024`
 4. Close Chrome/Edge tabs, other RAM-heavy apps
 5. Restart your PC to free fragmented memory
@@ -119,7 +119,7 @@ It tests all services and shows exactly what is and isn't working.
 **Fixes:**
 1. **Update NVIDIA drivers** — download from https://www.nvidia.com/drivers
 2. **Reinstall Ollama** — uninstall via Windows Settings, then re-run `install.bat`
-3. **Check CUDA is available:** Run `ollama run qwen2.5:8b "hello"` in CMD. If it says "CUDA not available" or "using CPU", that confirms the issue.
+3. **Check CUDA is available:** Run `ollama run qwen3:8b "hello"` in CMD. If it says "CUDA not available" or "using CPU", that confirms the issue.
 4. **Check GPU is detected by Ollama:** Run `ollama ps` after starting a model — it should show `GPU` layers
 
 ---
@@ -174,7 +174,7 @@ It tests all services and shows exactly what is and isn't working.
 
 **Fixes:**
 1. Switch to `safe-mode` profile and try again
-2. Use `qwen2.5:3b` (much smaller, fits easily)
+2. Use `qwen3:4b` (much smaller, fits easily)
 3. Run `nvidia-smi` to check actual free VRAM before loading
 4. Stop other GPU-using applications (games, rendering apps)
 

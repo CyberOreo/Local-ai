@@ -1,8 +1,8 @@
 {
   "ollama_port": 11434,
   "webui_port": 3000,
-  "primary_model": "qwen2.5:8b",
-  "backup_model": "qwen2.5:3b",
+  "primary_model": "qwen3:8b",
+  "backup_model": "qwen3:4b",
   "webui_container_name": "open-webui",
   "webui_docker_image": "ghcr.io/open-webui/open-webui:main",
   "startup_timeout_seconds": 90,
