@@ -23,12 +23,12 @@ Everything runs on your machine. No cloud, no subscriptions, no data sent anywhe
 | CPU | Ryzen 5 3600X (6c/12t) | 10 threads used by default |
 | GPU | GTX 1070 Ti 8GB VRAM | All model layers offloaded to GPU |
 | RAM | 16 GB | Leaves ~13 GB free during use |
-| Model | qwen3.5:9b Q4_K_M | ~4.5–6.5 GB VRAM depending on profile |
+| Model | qwen3.5:9b Q4_K_M | ~6.6 GB weights + KV cache per profile |
 
 **Expected performance (max-performance profile):**
-- Speed: ~20–30 tokens/second
+- Speed: ~18–25 tokens/second
 - First response: 3–6 seconds
-- Context window: 8192 tokens
+- Context window: 4096 tokens (safe default), up to 6144 with quality profile
 
 ---
 
@@ -57,8 +57,8 @@ Before installing, make sure you have:
 3. Wait — the installer will:
    - Check your system
    - Download and install Ollama (~50 MB)
-   - Download Qwen 2.5 8B model (~5 GB) — **this takes 10–20 min**
-   - Download Qwen 2.5 3B backup model (~2 GB)
+   - Download Qwen 3.5 9B model (~6.6 GB) — **this takes 15–25 min**
+   - Download Qwen 3.5 4B backup model (~2.5 GB)
    - Set up the Open WebUI container
    - Create a "Local AI" desktop shortcut
 
@@ -86,11 +86,12 @@ That's it. No terminal. No commands.
 
 Edit the file `config\.env` and change the `PROFILE=` line:
 
-| Profile | Context | GPU | Speed | Use When |
-|---------|---------|-----|-------|----------|
-| `max-performance` | 8192 tokens | ~88% | 20–30 tok/s | Default — best AI speed |
-| `balanced` | 4096 tokens | ~70% | 20–28 tok/s | Running other heavy apps |
-| `safe-mode` | 2048 tokens | ~50% | 15–20 tok/s | System feels sluggish |
+| Profile | Context | GPU layers | Speed | Use When |
+|---------|---------|-----------|-------|----------|
+| `max-performance` | 4096 tokens | 36/36 (~88%) | 18–25 tok/s | Default — best daily speed |
+| `balanced` | 2048 tokens | 36/36 (~85%) | 20–27 tok/s | Running other apps too |
+| `quality` | 6144 tokens | 36/36 (~96%) | 15–20 tok/s | Long docs — close other apps first |
+| `safe-mode` | 1024 tokens | 20/36 (~50%) | 10–15 tok/s | Emergency fallback |
 
 ```
 # In config\.env:
@@ -105,12 +106,12 @@ Then restart: double-click `launcher\restart-ai.bat`
 
 In Open WebUI, use the **model selector** at the top of the chat to switch between:
 
-- `qwen3.5:9b` — full 8B model (best quality)
-- `qwen3.5:9b-maxperf` — 8B with max-performance settings
-- `qwen3.5:9b-balanced` — 8B with balanced settings
-- `qwen3.5:9b-safe` — 8B with safe-mode settings
-- `qwen3.5:4b` — smaller, faster backup model
-- `qwen3.5:4b-fast` — 3B with max performance settings
+- `qwen3.5:9b` — full 9B model (best quality)
+- `qwen3.5:9b-maxperf` — 9B with max-performance settings
+- `qwen3.5:9b-balanced` — 9B with balanced settings
+- `qwen3.5:9b-safe` — 9B with safe-mode settings
+- `qwen3.5:4b` — smaller, faster backup model (~40–50 tok/s)
+- `qwen3.5:4b-fast` — 4B with max performance settings
 
 ---
 

@@ -246,10 +246,10 @@ if ($LASTEXITCODE -ne 0) {
 Write-Log "Creating model profiles (Modelfiles)..." "STEP"
 
 $profiles = @(
-    @{ Name = "qwen3.5:9b-maxperf";  Base = "qwen3.5:9b"; NumCtx = 8192; NumGpu = 35; NumThread = 10; Flash = 1 },
-    @{ Name = "qwen3.5:9b-balanced"; Base = "qwen3.5:9b"; NumCtx = 4096; NumGpu = 35; NumThread = 8;  Flash = 1 },
-    @{ Name = "qwen3.5:9b-safe";     Base = "qwen3.5:9b"; NumCtx = 2048; NumGpu = 20; NumThread = 4;  Flash = 0 },
-    @{ Name = "qwen3.5:4b-fast";     Base = "qwen3.5:4b"; NumCtx = 4096; NumGpu = 35; NumThread = 10; Flash = 1 }
+    @{ Name = "qwen3.5:9b-maxperf";  Base = "qwen3.5:9b"; NumCtx = 4096; NumGpu = 36; NumThread = 10; Flash = 1 },
+    @{ Name = "qwen3.5:9b-balanced"; Base = "qwen3.5:9b"; NumCtx = 2048; NumGpu = 36; NumThread = 8;  Flash = 1 },
+    @{ Name = "qwen3.5:9b-safe";     Base = "qwen3.5:9b"; NumCtx = 1024; NumGpu = 20; NumThread = 4;  Flash = 0 },
+    @{ Name = "qwen3.5:4b-fast";     Base = "qwen3.5:4b"; NumCtx = 4096; NumGpu = 36; NumThread = 10; Flash = 1 }
 )
 
 foreach ($p in $profiles) {
@@ -394,8 +394,8 @@ Write-Host "   INSTALLATION COMPLETE!" -ForegroundColor Green
 Write-Host "  ============================================================" -ForegroundColor Green
 Write-Host ""
 Write-Host "   Models installed:" -ForegroundColor White
-Write-Host "     - qwen3.5:9b  (primary, ~5 GB)" -ForegroundColor Gray
-Write-Host "     - qwen3.5:4b  (backup,  ~2 GB)" -ForegroundColor Gray
+Write-Host "     - qwen3.5:9b  (primary, ~6.6 GB)" -ForegroundColor Gray
+Write-Host "     - qwen3.5:4b  (backup,  ~2.5 GB)" -ForegroundColor Gray
 Write-Host ""
 Write-Host "   Web UI is running at:" -ForegroundColor White
 Write-Host "     http://localhost:${webuiPort}" -ForegroundColor Cyan
