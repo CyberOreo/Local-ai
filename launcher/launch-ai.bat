@@ -233,6 +233,28 @@ echo  [OK]   Web UI is ready!
 echo [%date% %time%] Web UI ready on port %WEBUI_PORT% >> "%LOG_FILE%"
 
 :: ============================================================
+:: Start Update Server (enables update button in Open WebUI)
+:: ============================================================
+echo.
+echo  Starting update server (for in-chat update button)...
+tasklist /FI "IMAGENAME eq powershell.exe" /FI "WINDOWTITLE eq LocalAI-UpdateServer" >nul 2>&1
+curl -s --max-time 2 http://localhost:9999/api/health >nul 2>&1
+if not errorlevel 1 (
+    echo  [OK]   Update server already running.
+) else (
+    start "LocalAI-UpdateServer" /min powershell -ExecutionPolicy Bypass -WindowStyle Hidden ^
+        -File "%PROJECT_ROOT%\scripts\update-server.ps1" -ProjectRoot "%PROJECT_ROOT%"
+    timeout /t 2 /nobreak >nul
+    curl -s --max-time 3 http://localhost:9999/api/health >nul 2>&1
+    if not errorlevel 1 (
+        echo  [OK]   Update server started on port 9999.
+    ) else (
+        echo  [WARN] Update server slow to start - will be available shortly.
+    )
+)
+echo [%date% %time%] Update server started >> "%LOG_FILE%"
+
+:: ============================================================
 :: Open browser
 :: ============================================================
 if /i "%AUTO_OPEN_BROWSER%"=="true" (
@@ -248,18 +270,17 @@ echo.
 echo  ============================================================
 echo    LOCAL AI IS RUNNING
 echo.
-echo    Browser:   http://localhost:%WEBUI_PORT%
-echo    Ollama:    http://localhost:%OLLAMA_PORT%
-echo    Profile:   %PROFILE%
-echo    Model:     %PRIMARY_MODEL%
+echo    Browser:      http://localhost:%WEBUI_PORT%
+echo    Ollama:       http://localhost:%OLLAMA_PORT%
+echo    Update API:   http://localhost:9999
+echo    Profile:      %PROFILE%
+echo    Model:        %PRIMARY_MODEL%
 echo.
-echo    This window keeps services alive.
+echo    IN-CHAT UPDATE: type "update" in the chat
 echo    To STOP everything: run launcher\stop-ai.bat
-echo    Or just close this window (services continue in background).
 echo  ============================================================
 echo.
 echo  Press any key to exit this window (services keep running).
-echo  To stop services use: launcher\stop-ai.bat
 echo.
 pause >nul
 

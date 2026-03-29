@@ -34,6 +34,11 @@ if errorlevel 1 (
     echo  [OK]   Ollama stopped.
 )
 
+:: Stop update server (PowerShell window titled LocalAI-UpdateServer)
+echo  Stopping update server...
+taskkill /F /FI "WINDOWTITLE eq LocalAI-UpdateServer" >nul 2>&1
+echo  [OK]   Update server stopped.
+
 echo.
 echo  [OK]   All services stopped.
 echo [%date% %time%] Services stopped >> "%LOG_FILE%"
