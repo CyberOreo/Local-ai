@@ -28,7 +28,7 @@ if (Test-Path $envFile) {
 $steps   = [System.Collections.Generic.List[string]]::new()
 $errors  = [System.Collections.Generic.List[string]]::new()
 
-# ── Helpers ──────────────────────────────────────────────────
+# -- Helpers --------------------------------------------------
 
 function Set-Status([string]$msg, [string]$state = "running") {
     $obj = [ordered]@{
@@ -65,20 +65,20 @@ function Wait-OllamaReady([int]$timeout = 30) {
     return $false
 }
 
-# ── Start ────────────────────────────────────────────────────
+# -- Start ----------------------------------------------------
 
 try {
 
 Add-Step "Starting update..."
 
-# ── STEP 1: Stop services ────────────────────────────────────
+# -- STEP 1: Stop services ------------------------------------
 Add-Step "Stopping services..."
 & docker stop $CONTAINER 2>$null | Out-Null
 & taskkill /F /IM ollama.exe /T 2>$null | Out-Null
 Start-Sleep 3
 Add-Step "Services stopped."
 
-# ── STEP 2: Update Ollama ────────────────────────────────────
+# -- STEP 2: Update Ollama ------------------------------------
 Add-Step "Updating Ollama runtime..."
 try {
     $installer = Join-Path $env:TEMP "OllamaSetup.exe"
@@ -93,7 +93,7 @@ try {
     Add-Error "Ollama update failed (non-critical): $_"
 }
 
-# ── STEP 3: Update Open WebUI image ──────────────────────────
+# -- STEP 3: Update Open WebUI image --------------------------
 Add-Step "Updating Open WebUI image (downloading only changed layers)..."
 try {
     # Make sure Docker daemon is running
@@ -118,7 +118,7 @@ try {
     if ($dockerOk) {
         & docker pull $WEBUI_IMAGE
         if ($LASTEXITCODE -eq 0) {
-            Add-Step "Removing old container (chat history is in a volume — safe)..."
+            Add-Step "Removing old container (chat history is in a volume  -  safe)..."
             & docker rm $CONTAINER 2>$null | Out-Null
             Add-Step "Recreating container with latest image..."
             & docker run -d `
@@ -132,49 +132,58 @@ try {
                 $WEBUI_IMAGE 2>&1 | Out-Null
             if ($LASTEXITCODE -eq 0) {
                 Add-Step "Open WebUI updated. Chat history preserved."
+                # Re-install skill packages (lost when container is recreated)
+                Add-Step "Re-installing skill packages into updated container..."
+                $pkgResult = & docker exec $CONTAINER pip install --quiet --no-warn-script-location `
+                    youtube-transcript-api requests beautifulsoup4 pypdf python-docx openpyxl lxml 2>&1
+                if ($LASTEXITCODE -eq 0) {
+                    Add-Step "Skill packages re-installed."
+                } else {
+                    Add-Error "Skill package re-install failed (non-critical): $pkgResult"
+                }
             } else {
-                Add-Error "Failed to recreate container — run start.bat to recover."
+                Add-Error "Failed to recreate container  -  run start.bat to recover."
             }
         } else {
-            Add-Error "docker pull failed — keeping existing image."
+            Add-Error "docker pull failed  -  keeping existing image."
         }
     } else {
-        Add-Error "Docker not available — WebUI update skipped."
+        Add-Error "Docker not available  -  WebUI update skipped."
     }
 } catch {
     Add-Error "WebUI update error: $_"
 }
 
-# ── STEP 4: Start Ollama for model updates ───────────────────
+# -- STEP 4: Start Ollama for model updates -------------------
 Add-Step "Starting Ollama for model updates..."
 Start-Process "ollama" -ArgumentList "serve" -WindowStyle Hidden
 $ready = Wait-OllamaReady -timeout 30
 if (-not $ready) {
-    Add-Error "Ollama did not start in time — model updates skipped."
+    Add-Error "Ollama did not start in time  -  model updates skipped."
     Set-Status "Update complete with warnings. Restart the app." "complete"
     exit 0
 }
 Add-Step "Ollama ready."
 
-# ── STEP 5: Update primary model ─────────────────────────────
-Add-Step "Updating $PRIMARY_MODEL (smart delta — 0 bytes if unchanged)..."
+# -- STEP 5: Update primary model -----------------------------
+Add-Step "Updating $PRIMARY_MODEL (smart delta  -  0 bytes if unchanged)..."
 & ollama pull $PRIMARY_MODEL
 if ($LASTEXITCODE -eq 0) {
     Add-Step "$PRIMARY_MODEL is up to date."
 } else {
-    Add-Error "$PRIMARY_MODEL update failed — existing version kept."
+    Add-Error "$PRIMARY_MODEL update failed  -  existing version kept."
 }
 
-# ── STEP 6: Update backup model ──────────────────────────────
+# -- STEP 6: Update backup model ------------------------------
 Add-Step "Updating $BACKUP_MODEL..."
 & ollama pull $BACKUP_MODEL
 if ($LASTEXITCODE -eq 0) {
     Add-Step "$BACKUP_MODEL is up to date."
 } else {
-    Add-Error "$BACKUP_MODEL update failed — existing version kept."
+    Add-Error "$BACKUP_MODEL update failed  -  existing version kept."
 }
 
-# ── DONE ─────────────────────────────────────────────────────
+# -- DONE -----------------------------------------------------
 $errCount = $errors.Count
 if ($errCount -eq 0) {
     Set-Status "Update complete! Everything is up to date. Refresh the page." "complete"

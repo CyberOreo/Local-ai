@@ -50,7 +50,7 @@ $listener.Prefixes.Add("http://localhost:$Port/")
 try {
     $listener.Start()
 } catch {
-    Write-Log "ERROR: Could not start listener on port $Port — $_"
+    Write-Log "ERROR: Could not start listener on port $Port  -  $_"
     exit 1
 }
 
@@ -74,7 +74,7 @@ while ($listener.IsListening) {
 
         switch ($path) {
 
-            # ── Health check ─────────────────────────────────
+            # -- Health check ---------------------------------
             "/api/health" {
                 Send-Json $res @{
                     status  = "ok"
@@ -82,7 +82,7 @@ while ($listener.IsListening) {
                 }
             }
 
-            # ── Start update ─────────────────────────────────
+            # -- Start update ---------------------------------
             "/api/update" {
                 $current = Get-Content $StatusFile -Raw | ConvertFrom-Json
                 if ($current.status -eq "running") {
@@ -113,7 +113,7 @@ while ($listener.IsListening) {
                 }
             }
 
-            # ── Status ───────────────────────────────────────
+            # -- Status ---------------------------------------
             "/api/status" {
                 if (Test-Path $StatusFile) {
                     $raw   = Get-Content $StatusFile -Raw -Encoding UTF8
@@ -129,7 +129,7 @@ while ($listener.IsListening) {
                 }
             }
 
-            # ── Reset status (after reading complete/error) ──
+            # -- Reset status (after reading complete/error) --
             "/api/reset" {
                 Set-StatusIdle
                 Send-Json $res @{ status = "ok"; message = "Status reset to idle." }

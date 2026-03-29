@@ -235,7 +235,7 @@ Write-Log "Pulling backup model: qwen3.5:4b..." "STEP"
 Write-Host "  Downloading qwen3.5:4b model (~2 GB)..." -ForegroundColor Cyan
 & ollama pull qwen3.5:4b
 if ($LASTEXITCODE -ne 0) {
-    Write-Log "Failed to pull qwen3.5:4b. This is not critical — continuing." "WARN"
+    Write-Log "Failed to pull qwen3.5:4b. This is not critical - continuing." "WARN"
 } else {
     Write-Log "qwen3.5:4b backup model ready." "OK"
 }
