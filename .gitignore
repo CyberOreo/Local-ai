@@ -1,0 +1,5 @@
+logs/*.log
+shortcuts/*.lnk
+config/.env
+.env
+*.tmp

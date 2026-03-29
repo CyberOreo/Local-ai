@@ -1,0 +1,14 @@
+{
+  "ollama_port": 11434,
+  "webui_port": 3000,
+  "primary_model": "qwen2.5:8b",
+  "backup_model": "qwen2.5:3b",
+  "webui_container_name": "open-webui",
+  "webui_docker_image": "ghcr.io/open-webui/open-webui:main",
+  "startup_timeout_seconds": 90,
+  "docker_startup_wait_seconds": 60,
+  "auto_open_browser": true,
+  "log_dir": "logs",
+  "default_profile": "max-performance",
+  "project_name": "Local AI"
+}
