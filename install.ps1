@@ -221,15 +221,15 @@ if (-not $ollamaRunning) {
 # ============================================================
 # STEP 8: Pull Models
 # ============================================================
-Write-Log "Pulling primary model: qwen3.5:8b (this may take 10-20 minutes on first run)..." "STEP"
-Write-Host "  Downloading qwen3.5:8b model (~5 GB)..." -ForegroundColor Cyan
+Write-Log "Pulling primary model: qwen3.5:9b (this may take 10-20 minutes on first run)..." "STEP"
+Write-Host "  Downloading qwen3.5:9b model (~5 GB)..." -ForegroundColor Cyan
 Write-Host "  This is a one-time download. Please be patient." -ForegroundColor DarkGray
-& ollama pull qwen3.5:8b
+& ollama pull qwen3.5:9b
 if ($LASTEXITCODE -ne 0) {
-    Write-Log "Failed to pull qwen3.5:8b. Check your internet connection." "ERROR"
+    Write-Log "Failed to pull qwen3.5:9b. Check your internet connection." "ERROR"
     exit 1
 }
-Write-Log "qwen3.5:8b model ready." "OK"
+Write-Log "qwen3.5:9b model ready." "OK"
 
 Write-Log "Pulling backup model: qwen3.5:4b..." "STEP"
 Write-Host "  Downloading qwen3.5:4b model (~2 GB)..." -ForegroundColor Cyan
@@ -246,9 +246,9 @@ if ($LASTEXITCODE -ne 0) {
 Write-Log "Creating model profiles (Modelfiles)..." "STEP"
 
 $profiles = @(
-    @{ Name = "qwen3.5:8b-maxperf";  Base = "qwen3.5:8b"; NumCtx = 8192; NumGpu = 35; NumThread = 10; Flash = 1 },
-    @{ Name = "qwen3.5:8b-balanced"; Base = "qwen3.5:8b"; NumCtx = 4096; NumGpu = 35; NumThread = 8;  Flash = 1 },
-    @{ Name = "qwen3.5:8b-safe";     Base = "qwen3.5:8b"; NumCtx = 2048; NumGpu = 20; NumThread = 4;  Flash = 0 },
+    @{ Name = "qwen3.5:9b-maxperf";  Base = "qwen3.5:9b"; NumCtx = 8192; NumGpu = 35; NumThread = 10; Flash = 1 },
+    @{ Name = "qwen3.5:9b-balanced"; Base = "qwen3.5:9b"; NumCtx = 4096; NumGpu = 35; NumThread = 8;  Flash = 1 },
+    @{ Name = "qwen3.5:9b-safe";     Base = "qwen3.5:9b"; NumCtx = 2048; NumGpu = 20; NumThread = 4;  Flash = 0 },
     @{ Name = "qwen3.5:4b-fast";     Base = "qwen3.5:4b"; NumCtx = 4096; NumGpu = 35; NumThread = 10; Flash = 1 }
 )
 
@@ -394,7 +394,7 @@ Write-Host "   INSTALLATION COMPLETE!" -ForegroundColor Green
 Write-Host "  ============================================================" -ForegroundColor Green
 Write-Host ""
 Write-Host "   Models installed:" -ForegroundColor White
-Write-Host "     - qwen3.5:8b  (primary, ~5 GB)" -ForegroundColor Gray
+Write-Host "     - qwen3.5:9b  (primary, ~5 GB)" -ForegroundColor Gray
 Write-Host "     - qwen3.5:4b  (backup,  ~2 GB)" -ForegroundColor Gray
 Write-Host ""
 Write-Host "   Web UI is running at:" -ForegroundColor White

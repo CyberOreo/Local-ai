@@ -119,7 +119,7 @@ It tests all services and shows exactly what is and isn't working.
 **Fixes:**
 1. **Update NVIDIA drivers** — download from https://www.nvidia.com/drivers
 2. **Reinstall Ollama** — uninstall via Windows Settings, then re-run `install.bat`
-3. **Check CUDA is available:** Run `ollama run qwen3.5:8b "hello"` in CMD. If it says "CUDA not available" or "using CPU", that confirms the issue.
+3. **Check CUDA is available:** Run `ollama run qwen3.5:9b "hello"` in CMD. If it says "CUDA not available" or "using CPU", that confirms the issue.
 4. **Check GPU is detected by Ollama:** Run `ollama ps` after starting a model — it should show `GPU` layers
 
 ---

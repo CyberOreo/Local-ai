@@ -23,7 +23,7 @@ Everything runs on your machine. No cloud, no subscriptions, no data sent anywhe
 | CPU | Ryzen 5 3600X (6c/12t) | 10 threads used by default |
 | GPU | GTX 1070 Ti 8GB VRAM | All model layers offloaded to GPU |
 | RAM | 16 GB | Leaves ~13 GB free during use |
-| Model | qwen3.5:8b Q4_K_M | ~4.5–6.5 GB VRAM depending on profile |
+| Model | qwen3.5:9b Q4_K_M | ~4.5–6.5 GB VRAM depending on profile |
 
 **Expected performance (max-performance profile):**
 - Speed: ~20–30 tokens/second
@@ -105,10 +105,10 @@ Then restart: double-click `launcher\restart-ai.bat`
 
 In Open WebUI, use the **model selector** at the top of the chat to switch between:
 
-- `qwen3.5:8b` — full 8B model (best quality)
-- `qwen3.5:8b-maxperf` — 8B with max-performance settings
-- `qwen3.5:8b-balanced` — 8B with balanced settings
-- `qwen3.5:8b-safe` — 8B with safe-mode settings
+- `qwen3.5:9b` — full 8B model (best quality)
+- `qwen3.5:9b-maxperf` — 8B with max-performance settings
+- `qwen3.5:9b-balanced` — 8B with balanced settings
+- `qwen3.5:9b-safe` — 8B with safe-mode settings
 - `qwen3.5:4b` — smaller, faster backup model
 - `qwen3.5:4b-fast` — 3B with max performance settings
 
