@@ -61,7 +61,7 @@ if (-not (Test-Path $LogDir)) { New-Item -ItemType Directory -Path $LogDir -Forc
 Write-Host ""
 Write-Host "  ============================================================" -ForegroundColor Cyan
 Write-Host "    LOCAL AI INSTALLER v1.0" -ForegroundColor Cyan
-Write-Host "    Ollama + Open WebUI + Qwen 2.5 8B" -ForegroundColor Cyan
+Write-Host "    Ollama + Open WebUI + Qwen 3.5 9B" -ForegroundColor Cyan
 Write-Host "  ============================================================" -ForegroundColor Cyan
 Write-Host ""
 
@@ -253,12 +253,10 @@ $profiles = @(
 )
 
 foreach ($p in $profiles) {
-    $modelfileContent = @"
-FROM $($p.Base)
-PARAMETER num_ctx $($p.NumCtx)
-PARAMETER num_gpu $($p.NumGpu)
-PARAMETER num_thread $($p.NumThread)
-"@
+    $modelfileContent  = "FROM $($p.Base)`n"
+    $modelfileContent += "PARAMETER num_ctx $($p.NumCtx)`n"
+    $modelfileContent += "PARAMETER num_gpu $($p.NumGpu)`n"
+    $modelfileContent += "PARAMETER num_thread $($p.NumThread)"
     if ($p.Flash -eq 1) { $modelfileContent += "`nPARAMETER use_mmap true" }
 
     $mfPath = Join-Path $env:TEMP "Modelfile_$($p.Name -replace '[:.]','-')"
@@ -302,7 +300,7 @@ if (-not $dockerRunning) {
             $waited += 5
             $info = & docker info 2>&1
             if ($LASTEXITCODE -eq 0) { $dockerRunning = $true; break }
-            Write-Host "    ...waiting for Docker daemon ($waited/60 sec)" -ForegroundColor DarkGray
+            Write-Host "    ...waiting for Docker daemon... ${waited}s / 60s" -ForegroundColor DarkGray
         }
     }
     if (-not $dockerRunning) {
@@ -427,5 +425,5 @@ Write-Host ""
 Start-Sleep -Seconds 2
 $launchScript = Join-Path $ProjectRoot "launcher\launch-ai.bat"
 if (Test-Path $launchScript) {
-    Start-Process -FilePath "cmd.exe" -ArgumentList "/c `"$launchScript`""
+    Start-Process -FilePath "cmd.exe" -ArgumentList @("/c", $launchScript)
 }
