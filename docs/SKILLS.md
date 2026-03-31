@@ -1,6 +1,6 @@
 # Local AI Skills
 
-14 skills that make your AI smarter — document reading, web search, YouTube transcripts, meeting analysis, and more.
+16 skills + Clawbot autonomous agent — document reading, web search, YouTube transcripts, task planning, memory, and more.
 
 ---
 
@@ -64,6 +64,36 @@ For behavior-shaping prompts (debugging, brainstorming, kaizen):
 | `csv-summarizer-tool.py` | (stdlib) | Analyze CSV data | "analyze this CSV: C:/path/file.csv" |
 | `deep-research-tool.py` | beautifulsoup4 | Multi-step web research | "research everything about X" |
 | `tapestry-tool.py` | (stdlib) | Link documents in a folder | "scan my documents in C:/path/folder" |
+| `task-planner-tool.py` | (stdlib) | Break projects into trackable steps | "create a plan for X" |
+| `remember-tool.py` | (stdlib) | Remember facts about you permanently | "remember that I prefer Python" |
+
+---
+
+## Clawbot Agent Setup
+
+Clawbot is an **autonomous AI agent** that proactively uses tools to get things done instead of just answering questions.
+
+### How to set up Clawbot
+
+1. Open **http://localhost:3000**
+2. Click your avatar (top right) → **Admin Panel** → **Models**
+3. Click **+ Add Model** (or create a new model based on `qwen3.5:9b`)
+4. Set the name to: `Clawbot`
+5. Paste the contents of `config/skills/system-prompts/clawbot-agent.txt` into the **System Prompt** field
+6. Enable ALL tools for this model (click the tools section and toggle everything on)
+7. Save
+
+Now when you select **Clawbot** in the model dropdown, the AI will automatically use search, read documents, plan tasks, and remember things about you.
+
+### What Clawbot can do
+
+- Search the web for current information automatically
+- Read PDFs, Word docs, Excel files, and web pages you point it to
+- Plan multi-step projects and track progress
+- Remember facts about you between conversations
+- Research topics using multiple sources
+- Extract action items from meeting notes
+- Chain tools together to complete complex tasks
 
 ---
 
@@ -74,6 +104,7 @@ For behavior-shaping prompts (debugging, brainstorming, kaizen):
 | `systematic-debugging.txt` | Forces step-by-step root-cause analysis before fixes | Debugging sessions |
 | `brainstorming.txt` | Structured diverge → cluster → stress-test ideation | Creative sessions |
 | `kaizen.txt` | Continuous improvement lens on any process or system | Code/process reviews |
+| `clawbot-agent.txt` | Autonomous agent that proactively uses tools | Use as Clawbot model system prompt |
 
 ---
 

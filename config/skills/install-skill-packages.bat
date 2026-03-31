@@ -69,6 +69,10 @@ echo      openpyxl                - Excel spreadsheet reader
 echo      lxml                    - HTML parser (faster bs4)
 echo.
 echo    Tools ready to use in Open WebUI chat!
+echo.
+echo    No extra packages needed for:
+echo      task-planner-tool       - Project planning + step tracking
+echo      remember-tool           - Permanent memory about you
 echo  ============================================================
 echo.
 echo  NOTE: Re-run this file after running update.bat,
