@@ -1,6 +1,5 @@
 logs/*.log
 shortcuts/*.lnk
 config/.env
-config/.installed
 .env
 *.tmp
