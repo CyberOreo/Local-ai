@@ -255,12 +255,83 @@ if not errorlevel 1 (
 echo [%date% %time%] Update server started >> "%LOG_FILE%"
 
 :: ============================================================
-:: Open browser
+:: STEP 4.5: Start OpenClaw Agent
+:: ============================================================
+echo.
+echo  [4.5/5] Starting Clawbot (OpenClaw)...
+
+curl -s --max-time 2 http://localhost:18789 >nul 2>&1
+if not errorlevel 1 (
+    echo  [OK]   Clawbot already running at localhost:18789
+    goto OpenClawReady
+)
+
+where openclaw >nul 2>&1
+if not errorlevel 1 (
+    start "OpenClaw" /min openclaw gateway start --allow-unconfigured
+    echo  [INFO] Waiting for Clawbot to start...
+    timeout /t 4 /nobreak >nul
+    curl -s --max-time 3 http://localhost:18789 >nul 2>&1
+    if not errorlevel 1 (
+        echo  [OK]   Clawbot started at localhost:18789
+    ) else (
+        echo  [WARN] Clawbot is starting slowly - will be available shortly.
+    )
+) else (
+    :: Try npm global path directly
+    if exist "%APPDATA%\npm\openclaw.cmd" (
+        start "OpenClaw" /min "%APPDATA%\npm\openclaw.cmd" gateway start --allow-unconfigured
+        timeout /t 4 /nobreak >nul
+        echo  [OK]   Clawbot started.
+    ) else (
+        echo  [WARN] Clawbot not installed yet. Run install-openclaw.bat to install it.
+        echo         Local AI Chat will still work normally.
+    )
+)
+
+:OpenClawReady
+echo [%date% %time%] OpenClaw started >> "%LOG_FILE%"
+
+:: ============================================================
+:: STEP 4.6: Start LocalAI Hub (unified portal at port 8080)
+:: ============================================================
+echo.
+echo  [4.6/5] Starting LocalAI Hub...
+
+curl -s --max-time 2 http://localhost:8080 >nul 2>&1
+if not errorlevel 1 (
+    echo  [OK]   LocalAI Hub already running at localhost:8080
+    goto HubReady
+)
+
+set "HUB_JS=%PROJECT_ROOT%hub\hub.js"
+if exist "%HUB_JS%" (
+    where node >nul 2>&1
+    if not errorlevel 1 (
+        start "LocalAI Hub" /min node "%HUB_JS%"
+        timeout /t 2 /nobreak >nul
+        echo  [OK]   LocalAI Hub started at localhost:8080
+    ) else if exist "%ProgramFiles%\nodejs\node.exe" (
+        start "LocalAI Hub" /min "%ProgramFiles%\nodejs\node.exe" "%HUB_JS%"
+        timeout /t 2 /nobreak >nul
+        echo  [OK]   LocalAI Hub started at localhost:8080
+    ) else (
+        echo  [WARN] Node.js not found - hub unavailable. Run install-openclaw.bat first.
+    )
+) else (
+    echo  [WARN] Hub not found - skipping. Re-download the project to restore it.
+)
+
+:HubReady
+echo [%date% %time%] LocalAI Hub started >> "%LOG_FILE%"
+
+:: ============================================================
+:: Open browser (hub is the main entry point)
 :: ============================================================
 if /i "%AUTO_OPEN_BROWSER%"=="true" (
     echo.
-    echo  Opening http://localhost:%WEBUI_PORT% in your browser...
-    start http://localhost:%WEBUI_PORT%
+    echo  Opening LocalAI Hub in your browser...
+    start http://localhost:8080
 )
 
 :: ============================================================
@@ -268,15 +339,17 @@ if /i "%AUTO_OPEN_BROWSER%"=="true" (
 :: ============================================================
 echo.
 echo  ============================================================
-echo    LOCAL AI IS RUNNING
+echo    ALL SYSTEMS RUNNING
 echo.
-echo    Browser:      http://localhost:%WEBUI_PORT%
-echo    Ollama:       http://localhost:%OLLAMA_PORT%
-echo    Update API:   http://localhost:9999
-echo    Profile:      %PROFILE%
-echo    Model:        %PRIMARY_MODEL%
+echo    LocalAI Hub:    http://localhost:8080   (start here)
+echo    Local AI Chat:  http://localhost:%WEBUI_PORT%
+echo    Clawbot Agent:  http://localhost:18789/webchat
+echo    Ollama:         http://localhost:%OLLAMA_PORT%
+echo    Update API:     http://localhost:9999
 echo.
-echo    IN-CHAT UPDATE: type "update" in the chat
+echo    Profile:  %PROFILE%   ^|   Model: %PRIMARY_MODEL%
+echo.
+echo    IN-CHAT UPDATE: type "update" in Local AI Chat
 echo    To STOP everything: run launcher\stop-ai.bat
 echo  ============================================================
 echo.

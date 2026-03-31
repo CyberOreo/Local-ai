@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>LocalAI Hub</title>
+  <style>
+    /* ── Reset & base ─────────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: #08080f;
+      color: #dde1ea;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      min-height: 100vh;
+      padding: 28px 32px 40px;
+    }
+
+    /* ── Header ───────────────────────────────────────────────── */
+    .header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 36px;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .logo {
+      font-size: 22px;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+      background: linear-gradient(120deg, #60a5fa 0%, #a78bfa 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .logo span { -webkit-text-fill-color: #dde1ea; color: #dde1ea; }
+
+    .status-bar {
+      display: flex;
+      gap: 20px;
+      align-items: center;
+    }
+
+    .svc {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      font-size: 13px;
+      color: #8693a8;
+    }
+
+    .dot {
+      width: 9px; height: 9px;
+      border-radius: 50%;
+      background: #2a2d36;
+      flex-shrink: 0;
+      transition: background 0.4s, box-shadow 0.4s;
+    }
+    .dot.checking { background: #f59e0b; animation: blink 1.1s ease-in-out infinite; }
+    .dot.online   { background: #22c55e; box-shadow: 0 0 7px #22c55e88; }
+    .dot.offline  { background: #ef4444; }
+
+    @keyframes blink { 0%,100%{opacity:1} 50%{opacity:.35} }
+
+    /* ── Main grid ────────────────────────────────────────────── */
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 22px;
+      margin-bottom: 24px;
+    }
+
+    @media (max-width: 700px) { .grid { grid-template-columns: 1fr; } }
+
+    /* ── Cards ────────────────────────────────────────────────── */
+    .card {
+      background: #10111a;
+      border: 1px solid #1c1e2e;
+      border-radius: 18px;
+      padding: 28px 28px 26px;
+      display: flex;
+      flex-direction: column;
+      transition: border-color .2s, transform .2s;
+    }
+    .card:hover { border-color: #2d3050; transform: translateY(-3px); }
+
+    .card-head {
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+      margin-bottom: 14px;
+    }
+
+    .icon {
+      width: 50px; height: 50px;
+      border-radius: 14px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 26px;
+      flex-shrink: 0;
+    }
+    .icon-blue   { background: #12264a; }
+    .icon-purple { background: #22164a; }
+
+    .card-titles { flex: 1; }
+    .card-name { font-size: 17px; font-weight: 700; margin-bottom: 3px; }
+    .card-sub  { font-size: 12px; color: #4f5870; }
+
+    .card-svc {
+      display: flex; align-items: center; gap: 6px;
+      font-size: 12px; color: #6b7a94;
+      margin-left: auto;
+      flex-shrink: 0;
+      padding-top: 4px;
+    }
+
+    .card-desc {
+      font-size: 14px;
+      color: #6b7a94;
+      line-height: 1.65;
+      margin-bottom: 18px;
+    }
+
+    .features {
+      list-style: none;
+      margin-bottom: 24px;
+      flex: 1;
+    }
+    .features li {
+      font-size: 13px;
+      color: #8693a8;
+      padding: 4px 0;
+      display: flex;
+      align-items: baseline;
+      gap: 8px;
+    }
+    .features li::before {
+      content: '›';
+      color: #4ade80;
+      font-size: 15px;
+      flex-shrink: 0;
+    }
+
+    /* ── Buttons ──────────────────────────────────────────────── */
+    .btn {
+      display: block; width: 100%;
+      padding: 14px 20px;
+      border: none; border-radius: 11px;
+      font-size: 14px; font-weight: 600;
+      cursor: pointer; text-align: center;
+      text-decoration: none;
+      transition: opacity .15s, transform .1s, background .2s;
+    }
+    .btn:active { transform: scale(.97); }
+
+    .btn-blue {
+      background: linear-gradient(135deg, #1d4ed8, #2563eb);
+      color: #fff;
+    }
+    .btn-blue:hover { opacity: .88; }
+
+    .btn-purple {
+      background: linear-gradient(135deg, #6d28d9, #7c3aed);
+      color: #fff;
+    }
+    .btn-purple:hover { opacity: .88; }
+
+    .btn-off {
+      background: #15171f;
+      color: #3a3f52;
+      cursor: not-allowed;
+      border: 1px solid #1c1e2e;
+    }
+
+    /* ── Memory panel ─────────────────────────────────────────── */
+    .memory-panel {
+      background: #10111a;
+      border: 1px solid #1c1e2e;
+      border-radius: 18px;
+      padding: 24px 28px 28px;
+    }
+
+    .mem-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 18px;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .mem-title {
+      font-size: 15px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .mem-badge {
+      font-size: 11px;
+      color: #4ade80;
+      background: #0f291a;
+      border: 1px solid #1a4a2a;
+      padding: 3px 10px;
+      border-radius: 20px;
+    }
+
+    .mem-actions { display: flex; gap: 8px; align-items: center; }
+
+    .btn-sm {
+      background: none;
+      border: 1px solid #1c1e2e;
+      color: #6b7a94;
+      padding: 6px 14px;
+      border-radius: 8px;
+      font-size: 12px;
+      cursor: pointer;
+      transition: background .15s, color .15s;
+    }
+    .btn-sm:hover { background: #1c1e2e; color: #9ba8bf; }
+
+    .mem-hint {
+      font-size: 12px;
+      color: #3a3f52;
+      margin-bottom: 16px;
+    }
+
+    .mem-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 10px;
+    }
+
+    .mem-item {
+      background: #0c0d14;
+      border: 1px solid #181a27;
+      border-radius: 10px;
+      padding: 11px 14px;
+    }
+    .mem-cat {
+      font-size: 10px;
+      color: #6366f1;
+      text-transform: uppercase;
+      letter-spacing: .6px;
+      margin-bottom: 5px;
+    }
+    .mem-fact {
+      font-size: 13px;
+      color: #8693a8;
+      line-height: 1.4;
+    }
+
+    .mem-empty {
+      color: #3a3f52;
+      font-size: 14px;
+      text-align: center;
+      padding: 28px;
+      grid-column: 1/-1;
+    }
+
+    /* ── Footer ───────────────────────────────────────────────── */
+    .footer {
+      margin-top: 24px;
+      text-align: center;
+      font-size: 12px;
+      color: #2a2d3a;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ── Header ─────────────────────────────────────────────── -->
+  <header class="header">
+    <div class="logo">🤖 <span>LocalAI Hub</span></div>
+    <div class="status-bar">
+      <div class="svc"><div class="dot checking" id="d-ollama"></div>Ollama</div>
+      <div class="svc"><div class="dot checking" id="d-webui"></div>Local AI</div>
+      <div class="svc"><div class="dot checking" id="d-openclaw"></div>Clawbot</div>
+    </div>
+  </header>
+
+  <!-- ── Cards ──────────────────────────────────────────────── -->
+  <div class="grid">
+
+    <!-- Local AI card -->
+    <div class="card">
+      <div class="card-head">
+        <div class="icon icon-blue">🗨️</div>
+        <div class="card-titles">
+          <div class="card-name">Local AI Chat</div>
+          <div class="card-sub">qwen3.5:9b &nbsp;·&nbsp; fully private</div>
+        </div>
+        <div class="card-svc">
+          <div class="dot checking" id="d-webui-card"></div>
+          <span id="lbl-webui">checking…</span>
+        </div>
+      </div>
+
+      <p class="card-desc">
+        Your personal AI assistant. Reads documents, remembers your preferences
+        and conversation history, and answers anything — 100% offline.
+      </p>
+
+      <ul class="features">
+        <li>Normal chat with your local AI model</li>
+        <li>Upload PDFs, Word docs, and Excel files</li>
+        <li>Builds memory about you over time</li>
+        <li>Use tools: web search, research, task planning</li>
+        <li>Nothing ever leaves your computer</li>
+      </ul>
+
+      <a href="http://localhost:3000" target="_blank"
+         class="btn btn-blue" id="btn-webui">
+        Open Local AI Chat
+      </a>
+    </div>
+
+    <!-- Clawbot card -->
+    <div class="card">
+      <div class="card-head">
+        <div class="icon icon-purple">⚡</div>
+        <div class="card-titles">
+          <div class="card-name">Clawbot Agent</div>
+          <div class="card-sub">OpenClaw &nbsp;·&nbsp; autonomous tasks</div>
+        </div>
+        <div class="card-svc">
+          <div class="dot checking" id="d-claw-card"></div>
+          <span id="lbl-claw">checking…</span>
+        </div>
+      </div>
+
+      <p class="card-desc">
+        Give Clawbot a complex task. It breaks it into steps, uses tools
+        autonomously, and delivers a complete result — live or in the background.
+      </p>
+
+      <ul class="features">
+        <li>Researches topics with live web search</li>
+        <li>Plans and tracks multi-step projects</li>
+        <li>Reads and analyzes your files automatically</li>
+        <li>Runs tasks in background — notifies when done</li>
+        <li>Shares memory with your Local AI Chat</li>
+      </ul>
+
+      <a href="http://localhost:18789/webchat" target="_blank"
+         class="btn btn-purple" id="btn-claw">
+        Open Clawbot Agent
+      </a>
+    </div>
+
+  </div>
+
+  <!-- ── Memory panel ───────────────────────────────────────── -->
+  <div class="memory-panel">
+    <div class="mem-head">
+      <div class="mem-title">
+        🧠 Shared Memory
+        <span class="mem-badge" id="mem-count">0 facts</span>
+      </div>
+      <div class="mem-actions">
+        <button class="btn-sm" onclick="loadMemory()">↻ Refresh</button>
+      </div>
+    </div>
+    <p class="mem-hint">
+      Memory is shared between Local AI Chat and Clawbot.
+      In Local AI Chat, say <em>"remember that…"</em> to store a fact.
+    </p>
+    <div class="mem-grid" id="mem-grid">
+      <div class="mem-empty">Loading memories…</div>
+    </div>
+  </div>
+
+  <div class="footer">
+    LocalAI Hub &nbsp;·&nbsp; All services run locally &nbsp;·&nbsp;
+    Powered by qwen3.5:9b via Ollama
+  </div>
+
+  <!-- ── Script ─────────────────────────────────────────────── -->
+  <script>
+    // ── Status check ───────────────────────────────────────────
+    async function checkStatus() {
+      let status = { ollama: false, webui: false, openclaw: false };
+      try {
+        const res = await fetch('/api/status');
+        status = await res.json();
+      } catch { /* hub unreachable — shouldn't happen */ }
+
+      setDot('d-ollama',    status.ollama);
+      setDot('d-webui',     status.webui);
+      setDot('d-openclaw',  status.openclaw);
+      setDot('d-webui-card', status.webui);
+      setDot('d-claw-card',  status.openclaw);
+
+      document.getElementById('lbl-webui').textContent =
+        status.webui ? 'Online' : 'Offline';
+      document.getElementById('lbl-claw').textContent =
+        status.openclaw ? 'Online' : 'Offline';
+
+      // Swap button style based on availability
+      setBtn('btn-webui',
+        status.webui,
+        'btn btn-blue',
+        'Open Local AI Chat',
+        'Local AI is offline — start services');
+
+      setBtn('btn-claw',
+        status.openclaw,
+        'btn btn-purple',
+        'Open Clawbot Agent',
+        'Clawbot is offline — start services');
+    }
+
+    function setDot(id, online) {
+      const el = document.getElementById(id);
+      if (!el) return;
+      el.className = 'dot ' + (online ? 'online' : 'offline');
+    }
+
+    function setBtn(id, online, activeClass, activeText, offText) {
+      const el = document.getElementById(id);
+      if (!el) return;
+      if (online) {
+        el.className = activeClass;
+        el.textContent = activeText;
+        el.style.pointerEvents = '';
+      } else {
+        el.className = 'btn btn-off';
+        el.textContent = offText;
+        el.style.pointerEvents = 'none';
+      }
+    }
+
+    // ── Memory load ────────────────────────────────────────────
+    async function loadMemory() {
+      const grid  = document.getElementById('mem-grid');
+      const badge = document.getElementById('mem-count');
+      try {
+        const res  = await fetch('/api/memory');
+        const data = await res.json();
+        const facts = (data.facts || []).slice().reverse(); // newest first
+
+        badge.textContent = facts.length + ' fact' + (facts.length !== 1 ? 's' : '');
+
+        if (facts.length === 0) {
+          grid.innerHTML = '<div class="mem-empty">No memories yet. ' +
+            'Chat with Local AI and say <em>"remember that…"</em> to add a memory here.</div>';
+          return;
+        }
+
+        grid.innerHTML = facts.slice(0, 18).map(f => `
+          <div class="mem-item">
+            <div class="mem-cat">${esc((f.category || 'general').replace(/_/g,' '))}</div>
+            <div class="mem-fact">${esc(f.fact)}</div>
+          </div>
+        `).join('');
+      } catch {
+        grid.innerHTML = '<div class="mem-empty">Could not load memories.</div>';
+      }
+    }
+
+    function esc(s) {
+      return String(s)
+        .replace(/&/g,'&amp;')
+        .replace(/</g,'&lt;')
+        .replace(/>/g,'&gt;')
+        .replace(/"/g,'&quot;');
+    }
+
+    // ── Init ───────────────────────────────────────────────────
+    checkStatus();
+    loadMemory();
+    setInterval(checkStatus, 15_000);
+    setInterval(loadMemory,  30_000);
+  </script>
+</body>
+</html>
