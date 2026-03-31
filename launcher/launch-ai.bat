@@ -128,8 +128,8 @@ set "DOCKER_EXE="
 if exist "%ProgramFiles%\Docker\Docker\Docker Desktop.exe" (
     set "DOCKER_EXE=%ProgramFiles%\Docker\Docker\Docker Desktop.exe"
 )
-if exist "%LOCALAPPDATA%\Programs\Docker\Docker\Docker Desktop.exe" (
-    set "DOCKER_EXE=%LOCALAPPDATA%\Programs\Docker\Docker\Docker Desktop.exe"
+if exist "%USERPROFILE%\AppData\Local\Programs\Docker\Docker\Docker Desktop.exe" (
+    set "DOCKER_EXE=%USERPROFILE%\AppData\Local\Programs\Docker\Docker\Docker Desktop.exe"
 )
 
 if defined DOCKER_EXE (
@@ -144,15 +144,17 @@ if defined DOCKER_EXE (
     echo  [INFO] Waiting for Docker... (%DWAIT%s)
     if %DWAIT% LSS 60 goto WaitDocker
     echo  [ERROR] Docker daemon did not start in time.
-    echo          Please start Docker Desktop manually and try again.
+    echo          Please start Docker Desktop manually, wait 30 seconds,
+    echo          then double-click start.bat again.
     echo [%date% %time%] ERROR: Docker daemon timeout >> "%LOG_FILE%"
     pause
     exit /b 1
+
 ) else (
     echo.
     echo  [ERROR] Docker Desktop not found!
-    echo          Please install it from: https://www.docker.com/products/docker-desktop/
-    echo          Then run install.bat again.
+    echo          Please install Docker Desktop, start it, then run start.bat again.
+    echo          Download: https://www.docker.com/products/docker-desktop/
     echo.
     pause
     exit /b 1
@@ -185,8 +187,9 @@ if not defined CONTAINER_EXISTS (
         --restart unless-stopped ^
         ghcr.io/open-webui/open-webui:main >nul 2>&1
     if errorlevel 1 (
-        echo  [ERROR] Failed to create open-webui container.
-        echo          Check that Docker Desktop is running and has internet access.
+        echo  [ERROR] Failed to create the open-webui container.
+        echo          Make sure Docker Desktop is running and connected to the internet.
+        echo          Try: open Docker Desktop, wait for it to fully load, then run start.bat again.
         echo [%date% %time%] ERROR: Failed to create container >> "%LOG_FILE%"
         pause
         exit /b 1
