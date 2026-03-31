@@ -185,7 +185,7 @@ if not defined CONTAINER_EXISTS (
         -v open-webui:/app/backend/data ^
         --name open-webui ^
         --restart unless-stopped ^
-        ghcr.io/open-webui/open-webui:main >nul 2>&1
+        ghcr.io/open-webui/open-webui:main
     if errorlevel 1 (
         echo  [ERROR] Failed to create the open-webui container.
         echo          Make sure Docker Desktop is running and connected to the internet.
@@ -228,8 +228,16 @@ set /p WEBUI_STATUS=<"%TEMP%\webui_check.txt"
 if "%WEBUI_STATUS%"=="200" goto WebUIReady
 if "%WEBUI_STATUS%"=="302" goto WebUIReady
 echo  [INFO] Waiting for Web UI... (%UWAIT%s)
-if %UWAIT% LSS 90 goto WaitUI
-echo  [WARN] Web UI is taking longer than usual. Opening browser anyway...
+if %UWAIT% LSS 180 goto WaitUI
+echo.
+echo  [WARN] Web UI is taking longer than expected.
+echo  [INFO] Showing container logs to help diagnose:
+echo  --------------------------------------------------------
+docker logs --tail 20 open-webui 2>&1
+echo  --------------------------------------------------------
+echo.
+echo  [INFO] Opening browser anyway - it may still be loading.
+echo         If it shows a blank page, wait 60 more seconds and refresh.
 
 :WebUIReady
 echo  [OK]   Web UI is ready!
