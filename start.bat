@@ -19,9 +19,19 @@ set "FLAG=%ROOT%config\.installed"
 net session >nul 2>&1
 if %errorLevel% neq 0 (
     echo Requesting administrator access...
-    powershell -Command "Start-Process -FilePath '%~f0' -Verb RunAs"
+    powershell -Command "Start-Process cmd.exe -ArgumentList '/c \"%~f0\"' -Verb RunAs"
     exit /b
 )
+
+echo  [OK] Running as Administrator.
+echo  [INFO] Root folder: %ROOT%
+echo  [INFO] Flag file: %FLAG%
+if exist "%FLAG%" (
+    echo  [INFO] .installed flag found - launching...
+) else (
+    echo  [INFO] .installed flag NOT found - running installer...
+)
+echo.
 
 :: ---- First time: run installer ------------------------------
 if not exist "%FLAG%" (
@@ -64,3 +74,9 @@ echo    LOCAL AI  -  Starting...
 echo  ============================================================
 echo.
 call "%ROOT%launcher\launch-ai.bat"
+if errorlevel 1 (
+    echo.
+    echo  [ERROR] Launch failed. See message above.
+    echo.
+    pause
+)
