@@ -1,5 +1,9 @@
 logs/*.log
-shortcuts/*.lnk
+_engine/shortcuts/*.lnk
 config/.env
 .env
 *.tmp
+app/node_modules/
+dist/
+assets/neuralbox.ico
+assets/neuralbox.png

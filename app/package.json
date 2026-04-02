@@ -1,0 +1,40 @@
+{
+  "name": "neuralbox",
+  "version": "1.0.0",
+  "description": "NeuralBox — Your Private AI Empire",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "build": "electron-builder --win --x64"
+  },
+  "devDependencies": {
+    "electron": "^31.3.0",
+    "electron-builder": "^24.13.3"
+  },
+  "build": {
+    "appId": "com.neuralbox.app",
+    "productName": "NeuralBox",
+    "copyright": "Copyright © 2025 NeuralBox",
+    "asar": true,
+    "directories": {
+      "output": "../dist"
+    },
+    "extraResources": [
+      { "from": "../hub", "to": "hub", "filter": ["**/*"] }
+    ],
+    "win": {
+      "target": [{ "target": "nsis", "arch": ["x64"] }],
+      "icon": "assets/icon.ico"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "NeuralBox",
+      "runAfterFinish": true,
+      "installerMuiLanguage": "English"
+    },
+    "publish": null
+  }
+}

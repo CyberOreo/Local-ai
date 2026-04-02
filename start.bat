@@ -1,6 +1,6 @@
 @echo off
-title Local AI
-color 0A
+title NeuralBox
+color 0D
 
 set "ROOT=%~dp0"
 set "FLAG=%ROOT%config\.installed"
@@ -53,7 +53,7 @@ echo    LOCAL AI  -  Starting...
 echo  ============================================================
 echo.
 
-call "%ROOT%launcher\launch-ai.bat"
+call "%ROOT%_engine\launcher\launch-ai.bat"
 
 if errorlevel 1 (
     echo.

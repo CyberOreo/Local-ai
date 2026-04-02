@@ -9,7 +9,7 @@ color 0A
 :: the chat interface in your browser.
 :: ============================================================
 
-set "PROJECT_ROOT=%~dp0.."
+set "PROJECT_ROOT=%~dp0..\.."
 set "CONFIG_DIR=%PROJECT_ROOT%\config"
 set "LOG_DIR=%PROJECT_ROOT%\logs"
 set "LOG_FILE=%LOG_DIR%\launch.log"
@@ -254,7 +254,7 @@ if not errorlevel 1 (
     echo  [OK]   Update server already running.
 ) else (
     start "LocalAI-UpdateServer" /min powershell -ExecutionPolicy Bypass -WindowStyle Hidden ^
-        -File "%PROJECT_ROOT%\scripts\update-server.ps1" -ProjectRoot "%PROJECT_ROOT%"
+        -File "%PROJECT_ROOT%\_engine\scripts\update-server.ps1" -ProjectRoot "%PROJECT_ROOT%"
     timeout /t 2 /nobreak >nul
     curl -s --max-time 3 http://localhost:9999/api/health >nul 2>&1
     if not errorlevel 1 (
@@ -315,7 +315,7 @@ if not errorlevel 1 (
     goto HubReady
 )
 
-set "HUB_JS=%PROJECT_ROOT%hub\hub.js"
+set "HUB_JS=%PROJECT_ROOT%\hub\hub.js"
 if exist "%HUB_JS%" (
     where node >nul 2>&1
     if not errorlevel 1 (
@@ -343,7 +343,7 @@ if not exist "%USERPROFILE%\Desktop\NeuralBox.lnk" (
     echo.
     echo  Creating NeuralBox desktop shortcut...
     powershell -ExecutionPolicy Bypass -WindowStyle Hidden ^
-        -File "%PROJECT_ROOT%\scripts\create-shortcut.ps1" -ProjectRoot "%PROJECT_ROOT%"
+        -File "%PROJECT_ROOT%\_engine\scripts\create-shortcut.ps1" -ProjectRoot "%PROJECT_ROOT%"
     if not errorlevel 1 (
         echo  [OK]   NeuralBox shortcut added to Desktop.
     ) else (
