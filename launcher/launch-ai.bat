@@ -337,6 +337,22 @@ if exist "%HUB_JS%" (
 echo [%date% %time%] LocalAI Hub started >> "%LOG_FILE%"
 
 :: ============================================================
+:: Create NeuralBox desktop shortcut (first launch only)
+:: ============================================================
+if not exist "%USERPROFILE%\Desktop\NeuralBox.lnk" (
+    echo.
+    echo  Creating NeuralBox desktop shortcut...
+    powershell -ExecutionPolicy Bypass -WindowStyle Hidden ^
+        -File "%PROJECT_ROOT%\scripts\create-shortcut.ps1" -ProjectRoot "%PROJECT_ROOT%"
+    if not errorlevel 1 (
+        echo  [OK]   NeuralBox shortcut added to Desktop.
+    ) else (
+        echo  [WARN] Could not create desktop shortcut.
+    )
+    echo [%date% %time%] Desktop shortcut created >> "%LOG_FILE%"
+)
+
+:: ============================================================
 :: Open browser (hub is the main entry point)
 :: ============================================================
 if /i "%AUTO_OPEN_BROWSER%"=="true" (
