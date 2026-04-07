@@ -122,7 +122,7 @@ try {
             & docker rm $CONTAINER 2>$null | Out-Null
             Add-Step "Recreating container with latest image..."
             & docker run -d `
-                -p "${WEBUI_PORT}:8080" `
+                -p "127.0.0.1:${WEBUI_PORT}:8080" `
                 --add-host=host.docker.internal:host-gateway `
                 -e "OLLAMA_BASE_URL=http://host.docker.internal:${OLLAMA_PORT}" `
                 -e "WEBUI_AUTH=False" `

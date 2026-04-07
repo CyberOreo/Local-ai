@@ -7,3 +7,4 @@ app/node_modules/
 dist/
 assets/neuralbox.ico
 assets/neuralbox.png
+config/.installed

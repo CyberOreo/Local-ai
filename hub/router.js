@@ -208,9 +208,7 @@ function recommendProfile(taskType) {
  * Returns whether a call is allowed given current spend and settings.
  */
 function checkBudget(costUsd, spendInfo, settings) {
-  const daily_limit  = settings.daily_limit_usd         || 1.00;
-  const per_worker   = settings.per_worker_budget_usd   || 0.10;
-  const premium_max  = settings.premium_calls_per_day   || 5;
+  const daily_limit = settings.daily_limit_usd || 1.00;
 
   if (costUsd === 0) return { allowed: true };
 
@@ -223,6 +221,25 @@ function checkBudget(costUsd, spendInfo, settings) {
   }
 
   return { allowed: true };
+}
+
+/**
+ * Returns true if the premium call limit for the day is exhausted.
+ * "Premium" = any call with cost_label 'Premium' or 'Balanced' (non-free API call).
+ */
+function checkPremiumCallsExceeded(costLabel, settings) {
+  if (costLabel === 'Free') return false;
+  const max = settings.premium_calls_per_day || 5;
+  // Load today's premium call count from spend file
+  try {
+    const { loadSpend } = require('./storage.js');  // lazy to avoid circular
+    const data = loadSpend ? loadSpend() : {};
+    const d    = new Date().toISOString().slice(0, 10);
+    const count = (data[`${d}_premium_calls`] || 0);
+    return count >= max;
+  } catch {
+    return false;
+  }
 }
 
 // ── Profile list for UI ───────────────────────────────────────────────────────

@@ -1,203 +1,157 @@
-# Local AI — One-Click Windows 10 AI App
+# NeuralBox — Local AI on Windows
 
-A complete local AI setup for Windows 10 that runs **Qwen 2.5 8B** on your GPU with a clean web chat interface. One click to launch, zero command-line use after installation.
-
----
-
-## What This Is
-
-This project gives you a fully local, offline-capable AI chatbot running on your own PC using:
-
-- **Ollama** — runs AI models locally using your NVIDIA GPU
-- **Open WebUI** — a clean, dark-themed browser chat interface
-- **Qwen 2.5 8B** — a powerful 8-billion parameter language model
-
-Everything runs on your machine. No cloud, no subscriptions, no data sent anywhere.
+Runs **Qwen 3.5 9B** locally via Ollama + Open WebUI + NeuralBox Hub.
+One click to launch. No cloud, no subscriptions after setup.
 
 ---
 
-## Your Hardware Profile
+## What Runs
 
-| Component | Spec | Notes |
-|-----------|------|-------|
-| CPU | Ryzen 5 3600X (6c/12t) | 10 threads used by default |
-| GPU | GTX 1070 Ti 8GB VRAM | All model layers offloaded to GPU |
-| RAM | 16 GB | Leaves ~13 GB free during use |
-| Model | qwen3.5:9b Q4_K_M | ~6.6 GB weights + KV cache per profile |
+| Service | URL | What it does |
+|---------|-----|-------------|
+| **NeuralBox Hub** | http://localhost:8080 | Main portal — money tools, templates, workers, history |
+| **Open WebUI** | http://localhost:3000 | Full chat interface |
+| **Ollama** | http://localhost:11434 | Local AI model server |
+| **Update Server** | http://localhost:9999 | Handles in-app update requests |
+| **OpenClaw (optional)** | http://localhost:18789 | AI agent orchestration |
 
-**Expected performance (max-performance profile):**
-- Speed: ~18–25 tokens/second
-- First response: 3–6 seconds
-- Context window: 4096 tokens (safe default), up to 6144 with quality profile
+All services bind to **127.0.0.1 only**. Nothing is accessible from other machines.
 
 ---
 
 ## Requirements
 
-Before installing, make sure you have:
-
-1. **Windows 10** (version 1803 or later)
-2. **NVIDIA GPU drivers** — latest recommended ([download](https://www.nvidia.com/drivers))
-3. **Docker Desktop** — [download here](https://www.docker.com/products/docker-desktop/)
-   - Must be running (whale icon in system tray) before launching
-4. **~20 GB free disk space** (for models)
-5. **Internet connection** (for first-time setup only)
+1. **Windows 10/11**
+2. **NVIDIA GPU drivers** ([download](https://www.nvidia.com/drivers))
+3. **Docker Desktop** ([download](https://www.docker.com/products/docker-desktop/)) — must be running
+4. **~20 GB free disk space**
+5. **Internet** on first install only
 
 ---
 
-## Installation (One Time Only)
+## Installation (Once)
 
-1. **Install Docker Desktop** if you haven't already
-   - Download from: https://www.docker.com/products/docker-desktop/
-   - Run the installer, restart if prompted
-   - Start Docker Desktop — wait for the whale icon in the system tray
-
-2. **Right-click `install.bat`** → **Run as administrator**
-
+1. Install Docker Desktop, start it, wait for the whale icon in the tray
+2. **Right-click `_engine\install.bat`** → **Run as administrator**
 3. Wait — the installer will:
-   - Check your system
-   - Download and install Ollama (~50 MB)
-   - Download Qwen 3.5 9B model (~6.6 GB) — **this takes 15–25 min**
-   - Download Qwen 3.5 4B backup model (~2.5 GB)
-   - Set up the Open WebUI container
-   - Create a "Local AI" desktop shortcut
-
-4. When complete, your browser will open to `http://localhost:3000`
+   - Check your system (RAM, GPU, disk)
+   - Download and install Ollama
+   - Download **qwen3.5:9b** (~6.6 GB) and **qwen3.5:4b** (~2.5 GB)
+   - Create the Open WebUI Docker container (bound to 127.0.0.1)
+   - Create a "NeuralBox" desktop shortcut
+4. NeuralBox launches automatically when done
 
 ---
 
 ## Daily Use
 
 ```
-Double-click "Local AI" on your desktop
-         ↓
-Wait ~15–30 seconds (services start)
-         ↓
-Browser opens at http://localhost:3000
-         ↓
-Start chatting!
+Double-click  start.bat  (or the Desktop shortcut)
+       ↓
+All services start automatically
+       ↓
+Browser opens at http://localhost:8080 (NeuralBox Hub)
 ```
 
-That's it. No terminal. No commands.
+---
+
+## Stopping
+
+Run `_engine\launcher\stop-ai.bat`
+
+Stops: Hub, Open WebUI container, Ollama, Update Server, OpenClaw.
 
 ---
 
-## Switching Performance Profiles
+## Restarting
 
-Edit the file `config\.env` and change the `PROFILE=` line:
-
-| Profile | Context | GPU layers | Speed | Use When |
-|---------|---------|-----------|-------|----------|
-| `max-performance` | 4096 tokens | 36/36 (~88%) | 18–25 tok/s | Default — best daily speed |
-| `balanced` | 2048 tokens | 36/36 (~85%) | 20–27 tok/s | Running other apps too |
-| `quality` | 6144 tokens | 36/36 (~96%) | 15–20 tok/s | Long docs — close other apps first |
-| `safe-mode` | 1024 tokens | 20/36 (~50%) | 10–15 tok/s | Emergency fallback |
-
-```
-# In config\.env:
-PROFILE=max-performance    ← change this line
-```
-
-Then restart: double-click `launcher\restart-ai.bat`
+Run `_engine\launcher\restart-ai.bat`
 
 ---
 
-## Switching Models
+## Health Check
 
-In Open WebUI, use the **model selector** at the top of the chat to switch between:
+Run `_engine\launcher\healthcheck.bat`
 
-- `qwen3.5:9b` — full 9B model (best quality)
-- `qwen3.5:9b-maxperf` — 9B with max-performance settings
-- `qwen3.5:9b-balanced` — 9B with balanced settings
-- `qwen3.5:9b-safe` — 9B with safe-mode settings
-- `qwen3.5:4b` — smaller, faster backup model (~40–50 tok/s)
-- `qwen3.5:4b-fast` — 4B with max performance settings
+Shows pass/fail for every service including Hub, Update Server, and OpenClaw.
 
 ---
 
-## Stopping the App
+## Performance Profiles
 
-**Option A:** Run `launcher\stop-ai.bat`
+Edit `config\.env` → change `PROFILE=`:
 
-**Option B:** Docker Desktop tray → stop the `open-webui` container, and close Ollama from the system tray
+| Profile | Context | GPU | Speed |
+|---------|---------|-----|-------|
+| `max-performance` | 4096 tok | 36 layers | 18–25 tok/s |
+| `balanced` | 2048 tok | 36 layers | 20–27 tok/s |
+| `quality` | 6144 tok | 36 layers | 15–20 tok/s |
+| `safe-mode` | 1024 tok | 20 layers | 10–15 tok/s |
 
-The services run silently in the background. Closing the launcher window does NOT stop them.
-
----
-
-## Updating Models
-
-Run `scripts\update-model.bat` to download the latest model versions.
-Requires internet. All other features still work offline.
+After changing: run `_engine\launcher\restart-ai.bat`
 
 ---
 
-## Enabling File Upload / RAG
+## API Keys (Optional)
 
-Open WebUI has built-in RAG (document Q&A) support. To enable:
+Open **NeuralBox Hub → Settings → API Keys** to add OpenAI, Anthropic, or Groq keys.
 
-1. Go to `http://localhost:3000`
-2. Click your profile icon (top right) → **Settings**
-3. Go to **Documents**
-4. Upload any PDF, TXT, or DOCX
-5. In the chat, use `#document-name` to reference it
+Keys are stored encrypted (DPAPI) at `~\.neuralbox\settings.json` — never in the project directory.
 
 ---
 
-## Uninstalling
+## Updating
 
-Run `scripts\uninstall.bat` — it will:
-- Stop and remove the Open WebUI container
-- Optionally remove chat history
-- Optionally remove Ollama models
-- Remove the desktop shortcut
-
-To fully remove Ollama: **Windows Settings → Apps → Ollama → Uninstall**
+- **In-app**: type `update` in Open WebUI chat, or use the Update button in Hub
+- **Manual**: run `_engine\update.bat`
 
 ---
 
 ## File Structure
 
 ```
-LocalAI\
-├── install.bat            ← Run once to install everything
-├── install.ps1            ← Installer logic
-├── launcher\
-│   ├── launch-ai.bat      ← Daily one-click launcher
-│   ├── stop-ai.bat        ← Stop all services
-│   ├── restart-ai.bat     ← Restart all services
-│   └── healthcheck.bat    ← Check if everything is working
-├── scripts\
-│   ├── update-model.bat   ← Update models to latest versions
-│   ├── uninstall.bat      ← Remove everything
-│   └── create-shortcut.ps1
+Local-ai\
+├── start.bat                    ← Daily launcher (decides install or launch)
 ├── config\
-│   ├── .env               ← Your active settings (edit this)
-│   ├── .env.example       ← Template
-│   ├── settings.json      ← Ports, model names
-│   └── profiles\          ← Performance profiles
-├── logs\                  ← Log files
-├── docs\
-│   ├── README.md          ← This file
-│   └── TROUBLESHOOTING.md
-└── assets\                ← Icon files
+│   ├── .env                     ← Active settings (edit this)
+│   ├── .env.example             ← Template
+│   ├── settings.json            ← Ports, models, budget defaults
+│   └── profiles\                ← Performance profiles
+├── hub\
+│   ├── hub.js                   ← NeuralBox Hub server (port 8080)
+│   ├── index.html               ← Hub UI
+│   ├── storage.js               ← File-based persistence
+│   ├── efficiency.js            ← Stage-based generation + budget
+│   ├── router.js                ← Model routing logic
+│   └── templates.js             ← Money tools + template definitions
+├── app\
+│   └── main.js                  ← Electron wrapper (optional desktop app)
+├── _engine\
+│   ├── install.bat              ← Run once to install
+│   ├── install.ps1              ← Installer logic
+│   ├── version.json             ← Pinned versions
+│   ├── launcher\
+│   │   ├── launch-ai.bat        ← Start all services
+│   │   ├── stop-ai.bat          ← Stop all services
+│   │   ├── restart-ai.bat       ← Restart all services
+│   │   └── healthcheck.bat      ← Check all services
+│   ├── scripts\
+│   │   ├── update-server.ps1    ← HTTP server for update triggers
+│   │   ├── update-logic.ps1     ← Actual update execution
+│   │   ├── create-shortcut.ps1  ← Desktop shortcut creator
+│   │   ├── uninstall.bat        ← Remove everything
+│   │   ├── smoke-test.bat       ← Smoke test suite
+│   │   └── update-model.bat     ← Update models only
+│   └── docs\
+│       ├── README.md            ← This file
+│       └── TROUBLESHOOTING.md
+└── logs\                        ← Log files (gitignored)
 ```
-
----
-
-## Local URLs
-
-| Service | URL |
-|---------|-----|
-| Chat Interface | http://localhost:3000 |
-| Ollama API | http://localhost:11434 |
-| Ollama models list | http://localhost:11434/api/tags |
 
 ---
 
 ## Privacy
 
-- Everything runs **100% locally** after setup
-- No data is ever sent to external servers
-- Chat history is stored locally in a Docker volume
-- Models are stored in `%USERPROFILE%\.ollama\models`
+Everything runs locally after setup.
+**API keys are only sent to their respective providers** (OpenAI/Anthropic/Groq) if you configure them.
+NeuralBox never phones home and does not collect usage data.

@@ -1,0 +1,9 @@
+{
+  "neuralbox": "1.0.0",
+  "webui_image": "ghcr.io/open-webui/open-webui:main",
+  "webui_pinned_digest": "",
+  "ollama_download_url": "https://ollama.com/download/OllamaSetup.exe",
+  "primary_model": "qwen3.5:9b",
+  "backup_model": "qwen3.5:4b",
+  "_note": "Pin webui_image to a specific digest (e.g. :sha256-abc...) for reproducible builds. Leave empty to use :main (latest)."
+}

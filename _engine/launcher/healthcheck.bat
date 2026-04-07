@@ -1,16 +1,19 @@
 @echo off
 setlocal EnableDelayedExpansion
-title Local AI - Health Check
+title NeuralBox - Health Check
 color 0B
 
 :: ============================================================
-:: LOCAL AI - HEALTH CHECK
+:: NeuralBox - HEALTH CHECK
 :: Tests all services and shows PASS/FAIL status.
 :: ============================================================
 
-set "CONFIG_DIR=%~dp0..\config"
+set "CONFIG_DIR=%~dp0..\..\config"
 set "OLLAMA_PORT=11434"
 set "WEBUI_PORT=3000"
+set "HUB_PORT=8080"
+set "UPDATE_PORT=9999"
+set "CLAW_PORT=18789"
 
 :: Load port config from .env if available
 if exist "%CONFIG_DIR%\.env" (
@@ -24,7 +27,7 @@ if exist "%CONFIG_DIR%\.env" (
 
 echo.
 echo  ============================================================
-echo    LOCAL AI  -  HEALTH CHECK
+echo    NeuralBox  -  HEALTH CHECK
 echo    %date% %time%
 echo  ============================================================
 echo.
@@ -58,21 +61,8 @@ if "%HC_OLLAMA%"=="200" (
     set /a FAIL+=1
 )
 
-:: ---- Check: Installed models ---------------------------------
-echo  [3] Installed Ollama models...
-where ollama >nul 2>&1
-if errorlevel 1 (
-    echo       STATUS: FAIL  (ollama command not found)
-    set /a FAIL+=1
-) else (
-    echo       Available models:
-    ollama list 2>nul | findstr /v "^$" | findstr /v "^NAME"
-    echo       STATUS: PASS
-    set /a PASS+=1
-)
-
 :: ---- Check: Docker daemon ------------------------------------
-echo  [4] Docker daemon...
+echo  [3] Docker daemon...
 docker info >nul 2>&1
 if errorlevel 1 (
     echo       STATUS: FAIL  (Docker daemon not running)
@@ -83,7 +73,7 @@ if errorlevel 1 (
 )
 
 :: ---- Check: open-webui container running ---------------------
-echo  [5] Open WebUI container...
+echo  [4] Open WebUI container...
 for /f "tokens=*" %%S in ('docker ps --filter "name=^open-webui$" --format "{{.Status}}" 2^>nul') do (
     set WEBUI_CONTAINER_STATUS=%%S
 )
@@ -96,7 +86,7 @@ if defined WEBUI_CONTAINER_STATUS (
 )
 
 :: ---- Check: Web UI HTTP response ----------------------------
-echo  [6] Open WebUI HTTP (http://localhost:%WEBUI_PORT%)...
+echo  [5] Open WebUI HTTP (http://localhost:%WEBUI_PORT%)...
 curl -s -o nul -w "%%{http_code}" http://localhost:%WEBUI_PORT% > "%TEMP%\hc_webui.txt" 2>nul
 set /p HC_WEBUI=<"%TEMP%\hc_webui.txt"
 if "%HC_WEBUI%"=="200" (
@@ -110,8 +100,44 @@ if "%HC_WEBUI%"=="200" (
     set /a FAIL+=1
 )
 
+:: ---- Check: NeuralBox Hub ------------------------------------
+echo  [6] NeuralBox Hub (http://localhost:%HUB_PORT%)...
+curl -s -o nul -w "%%{http_code}" http://localhost:%HUB_PORT% > "%TEMP%\hc_hub.txt" 2>nul
+set /p HC_HUB=<"%TEMP%\hc_hub.txt"
+if "%HC_HUB%"=="200" (
+    echo       STATUS: PASS  (HTTP %HC_HUB%)
+    set /a PASS+=1
+) else (
+    echo       STATUS: FAIL  (HTTP %HC_HUB% - Hub not responding on port %HUB_PORT%)
+    set /a FAIL+=1
+)
+
+:: ---- Check: Update Server ------------------------------------
+echo  [7] Update Server (http://localhost:%UPDATE_PORT%)...
+curl -s -o nul -w "%%{http_code}" http://localhost:%UPDATE_PORT%/api/health > "%TEMP%\hc_upd.txt" 2>nul
+set /p HC_UPD=<"%TEMP%\hc_upd.txt"
+if "%HC_UPD%"=="200" (
+    echo       STATUS: PASS  (HTTP %HC_UPD%)
+    set /a PASS+=1
+) else (
+    echo       STATUS: WARN  (HTTP %HC_UPD% - Update server not running; non-critical)
+    :: Not a hard failure — update server is optional
+)
+
+:: ---- Check: OpenClaw (optional) ------------------------------
+echo  [8] OpenClaw agent (http://localhost:%CLAW_PORT%)...
+curl -s --max-time 2 -o nul -w "%%{http_code}" http://localhost:%CLAW_PORT% > "%TEMP%\hc_claw.txt" 2>nul
+set /p HC_CLAW=<"%TEMP%\hc_claw.txt"
+if "%HC_CLAW%"=="200" (
+    echo       STATUS: PASS  (HTTP %HC_CLAW%)
+    set /a PASS+=1
+) else (
+    echo       STATUS: WARN  (not running - optional component)
+    :: Not a hard failure
+)
+
 :: ---- Check: Ollama models API --------------------------------
-echo  [7] Ollama models API...
+echo  [9] Ollama models API...
 curl -s http://localhost:%OLLAMA_PORT%/api/tags > "%TEMP%\hc_models.txt" 2>nul
 findstr /i "models" "%TEMP%\hc_models.txt" >nul 2>&1
 if errorlevel 1 (
@@ -122,20 +148,26 @@ if errorlevel 1 (
     set /a PASS+=1
 )
 
+:: ---- Port usage summary --------------------------------------
+echo.
+echo  Active ports:
+netstat -aon 2>nul | findstr /i "LISTENING" | findstr ":8080 \|:3000 \|:11434 \|:9999 \|:18789 "
+
 :: ---- Summary -------------------------------------------------
 echo.
 echo  ============================================================
 echo    RESULTS:  %PASS% PASSED  /  %FAIL% FAILED
 if %FAIL% EQU 0 (
-    echo    OVERALL:  ALL SYSTEMS OPERATIONAL
+    echo    OVERALL:  ALL REQUIRED SERVICES OPERATIONAL
 ) else (
     echo    OVERALL:  SOME CHECKS FAILED - see above
     echo.
     echo    TIPS:
-    echo    - If Ollama failed: run launcher\launch-ai.bat
-    echo    - If Docker failed: start Docker Desktop from taskbar
-    echo    - If WebUI failed:  wait 30s then run healthcheck again
-    echo    - Full help:        docs\TROUBLESHOOTING.md
+    echo    - If Ollama failed:  run start.bat
+    echo    - If Docker failed:  start Docker Desktop from taskbar
+    echo    - If WebUI failed:   wait 30s then run healthcheck again
+    echo    - If Hub failed:     run start.bat (hub starts with launcher^)
+    echo    - Full help:         _engine\docs\TROUBLESHOOTING.md
 )
 echo  ============================================================
 echo.

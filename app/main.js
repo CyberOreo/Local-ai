@@ -96,7 +96,38 @@ async function startServices() {
   // 2 ── Docker / Open WebUI
   status('Waking up your assistant…', 30);
   if (!(await portOpen(WEBUI_PORT))) {
-    run('webui', 'docker', ['start', 'open-webui']);
+    // Check if Docker daemon is running
+    try { execSync('docker info', { stdio: 'ignore', shell: true, timeout: 5000 }); }
+    catch {
+      status('Docker not running — please start Docker Desktop', 30);
+      // Give user 30s to start Docker, then proceed anyway
+      await waitPort(WEBUI_PORT, 30000);
+    }
+
+    // Check if container exists; create if not
+    let containerExists = false;
+    try {
+      const out = execSync('docker ps -a --filter "name=^open-webui$" --format "{{.Names}}"',
+        { shell: true, encoding: 'utf8', timeout: 5000 }).trim();
+      containerExists = out.includes('open-webui');
+    } catch {}
+
+    if (!containerExists) {
+      status('Creating Open WebUI container…', 35);
+      run('webui-create', 'docker', [
+        'run', '-d',
+        '-p', `127.0.0.1:${WEBUI_PORT}:8080`,
+        '--add-host=host.docker.internal:host-gateway',
+        '-e', `OLLAMA_BASE_URL=http://host.docker.internal:${OLLAMA_PORT}`,
+        '-e', 'WEBUI_AUTH=False',
+        '-v', 'open-webui:/app/backend/data',
+        '--name', 'open-webui',
+        '--restart', 'unless-stopped',
+        'ghcr.io/open-webui/open-webui:main',
+      ]);
+    } else {
+      run('webui', 'docker', ['start', 'open-webui']);
+    }
     status('Open WebUI loading (first boot ~2 min)…', 40);
     await waitPort(WEBUI_PORT, 150000);
   }

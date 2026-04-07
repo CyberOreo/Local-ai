@@ -6,9 +6,60 @@
 
 'use strict';
 
-const fs   = require('fs');
-const path = require('path');
-const os   = require('os');
+const fs            = require('fs');
+const path          = require('path');
+const os            = require('os');
+const { execSync }  = require('child_process');
+
+// ── DPAPI secure key storage (Windows only) ───────────────────────────────────
+// Keys stored as "dpapi:<base64>" in the settings file.
+// Non-Windows: keys remain plaintext (user is responsible).
+
+const DPAPI_PREFIX = 'dpapi:';
+
+function dpapiEncrypt(plaintext) {
+  if (process.platform !== 'win32' || !plaintext) return plaintext;
+  try {
+    const escaped = plaintext.replace(/'/g, "''");
+    const script  = `[Convert]::ToBase64String([System.Security.Cryptography.ProtectedData]::Protect([System.Text.Encoding]::UTF8.GetBytes('${escaped}'), $null, 'CurrentUser'))`;
+    const b64 = execSync(`powershell -NoProfile -Command "${script}"`, { timeout: 5000, stdio: ['ignore','pipe','ignore'] }).toString().trim();
+    return DPAPI_PREFIX + b64;
+  } catch {
+    return plaintext; // fallback: store as-is
+  }
+}
+
+function dpapiDecrypt(stored) {
+  if (!stored || !stored.startsWith(DPAPI_PREFIX)) return stored;
+  if (process.platform !== 'win32') return ''; // cannot decrypt on non-Windows
+  try {
+    const b64 = stored.slice(DPAPI_PREFIX.length);
+    const script = `[System.Text.Encoding]::UTF8.GetString([System.Security.Cryptography.ProtectedData]::Unprotect([Convert]::FromBase64String('${b64}'), $null, 'CurrentUser'))`;
+    return execSync(`powershell -NoProfile -Command "${script}"`, { timeout: 5000, stdio: ['ignore','pipe','ignore'] }).toString().trim();
+  } catch {
+    return ''; // decryption failed — key lost/migrated
+  }
+}
+
+function encryptApiKeys(api_keys) {
+  if (!api_keys) return {};
+  const out = {};
+  for (const [provider, key] of Object.entries(api_keys)) {
+    if (!key) { out[provider] = ''; continue; }
+    // Only encrypt if not already encrypted
+    out[provider] = key.startsWith(DPAPI_PREFIX) ? key : dpapiEncrypt(key);
+  }
+  return out;
+}
+
+function decryptApiKeys(api_keys) {
+  if (!api_keys) return {};
+  const out = {};
+  for (const [provider, key] of Object.entries(api_keys)) {
+    out[provider] = key && key.startsWith(DPAPI_PREFIX) ? dpapiDecrypt(key) : (key || '');
+  }
+  return out;
+}
 
 const NEURALBOX_DIR = path.join(os.homedir(), '.neuralbox');
 const HISTORY_FILE  = path.join(NEURALBOX_DIR, 'history.json');
@@ -69,6 +120,9 @@ const DEFAULT_SETTINGS = {
 // ── Settings ──────────────────────────────────────────────────────────────────
 
 function loadUserSettings() {
+  // Migrate plaintext keys on first load
+  migrateKeysIfNeeded(SETTINGS_FILE);
+
   // Load project defaults from config/settings.json
   let projectDefaults = {};
   try {
@@ -82,17 +136,20 @@ function loadUserSettings() {
   // Merge: DEFAULT_SETTINGS → projectDefaults → userOverrides
   const merged = Object.assign({}, DEFAULT_SETTINGS, projectDefaults, userOverrides);
 
-  // Deep merge routing_rules and api_keys
+  // Deep merge routing_rules
   merged.routing_rules = Object.assign(
     {}, DEFAULT_SETTINGS.routing_rules,
     projectDefaults.routing_rules || {},
     userOverrides.routing_rules   || {}
   );
-  merged.api_keys = Object.assign(
+
+  // Deep merge api_keys then DECRYPT for in-memory use
+  const rawKeys = Object.assign(
     {}, DEFAULT_SETTINGS.api_keys,
     projectDefaults.api_keys || {},
     userOverrides.api_keys   || {}
   );
+  merged.api_keys = decryptApiKeys(rawKeys);
 
   return merged;
 }
@@ -106,11 +163,36 @@ function saveUserSettings(patch) {
     updated.routing_rules = Object.assign({}, current.routing_rules || {}, patch.routing_rules);
   }
   if (patch.api_keys) {
-    updated.api_keys = Object.assign({}, current.api_keys || {}, patch.api_keys);
+    const merged = Object.assign({}, current.api_keys || {}, patch.api_keys);
+    // Encrypt any plaintext keys before persisting
+    updated.api_keys = encryptApiKeys(merged);
   }
 
   writeJSON(SETTINGS_FILE, updated);
   return loadUserSettings(); // return full merged result
+}
+
+// Migrate any existing plaintext keys to DPAPI on first load
+function migrateKeysIfNeeded(settingsFile) {
+  if (process.platform !== 'win32') return;
+  try {
+    const data = readJSON(settingsFile, null);
+    if (!data || !data.api_keys) return;
+    let changed = false;
+    const encrypted = {};
+    for (const [provider, key] of Object.entries(data.api_keys)) {
+      if (key && !key.startsWith(DPAPI_PREFIX)) {
+        encrypted[provider] = dpapiEncrypt(key);
+        changed = true;
+      } else {
+        encrypted[provider] = key;
+      }
+    }
+    if (changed) {
+      data.api_keys = encrypted;
+      writeJSON(settingsFile, data);
+    }
+  } catch { /* non-critical */ }
 }
 
 // Mask API key for UI display — show only last 4 chars
@@ -183,11 +265,16 @@ function loadSpend() {
   return data;
 }
 
-function trackSpend(usdAmount) {
+function trackSpend(usdAmount, costLabel) {
   if (!usdAmount || usdAmount <= 0) return;
   const data    = loadSpend();
   const d       = today();
   data[d]       = (data[d] || 0) + usdAmount;
+  // Track premium calls separately for per-day limit enforcement
+  if (costLabel && costLabel !== 'Free') {
+    const key = `${d}_premium_calls`;
+    data[key] = (data[key] || 0) + 1;
+  }
   writeJSON(SPEND_FILE, data);
 }
 
@@ -223,5 +310,6 @@ module.exports = {
   toggleFavorite,
   trackSpend,
   getSpend,
+  loadSpend,
   NEURALBOX_DIR,
 };

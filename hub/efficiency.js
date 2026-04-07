@@ -6,7 +6,7 @@
 
 'use strict';
 
-const { routeModel, checkBudget } = require('./router.js');
+const { routeModel, checkBudget, checkPremiumCallsExceeded } = require('./router.js');
 const { trackSpend, getSpend }    = require('./storage.js');
 
 // ── HTTP helpers ──────────────────────────────────────────────────────────────
@@ -198,7 +198,9 @@ function buildPolishPrompt(draft, originalPrompt, stage) {
 /**
  * generate(options) → { result, model_used, provider, cost_label, cost_usd, tokens, reason, cheaper_alt, stages_run, spend }
  *
- * options: { systemPrompt, userPrompt, taskType, profileName, settings, maxStage }
+ * options: { systemPrompt, userPrompt, taskType, profileName, settings, maxStage, budgetCap, jobId }
+ *   budgetCap: optional per-job USD limit (overrides per_worker_budget_usd if lower)
+ *   jobId: optional string for per-job spend tracking
  * maxStage: 1 | 2 | 3 (default from profile; user can override)
  */
 async function generate(options) {
@@ -208,14 +210,28 @@ async function generate(options) {
     taskType    = 'template',
     profileName = null,
     settings    = {},
-    maxStage    = 2,  // default to stage2 unless explicitly requested
+    maxStage    = 2,
+    budgetCap   = null,  // hard per-job limit in USD
+    jobId       = null,
   } = options;
 
   const spendInfo  = getSpend(settings);
+
+  // Hard-block if daily limit already reached
+  if (spendInfo.locked) {
+    throw new Error(`Daily budget limit reached ($${settings.daily_limit_usd || 1.00}). API calls blocked. Using local only mode.`);
+  }
+
+  // Resolve effective per-job cap
+  const perWorkerCap = settings.per_worker_budget_usd || 0.10;
+  const effectiveCap = budgetCap != null
+    ? Math.min(budgetCap, perWorkerCap)
+    : perWorkerCap;
+
   const stagesRun  = [];
-  let   currentText = '';
-  let   totalTokens = 0;
-  let   totalCost   = 0;
+  let   currentText  = '';
+  let   totalTokens  = 0;
+  let   totalCost    = 0;  // cost accumulated in this job
   let   finalRouting = null;
   let   openclawAvailable = null;
 
@@ -227,15 +243,27 @@ async function generate(options) {
 
     // Budget check for non-free stages
     if (routing.cost_usd > 0) {
+      // 1. Check daily limit
       const budget = checkBudget(routing.cost_usd, spendInfo, settings);
-      if (!budget.allowed) {
+      // 2. Check per-job cap
+      const jobBudgetExceeded = (totalCost + routing.cost_usd) > effectiveCap;
+      // 3. Check premium calls per day
+      const premiumBlocked = checkPremiumCallsExceeded(routing.cost_label, settings);
+
+      if (!budget.allowed || jobBudgetExceeded || premiumBlocked) {
+        const reason = !budget.allowed
+          ? budget.reason
+          : jobBudgetExceeded
+            ? `Per-job budget cap ($${effectiveCap.toFixed(4)}) would be exceeded — using local model`
+            : `Daily premium call limit (${settings.premium_calls_per_day || 5}) reached — using local model`;
+
         // Fallback to local for this stage
         const localRouting = routeModel(taskType, 'Local Only', settings, 'stage1');
         routing.provider   = localRouting.provider;
         routing.model      = localRouting.model;
         routing.cost_label = localRouting.cost_label;
         routing.cost_usd   = 0;
-        routing.reason     = budget.reason;
+        routing.reason     = reason;
         routing.fallback   = true;
       }
     }
@@ -293,7 +321,7 @@ async function generate(options) {
 
     // Track spend if non-free
     if (routing.cost_usd > 0) {
-      trackSpend(routing.cost_usd);
+      trackSpend(routing.cost_usd, routing.cost_label);
     }
   }
 

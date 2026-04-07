@@ -68,6 +68,8 @@ async function processWorkerQueue() {
       profileName: job.profile || settings.routing_rules?.workers || 'Balanced',
       settings,
       maxStage:    2,
+      budgetCap:   job.budget_cap || null,
+      jobId:       job.id,
     });
 
     job.progress   = 100;
@@ -151,12 +153,26 @@ function readBody(req) {
   });
 }
 
+// ── CORS / Origin guard ───────────────────────────────────────────────────────
+
+const ALLOWED_ORIGINS = new Set([
+  'http://localhost:8080',
+  'http://127.0.0.1:8080',
+]);
+
+function isLocalOrigin(req) {
+  const origin = req.headers['origin'];
+  const host   = req.headers['host'];
+  if (!origin) return true;                     // non-browser (curl, scripts)
+  if (ALLOWED_ORIGINS.has(origin)) return true; // hub's own UI
+  return false;
+}
+
 function json(res, statusCode, data) {
   const body = JSON.stringify(data);
   res.writeHead(statusCode, {
-    'Content-Type':   'application/json',
-    'Cache-Control':  'no-cache',
-    'Access-Control-Allow-Origin': '*',
+    'Content-Type':  'application/json',
+    'Cache-Control': 'no-cache',
   });
   res.end(body);
 }
@@ -234,10 +250,26 @@ const server = http.createServer(async (req, res) => {
   const url     = urlObj.pathname;
   const method  = req.method.toUpperCase();
 
-  // CORS preflight
+  // CORS preflight — only allow localhost origins
   if (method === 'OPTIONS') {
-    res.writeHead(204, { 'Access-Control-Allow-Origin': '*', 'Access-Control-Allow-Methods': 'GET,POST,DELETE', 'Access-Control-Allow-Headers': 'Content-Type' });
+    const origin = req.headers['origin'];
+    const allowOrigin = (origin && ALLOWED_ORIGINS.has(origin)) ? origin : 'http://localhost:8080';
+    res.writeHead(204, {
+      'Access-Control-Allow-Origin':  allowOrigin,
+      'Access-Control-Allow-Methods': 'GET,POST,DELETE',
+      'Access-Control-Allow-Headers': 'Content-Type',
+    });
     res.end();
+    return;
+  }
+
+  // Block write requests from non-local origins
+  const WRITE_PATHS = new Set(['/api/settings', '/api/keys/test', '/api/worker/start', '/api/history/save']);
+  const isWritePath = method === 'POST' || method === 'DELETE' ||
+    url.match(/^\/api\/history\/.+\/favorite$/);
+  if (isWritePath && !isLocalOrigin(req)) {
+    res.writeHead(403, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify({ error: 'forbidden: non-local origin' }));
     return;
   }
 

@@ -375,7 +375,7 @@ if (-not (Test-Path $envFile)) {
 # STEP 14: Create Desktop Shortcut
 # ============================================================
 Write-Log "Creating desktop shortcut..." "STEP"
-$shortcutScript = Join-Path $ProjectRoot "scripts\create-shortcut.ps1"
+$shortcutScript = Join-Path $ProjectRoot "_engine\scripts\create-shortcut.ps1"
 if (Test-Path $shortcutScript) {
     & powershell -ExecutionPolicy Bypass -File $shortcutScript -ProjectRoot $ProjectRoot
     Write-Log "Desktop shortcut created." "OK"
@@ -423,7 +423,7 @@ Write-Host ""
 Write-Host "  Launching Local AI now..." -ForegroundColor Cyan
 Write-Host ""
 Start-Sleep -Seconds 2
-$launchScript = Join-Path $ProjectRoot "launcher\launch-ai.bat"
+$launchScript = Join-Path $ProjectRoot "_engine\launcher\launch-ai.bat"
 if (Test-Path $launchScript) {
     Start-Process -FilePath "cmd.exe" -ArgumentList @("/c", $launchScript)
 }
