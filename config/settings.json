@@ -1,14 +1,23 @@
 {
-  "ollama_port": 11434,
-  "webui_port": 3000,
+  "project_name": "NeuralBox",
   "primary_model": "qwen3.5:9b",
   "backup_model": "qwen3.5:4b",
+  "ollama_port": 11434,
+  "webui_port": 3000,
   "webui_container_name": "open-webui",
   "webui_docker_image": "ghcr.io/open-webui/open-webui:main",
   "startup_timeout_seconds": 90,
   "docker_startup_wait_seconds": 60,
   "auto_open_browser": true,
   "log_dir": "logs",
-  "default_profile": "max-performance",
-  "project_name": "Local AI"
+  "default_profile": "Balanced",
+  "daily_limit_usd": 1.00,
+  "per_worker_budget_usd": 0.10,
+  "premium_calls_per_day": 5,
+  "ask_before_expensive": true,
+  "routing_rules": {
+    "templates": "Local Only",
+    "workers": "Balanced",
+    "money_mode": "Balanced"
+  }
 }

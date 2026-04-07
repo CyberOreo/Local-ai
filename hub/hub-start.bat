@@ -1,9 +1,9 @@
 @echo off
-title LocalAI Hub
-color 0A
+title NeuralBox Hub
+color 0D
 
 echo.
-echo  Starting LocalAI Hub...
+echo  Starting NeuralBox Hub...
 
 :: Check Node.js
 where node >nul 2>&1
@@ -20,7 +20,7 @@ if errorlevel 1 (
 )
 
 :: Start hub server
-start "LocalAI Hub" /min node "%~dp0hub.js"
+start "NeuralBox Hub" /min node "%~dp0hub.js"
 
 echo  [INFO] Waiting for hub to start...
 timeout /t 2 /nobreak >nul
@@ -28,7 +28,7 @@ timeout /t 2 /nobreak >nul
 :: Open browser
 start http://localhost:8080
 
-echo  [OK]   LocalAI Hub opened in your browser.
+echo  [OK]   NeuralBox Hub opened in your browser.
 echo.
 echo  The hub window runs minimised in the background.
 echo  Close this window - the hub keeps running.
