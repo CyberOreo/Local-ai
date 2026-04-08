@@ -125,6 +125,10 @@ echo  ============================================================
 echo  [2/5] Stopping services before update...
 echo  ============================================================
 
+:: Record current container image ID before touching anything (needed for rollback)
+set "OLD_IMAGE_ID="
+for /f "tokens=*" %%I in ('docker inspect %CONTAINER% --format "{{.Image}}" 2^>nul') do set "OLD_IMAGE_ID=%%I"
+
 echo  Stopping Open WebUI container...
 docker stop %CONTAINER% >nul 2>&1
 echo  Stopping Ollama...
@@ -168,6 +172,16 @@ if errorlevel 1 (
     goto UpdateWebUISkip
 )
 
+:: Check if image actually changed — skip recreation if digest is unchanged
+set "NEW_IMAGE_ID="
+for /f "tokens=*" %%I in ('docker inspect %WEBUI_IMAGE% --format "{{.Id}}" 2^>nul') do set "NEW_IMAGE_ID=%%I"
+if not "%NEW_IMAGE_ID%"=="" if "%NEW_IMAGE_ID%"=="%OLD_IMAGE_ID%" (
+    echo  [OK] Image unchanged after pull. Restarting existing container.
+    docker start %CONTAINER% >nul 2>&1
+    echo [%date% %time%] WebUI already up to date, restarted container >> "%LOG_FILE%"
+    goto UpdateWebUISkip
+)
+
 echo  Applying update (removing old container, keeping all data)...
 docker rm %CONTAINER% >nul 2>&1
 echo  Recreating container with latest image...
@@ -182,9 +196,29 @@ docker run -d ^
     %WEBUI_IMAGE% >nul 2>&1
 
 if errorlevel 1 (
-    echo  [ERROR] Failed to recreate container. Chat history is safe.
-    echo  [ERROR] Run start.bat to recover.
+    echo  [ERROR] Failed to recreate container.
     echo [%date% %time%] ERROR: container recreate failed >> "%LOG_FILE%"
+    if not "%OLD_IMAGE_ID%"=="" (
+        echo  [INFO] Attempting rollback to previous image...
+        docker run -d ^
+            -p 127.0.0.1:%WEBUI_PORT%:8080 ^
+            --add-host=host.docker.internal:host-gateway ^
+            -e OLLAMA_BASE_URL=http://host.docker.internal:%OLLAMA_PORT% ^
+            -e WEBUI_AUTH=False ^
+            -v open-webui:/app/backend/data ^
+            --name %CONTAINER% ^
+            --restart unless-stopped ^
+            %OLD_IMAGE_ID% >nul 2>&1
+        if not errorlevel 1 (
+            echo  [OK] Rollback successful. Previous version restored. Chat history safe.
+            echo [%date% %time%] Rollback successful >> "%LOG_FILE%"
+        ) else (
+            echo  [ERROR] Rollback also failed. Run start.bat to recover.
+            echo [%date% %time%] ERROR: rollback also failed >> "%LOG_FILE%"
+        )
+    ) else (
+        echo  [ERROR] No previous image recorded. Run start.bat to recover.
+    )
 ) else (
     echo  [OK]   Open WebUI updated. Chat history preserved.
     echo [%date% %time%] Open WebUI updated >> "%LOG_FILE%"

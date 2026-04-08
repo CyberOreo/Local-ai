@@ -38,14 +38,22 @@ function Set-StatusIdle {
 
 # ── Auth: shared token with hub.js ───────────────────────────
 # Hub writes the token at ~/.neuralbox/hub-token on startup.
-# We read it here; if the file is missing, privileged endpoints are locked.
-$TokenFile     = Join-Path $env:USERPROFILE ".neuralbox\hub-token"
-$ExpectedToken = $null
-if (Test-Path $TokenFile) {
-    try { $ExpectedToken = (Get-Content $TokenFile -Raw -Encoding UTF8).Trim() } catch {}
+# Token is re-read from disk on every privileged request so that if
+# hub.js starts after this server and creates the file, auth works
+# immediately without restarting the update server.
+$TokenFile = Join-Path $env:USERPROFILE ".neuralbox\hub-token"
+if (-not (Test-Path $TokenFile)) {
+    Write-Log "INFO: hub-token not yet present at $TokenFile — will check per-request once hub.js starts."
 }
-if (-not $ExpectedToken) {
-    Write-Log "WARNING: hub-token file not found at $TokenFile — privileged endpoints will reject all requests until hub.js creates the token."
+
+function Read-HubToken {
+    if (Test-Path $TokenFile) {
+        try {
+            $t = (Get-Content $TokenFile -Raw -Encoding UTF8).Trim()
+            if ($t -and $t.Length -ge 32) { return $t }
+        } catch {}
+    }
+    return $null
 }
 
 function Is-LocalOrigin($req) {
@@ -56,15 +64,16 @@ function Is-LocalOrigin($req) {
 }
 
 function Validate-HubToken($req) {
-    if (-not $ExpectedToken) { return $false }
+    $expected = Read-HubToken
+    if (-not $expected) { return $false }
     # Check X-Hub-Token header
     $t = $req.Headers["X-Hub-Token"]
-    if (-not [string]::IsNullOrEmpty($t) -and $t -eq $ExpectedToken) { return $true }
+    if (-not [string]::IsNullOrEmpty($t) -and $t -eq $expected) { return $true }
     # Check Authorization: Bearer <token>
     $auth = $req.Headers["Authorization"]
     if (-not [string]::IsNullOrEmpty($auth) -and $auth.StartsWith("Bearer ")) {
         $t = $auth.Substring(7).Trim()
-        if ($t -eq $ExpectedToken) { return $true }
+        if ($t -eq $expected) { return $true }
     }
     return $false
 }
@@ -114,7 +123,7 @@ try {
 
 Write-Log "Update server started on http://localhost:$Port"
 Write-Log "Logic script: $LogicScript"
-Write-Log "Token file:   $TokenFile  (loaded: $(-not [string]::IsNullOrEmpty($ExpectedToken)))"
+Write-Log "Token file:   $TokenFile  (present: $(Test-Path $TokenFile)) — re-read per-request"
 
 # ── Main loop ─────────────────────────────────────────────────
 while ($listener.IsListening) {

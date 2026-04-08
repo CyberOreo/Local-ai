@@ -363,8 +363,9 @@ if ($existingContainer -ne $containerName) {
         $webuiImage 2>&1
 
     if ($LASTEXITCODE -ne 0) {
-        Write-Log "Failed to create Open WebUI container." "ERROR"
-        Write-Log "Try running manually: docker run -d -p 127.0.0.1:3000:8080 --add-host=host.docker.internal:host-gateway -e OLLAMA_BASE_URL=http://host.docker.internal:11434 -e WEBUI_AUTH=False -v open-webui:/app/backend/data --name open-webui --restart unless-stopped $webuiImage" "ERROR"
+        Write-Log "Failed to create Open WebUI container using image: $webuiImage" "ERROR"
+        Write-Log "If the image tag does not exist, edit _engine\version.json (webui_image) to use a valid tag and re-run the installer." "ERROR"
+        Write-Log "Manual recovery: docker run -d -p 127.0.0.1:3000:8080 --add-host=host.docker.internal:host-gateway -e OLLAMA_BASE_URL=http://host.docker.internal:11434 -e WEBUI_AUTH=False -v open-webui:/app/backend/data --name open-webui --restart unless-stopped $webuiImage" "ERROR"
         exit 1
     }
     Write-Log "open-webui container created." "OK"
