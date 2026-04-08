@@ -9,14 +9,28 @@ param(
     [string]$StatusFile
 )
 
-$PRIMARY_MODEL  = "qwen3.5:9b"
-$BACKUP_MODEL   = "qwen3.5:4b"
-$WEBUI_IMAGE    = "ghcr.io/open-webui/open-webui:main"
-$CONTAINER      = "open-webui"
-$OLLAMA_PORT    = 11434
-$WEBUI_PORT     = 3000
+# ── Load version config (single source of truth) ───────────────
+$PRIMARY_MODEL = "qwen3.5:9b"
+$BACKUP_MODEL  = "qwen3.5:4b"
+$WEBUI_IMAGE   = "ghcr.io/open-webui/open-webui:main"
 
-# Load .env overrides if present
+$versionFile = Join-Path $ProjectRoot "_engine\version.json"
+if (Test-Path $versionFile) {
+    try {
+        $vCfg = Get-Content $versionFile -Raw | ConvertFrom-Json
+        if ($vCfg.webui_image)    { $WEBUI_IMAGE   = $vCfg.webui_image }
+        if ($vCfg.primary_model)  { $PRIMARY_MODEL = $vCfg.primary_model }
+        if ($vCfg.backup_model)   { $BACKUP_MODEL  = $vCfg.backup_model }
+    } catch {
+        # version.json malformed — use defaults above
+    }
+}
+
+$CONTAINER   = "open-webui"
+$OLLAMA_PORT = 11434
+$WEBUI_PORT  = 3000
+
+# Load .env overrides if present (ports may differ)
 $envFile = Join-Path $ProjectRoot "config\.env"
 if (Test-Path $envFile) {
     Get-Content $envFile | Where-Object { $_ -notmatch '^\s*#' -and $_ -match '=' } | ForEach-Object {

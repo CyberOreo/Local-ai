@@ -74,7 +74,9 @@ function encryptApiKeys(api_keys) {
   const out = {};
   for (const [provider, key] of Object.entries(api_keys)) {
     if (!key) { out[provider] = ''; continue; }
-    out[provider] = ks.isEncrypted(key) ? key : ks.encrypt(key);
+    if (ks.isEncrypted(key)) { out[provider] = key; continue; }
+    // ks.encrypt() throws on Windows DPAPI failure — let it propagate
+    out[provider] = ks.encrypt(key);
   }
   return out;
 }
@@ -83,12 +85,16 @@ function decryptApiKeys(api_keys) {
   if (!api_keys) return {};
   const out = {};
   for (const [provider, key] of Object.entries(api_keys)) {
-    out[provider] = key ? ks.decrypt(key) : '';
+    if (!key) { out[provider] = ''; continue; }
+    const decrypted = ks.decrypt(key);
+    // null = DPAPI unavailable or decryption failed → treat as missing (not empty string)
+    out[provider] = decrypted ?? '';
   }
   return out;
 }
 
-// Auto-migrate any plaintext API keys on first load (Windows only)
+// Auto-migrate any plaintext API keys on first load (Windows only).
+// If encryption fails for a key, it's left plaintext and retried next load.
 function migrateKeysIfNeeded(settingsFile) {
   if (process.platform !== 'win32') return;
   try {
@@ -98,8 +104,14 @@ function migrateKeysIfNeeded(settingsFile) {
     const encrypted = {};
     for (const [provider, key] of Object.entries(data.api_keys)) {
       if (key && !ks.isEncrypted(key)) {
-        encrypted[provider] = ks.encrypt(key);
-        changed = true;
+        try {
+          encrypted[provider] = ks.encrypt(key);
+          changed = true;
+        } catch (e) {
+          // Migration failed for this key — leave plaintext, log warning
+          console.warn(`[storage] Could not encrypt ${provider} key during migration: ${e.message}`);
+          encrypted[provider] = key;
+        }
       } else {
         encrypted[provider] = key;
       }

@@ -410,8 +410,8 @@ Write-Host "   Web UI is running at:" -ForegroundColor White
 Write-Host "     http://localhost:${webuiPort}" -ForegroundColor Cyan
 Write-Host ""
 Write-Host "   HOW TO USE:" -ForegroundColor White
-Write-Host "     Daily use:  Double-click 'Local AI' on your desktop" -ForegroundColor Gray
-Write-Host "             OR  Double-click launcher\launch-ai.bat" -ForegroundColor Gray
+Write-Host "     Daily use:  Double-click 'NeuralBox' on your desktop" -ForegroundColor Gray
+Write-Host "             OR  Double-click start.bat" -ForegroundColor Gray
 Write-Host ""
 Write-Host "   PROFILE (performance):  config\.env  -> PROFILE=max-performance" -ForegroundColor Gray
 Write-Host "   LOGS:                   logs\install.log" -ForegroundColor Gray

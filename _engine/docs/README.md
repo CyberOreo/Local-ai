@@ -12,7 +12,7 @@ One click to launch. No cloud, no subscriptions after setup.
 | **NeuralBox Hub** | http://localhost:8080 | Main portal — money tools, templates, workers, history |
 | **Open WebUI** | http://localhost:3000 | Full chat interface |
 | **Ollama** | http://localhost:11434 | Local AI model server |
-| **Update Server** | http://localhost:9999 | Handles in-app update requests |
+| **Update Server** | http://localhost:9999 | Handles in-app update requests (same runtime as batch) |
 | **OpenClaw (optional)** | http://localhost:18789 | AI agent orchestration |
 
 All services bind to **127.0.0.1 only**. Nothing is accessible from other machines.
@@ -32,14 +32,18 @@ All services bind to **127.0.0.1 only**. Nothing is accessible from other machin
 ## Installation (Once)
 
 1. Install Docker Desktop, start it, wait for the whale icon in the tray
-2. **Right-click `_engine\install.bat`** → **Run as administrator**
-3. Wait — the installer will:
+2. **Double-click `start.bat`** — it detects first run and calls the installer automatically
+   - You will see a UAC (admin) prompt — click **Yes**
+3. The installer will:
    - Check your system (RAM, GPU, disk)
    - Download and install Ollama
    - Download **qwen3.5:9b** (~6.6 GB) and **qwen3.5:4b** (~2.5 GB)
-   - Create the Open WebUI Docker container (bound to 127.0.0.1)
+   - Create the Open WebUI Docker container (bound to 127.0.0.1:3000)
    - Create a "NeuralBox" desktop shortcut
+   - Write `config\.installed` on success
 4. NeuralBox launches automatically when done
+
+> To reinstall: delete `config\.installed` and run `start.bat` again.
 
 ---
 
@@ -48,10 +52,34 @@ All services bind to **127.0.0.1 only**. Nothing is accessible from other machin
 ```
 Double-click  start.bat  (or the Desktop shortcut)
        ↓
-All services start automatically
+Reads config\.installed — goes straight to launch
+       ↓
+Starts: Ollama → Docker/WebUI → Hub → Update Server → OpenClaw
        ↓
 Browser opens at http://localhost:8080 (NeuralBox Hub)
 ```
+
+---
+
+## Startup Flow Detail
+
+`start.bat` → `_engine\launcher\launch-ai.bat`:
+
+1. Load `.env` profile (Ollama settings)
+2. Read Docker image tag from `_engine\version.json`
+3. Start / wait for **Ollama** (port 11434)
+4. Start Docker Desktop if needed; wait for daemon
+5. Check `open-webui` container:
+   - If bound to `0.0.0.0` → stop, remove, recreate with `127.0.0.1`
+   - If stopped → start it
+   - If missing → create with correct binding
+6. Wait for **Open WebUI** (port 3000)
+7. Start **Update Server** (port 9999)
+8. Start **OpenClaw** if installed (port 18789)
+9. Start **NeuralBox Hub** via Node.js (port 8080)
+10. Open browser
+
+The Electron app (`app/main.js`) runs the same startup sequence including the update server.
 
 ---
 
@@ -60,6 +88,7 @@ Browser opens at http://localhost:8080 (NeuralBox Hub)
 Run `_engine\launcher\stop-ai.bat`
 
 Stops: Hub, Open WebUI container, Ollama, Update Server, OpenClaw.
+Verifies each service actually stopped; reports failures.
 
 ---
 
@@ -73,7 +102,16 @@ Run `_engine\launcher\restart-ai.bat`
 
 Run `_engine\launcher\healthcheck.bat`
 
-Shows pass/fail for every service including Hub, Update Server, and OpenClaw.
+Shows pass/fail for every service.
+
+---
+
+## Smoke Test
+
+Run `_engine\scripts\smoke-test.bat`
+
+Validates: file structure, prerequisites, service health, API endpoints,
+CORS + token auth, Docker port binding, budget fields, stop flow, path resolution.
 
 ---
 
@@ -96,14 +134,58 @@ After changing: run `_engine\launcher\restart-ai.bat`
 
 Open **NeuralBox Hub → Settings → API Keys** to add OpenAI, Anthropic, or Groq keys.
 
-Keys are stored encrypted (DPAPI) at `~\.neuralbox\settings.json` — never in the project directory.
+Keys are stored **DPAPI-encrypted** at `~\.neuralbox\settings.json` — never in the project directory.
+If DPAPI encryption fails, the key is rejected (not stored as plaintext).
+
+---
+
+## Hub Authentication
+
+The Hub uses session-token auth for all write endpoints:
+
+- **Browser**: Load `http://localhost:8080` — an `nb_session` cookie is set automatically.
+  All subsequent API calls from the page include the cookie.
+- **Scripts / CLI**: Read the token from `~\.neuralbox\hub-token`, then pass it as:
+  `X-Hub-Token: <token>` or `Authorization: Bearer <token>`
+
+---
+
+## Budget Controls
+
+Configure in Hub → Settings → Budget:
+
+- **Daily limit (USD)** — API calls blocked once reached
+- **Per-worker cap (USD)** — hard limit per worker job; overflow falls back to local model
+- **Premium calls/day** — counted server-side; blocked when limit reached
+- **Ask before expensive** — hub prompts for confirmation before any paid API call
+
+All limits are enforced by the backend — UI warnings are informational only.
+
+---
+
+## Docker Image Version
+
+The WebUI Docker image is configured in `_engine\version.json`:
+
+```json
+"webui_image": "ghcr.io/open-webui/open-webui:main"
+```
+
+To pin to a specific version (recommended for production):
+```json
+"webui_image": "ghcr.io/open-webui/open-webui:v0.6.5"
+```
+
+All scripts read from this one location. Changing it here changes it everywhere.
 
 ---
 
 ## Updating
 
-- **In-app**: type `update` in Open WebUI chat, or use the Update button in Hub
+- **In-app**: use the Update button in Hub, or type `update` in Open WebUI chat
 - **Manual**: run `_engine\update.bat`
+
+Update logic (`update-logic.ps1`) reads model names and Docker image from `_engine\version.json`.
 
 ---
 
@@ -111,43 +193,55 @@ Keys are stored encrypted (DPAPI) at `~\.neuralbox\settings.json` — never in t
 
 ```
 Local-ai\
-├── start.bat                    ← Daily launcher (decides install or launch)
+├── start.bat                    ← Entry point: install or launch
 ├── config\
+│   ├── .installed               ← Written by installer; deleted = triggers reinstall
 │   ├── .env                     ← Active settings (edit this)
 │   ├── .env.example             ← Template
 │   ├── settings.json            ← Ports, models, budget defaults
 │   └── profiles\                ← Performance profiles
 ├── hub\
-│   ├── hub.js                   ← NeuralBox Hub server (port 8080)
+│   ├── hub.js                   ← NeuralBox Hub server (port 8080) + token auth
 │   ├── index.html               ← Hub UI
 │   ├── storage.js               ← File-based persistence + key encryption
-│   ├── keystore.js              ← Windows DPAPI key encryption helper
-│   ├── efficiency.js            ← Stage-based generation + budget enforcement
+│   ├── keystore.js              ← Windows DPAPI key encryption (no plaintext fallback)
+│   ├── efficiency.js            ← Stage-based generation + full budget enforcement
 │   ├── router.js                ← Model routing + budget checks
 │   └── templates.js             ← Money tools + template definitions
 ├── app\
-│   └── main.js                  ← Electron wrapper (optional desktop app)
+│   └── main.js                  ← Electron wrapper (same startup as batch)
 ├── _engine\
-│   ├── install.bat              ← Run once to install
-│   ├── install.ps1              ← Installer logic
-│   ├── version.json             ← Pinned versions
+│   ├── install.bat              ← Installer entry (handles own elevation)
+│   ├── install.ps1              ← Installer logic; writes config\.installed on success
+│   ├── version.json             ← Single source for Docker image + model versions
 │   ├── launcher\
 │   │   ├── launch-ai.bat        ← Start all services
-│   │   ├── stop-ai.bat          ← Stop all services
+│   │   ├── stop-ai.bat          ← Stop all services (verified)
 │   │   ├── restart-ai.bat       ← Restart all services
 │   │   └── healthcheck.bat      ← Check all services
 │   ├── scripts\
-│   │   ├── update-server.ps1    ← HTTP server for update triggers
-│   │   ├── update-logic.ps1     ← Actual update execution
+│   │   ├── update-server.ps1    ← HTTP server for update triggers (origin-checked)
+│   │   ├── update-logic.ps1     ← Actual update execution (reads version.json)
 │   │   ├── create-shortcut.ps1  ← Desktop shortcut creator
-│   │   ├── uninstall.bat        ← Remove everything
-│   │   ├── smoke-test.bat       ← Smoke test suite
+│   │   ├── smoke-test.bat       ← Full smoke test suite
 │   │   └── update-model.bat     ← Update models only
 │   └── docs\
 │       ├── README.md            ← This file
 │       └── TROUBLESHOOTING.md
 └── logs\                        ← Log files (gitignored)
 ```
+
+---
+
+## Runtime Data (not in project dir)
+
+| Path | What |
+|------|------|
+| `~\.neuralbox\settings.json` | User settings + DPAPI-encrypted API keys |
+| `~\.neuralbox\hub-token` | Hub session token (0600 permissions) |
+| `~\.neuralbox\history.json` | Generation history |
+| `~\.neuralbox\spend.json` | Daily spend tracking |
+| Docker volume `open-webui` | Open WebUI chat history |
 
 ---
 

@@ -17,6 +17,12 @@ set "LOG_FILE=%LOG_DIR%\launch.log"
 :: Ensure logs directory exists
 if not exist "%LOG_DIR%" mkdir "%LOG_DIR%"
 
+:: Read webui image from version.json (falls back to :main if unavailable)
+set "WEBUI_IMAGE=ghcr.io/open-webui/open-webui:main"
+for /f "usebackq tokens=*" %%I in (`powershell -NoProfile -NonInteractive -Command "(Get-Content '%PROJECT_ROOT%\_engine\version.json' -Raw | ConvertFrom-Json).webui_image" 2^>nul`) do (
+    if not "%%I"=="" set "WEBUI_IMAGE=%%I"
+)
+
 echo.
 echo  ============================================================
 echo    LOCAL AI  -  Starting...
@@ -185,7 +191,7 @@ if not defined CONTAINER_EXISTS (
         -v open-webui:/app/backend/data ^
         --name open-webui ^
         --restart unless-stopped ^
-        ghcr.io/open-webui/open-webui:main
+        %WEBUI_IMAGE%
     if errorlevel 1 (
         echo  [ERROR] Failed to create the open-webui container.
         echo          Make sure Docker Desktop is running and connected to the internet.
@@ -214,7 +220,7 @@ if not errorlevel 1 (
         -v open-webui:/app/backend/data ^
         --name open-webui ^
         --restart unless-stopped ^
-        ghcr.io/open-webui/open-webui:main
+        %WEBUI_IMAGE%
     if errorlevel 1 (
         echo  [ERROR] Failed to recreate container.
         echo [%date% %time%] ERROR: Failed to recreate container >> "%LOG_FILE%"
@@ -404,7 +410,7 @@ echo.
 echo    Profile:  %PROFILE%   ^|   Model: %PRIMARY_MODEL%
 echo.
 echo    IN-CHAT UPDATE: type "update" in Local AI Chat
-echo    To STOP everything: run launcher\stop-ai.bat
+echo    To STOP everything: run _engine\launcher\stop-ai.bat
 echo  ============================================================
 echo.
 echo  Press any key to exit this window (services keep running).

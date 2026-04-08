@@ -6,16 +6,69 @@
 
 'use strict';
 
-const http = require('http');
-const fs   = require('fs');
-const path = require('path');
-const os   = require('os');
+const http   = require('http');
+const fs     = require('fs');
+const path   = require('path');
+const os     = require('os');
+const crypto = require('crypto');
 
 const PORT       = 8080;
 const HUB_DIR    = __dirname;
 const HOME_DIR   = process.env.USERPROFILE || process.env.HOME || os.homedir();
 const START_TIME = Date.now();
 let   requestCount = 0;
+
+// ── Session token ─────────────────────────────────────────────────────────────
+// One random token per hub process. Persisted across restarts.
+// Stored at ~/.neuralbox/hub-token (not in project dir).
+// Privileged write endpoints require this token via cookie or header.
+
+const TOKEN_FILE = path.join(HOME_DIR, '.neuralbox', 'hub-token');
+let   HUB_TOKEN  = null;
+
+(function loadOrCreateToken() {
+  try {
+    if (fs.existsSync(TOKEN_FILE)) {
+      const t = fs.readFileSync(TOKEN_FILE, 'utf8').trim();
+      if (t && t.length >= 32) { HUB_TOKEN = t; return; }
+    }
+  } catch {}
+  HUB_TOKEN = crypto.randomBytes(32).toString('hex');
+  try {
+    const dir = path.dirname(TOKEN_FILE);
+    if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+    fs.writeFileSync(TOKEN_FILE, HUB_TOKEN, { mode: 0o600, encoding: 'utf8' });
+  } catch (e) {
+    console.warn(`[NeuralBox] WARNING: could not persist hub token: ${e.message}`);
+  }
+})();
+
+function parseCookies(header) {
+  const out = {};
+  if (!header) return out;
+  for (const part of header.split(';')) {
+    const idx = part.indexOf('=');
+    if (idx < 0) continue;
+    out[part.slice(0, idx).trim()] = part.slice(idx + 1).trim();
+  }
+  return out;
+}
+
+/** Returns true if request carries a valid hub session token. */
+function validateAuth(req) {
+  const cookies = parseCookies(req.headers['cookie']);
+  if (cookies['nb_session'] === HUB_TOKEN) return true;
+  const auth = req.headers['authorization'] || '';
+  if (auth.startsWith('Bearer ') && auth.slice(7) === HUB_TOKEN) return true;
+  if ((req.headers['x-hub-token'] || '') === HUB_TOKEN) return true;
+  return false;
+}
+
+/** For privileged write endpoints: must be local origin AND carry token. */
+function isAuthorizedWrite(req) {
+  if (!isLocalOrigin(req)) return false;
+  return validateAuth(req);
+}
 
 // Load modules
 const storage    = require('./storage.js');
@@ -264,22 +317,35 @@ const server = http.createServer(async (req, res) => {
     return;
   }
 
-  // Block write requests from non-local origins
-  const WRITE_PATHS = new Set(['/api/settings', '/api/keys/test', '/api/worker/start', '/api/history/save']);
+  // Block privileged write requests from non-local origins or without valid token.
+  // Browser requests (with Origin header): must be local origin + valid session cookie.
+  // CLI/script requests (no Origin header): must carry X-Hub-Token or Authorization: Bearer.
   const isWritePath = method === 'POST' || method === 'DELETE' ||
-    url.match(/^\/api\/history\/.+\/favorite$/);
-  if (isWritePath && !isLocalOrigin(req)) {
+    !!url.match(/^\/api\/history\/.+\/favorite$/);
+  if (isWritePath && !isAuthorizedWrite(req)) {
     res.writeHead(403, { 'Content-Type': 'application/json' });
-    res.end(JSON.stringify({ error: 'forbidden: non-local origin' }));
+    res.end(JSON.stringify({ error: 'forbidden: authentication required' }));
     return;
   }
 
-  // ── Static: serve index.html ──────────────────────────────────────────────
+  // ── GET /api/token — return session token to local scripts (no-browser only) ──
+  if (url === '/api/token' && method === 'GET') {
+    if (req.headers['origin']) {
+      return json(res, 403, { error: 'forbidden: use hub UI for browser access' });
+    }
+    return json(res, 200, { token: HUB_TOKEN, file: TOKEN_FILE });
+  }
+
+  // ── Static: serve index.html — set session cookie ────────────────────────
   if ((url === '/' || url === '/index.html') && method === 'GET') {
     requestCount++;
     try {
       const html = fs.readFileSync(path.join(HUB_DIR, 'index.html'), 'utf8');
-      res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
+      res.writeHead(200, {
+        'Content-Type':  'text/html; charset=utf-8',
+        'Set-Cookie':    `nb_session=${HUB_TOKEN}; HttpOnly; SameSite=Strict; Path=/`,
+        'Cache-Control': 'no-store',
+      });
       res.end(html);
     } catch {
       res.writeHead(500);

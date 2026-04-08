@@ -12,19 +12,32 @@ const HUB_PORT    = 8080;
 const OLLAMA_PORT = 11434;
 const WEBUI_PORT  = 3000;
 const CLAW_PORT   = 18789;
+const UPDATE_PORT = 9999;
 
 const IS_DEV  = !app.isPackaged;
 const HUB_DIR = IS_DEV
   ? path.join(__dirname, '..', 'hub')
   : path.join(process.resourcesPath, 'hub');
 
+const ENGINE_DIR = IS_DEV
+  ? path.join(__dirname, '..', '_engine')
+  : path.join(process.resourcesPath, '_engine');
+
+// ── Version config (single source of truth for Docker image + models) ──────
+let versionConfig = {};
+try {
+  const vf = path.join(ENGINE_DIR, 'version.json');
+  versionConfig = JSON.parse(fs.readFileSync(vf, 'utf8'));
+} catch {}
+const WEBUI_IMAGE = versionConfig.webui_image || 'ghcr.io/open-webui/open-webui:main';
+
 // ── State ──────────────────────────────────────────────────────────────────
-let mainWindow  = null;
+let mainWindow   = null;
 let splashWindow = null;
-let tray        = null;
-let appIcon     = null;
-let isQuitting  = false;
-const procs     = {};
+let tray         = null;
+let appIcon      = null;
+let isQuitting   = false;
+const procs      = {};
 
 // ── Single instance ────────────────────────────────────────────────────────
 if (!app.requestSingleInstanceLock()) { app.quit(); process.exit(0); }
@@ -35,8 +48,8 @@ app.on('second-instance', () => {
 // ── Port helpers ───────────────────────────────────────────────────────────
 function portOpen(port) {
   return new Promise(resolve => {
-    const req = http.request({ hostname:'127.0.0.1', port, method:'HEAD', timeout:800 }, () => resolve(true));
-    req.on('error', () => resolve(false));
+    const req = http.request({ hostname: '127.0.0.1', port, method: 'HEAD', timeout: 800 }, () => resolve(true));
+    req.on('error',   () => resolve(false));
     req.on('timeout', () => { req.destroy(); resolve(false); });
     req.end();
   });
@@ -63,7 +76,7 @@ function status(msg, pct) {
 
 // ── Spawn background process ───────────────────────────────────────────────
 function run(name, cmd, args) {
-  const p = spawn(cmd, args, { shell:true, detached:false, stdio:'ignore', windowsHide:true });
+  const p = spawn(cmd, args, { shell: true, detached: false, stdio: 'ignore', windowsHide: true });
   p.on('error', e => console.log(`[${name}] error: ${e.message}`));
   p.on('exit',  c => console.log(`[${name}] exit: ${c}`));
   procs[name] = p;
@@ -78,7 +91,7 @@ function findNode() {
     path.join(process.env['USERPROFILE']   || '', 'AppData', 'Local', 'Programs', 'nodejs', 'node.exe'),
   ];
   for (const t of tries) {
-    try { execSync(`"${t}" --version`, { stdio:'ignore', shell:true, timeout:3000 }); return t; }
+    try { execSync(`"${t}" --version`, { stdio: 'ignore', shell: true, timeout: 3000 }); return t; }
     catch {}
   }
   return null;
@@ -96,21 +109,34 @@ async function startServices() {
   // 2 ── Docker / Open WebUI
   status('Waking up your assistant…', 30);
   if (!(await portOpen(WEBUI_PORT))) {
-    // Check if Docker daemon is running
+    // Check Docker daemon
     try { execSync('docker info', { stdio: 'ignore', shell: true, timeout: 5000 }); }
     catch {
       status('Docker not running — please start Docker Desktop', 30);
-      // Give user 30s to start Docker, then proceed anyway
       await waitPort(WEBUI_PORT, 30000);
     }
 
-    // Check if container exists; create if not
+    // Check if container exists
     let containerExists = false;
     try {
       const out = execSync('docker ps -a --filter "name=^open-webui$" --format "{{.Names}}"',
         { shell: true, encoding: 'utf8', timeout: 5000 }).trim();
       containerExists = out.includes('open-webui');
     } catch {}
+
+    // If container exists but bound to 0.0.0.0, recreate it with 127.0.0.1
+    if (containerExists) {
+      try {
+        const inspect = execSync('docker inspect open-webui',
+          { shell: true, encoding: 'utf8', timeout: 5000 });
+        if (inspect.includes('"0.0.0.0"')) {
+          status('Fixing insecure container port binding (0.0.0.0 → 127.0.0.1)…', 33);
+          execSync('docker stop open-webui && docker rm open-webui',
+            { shell: true, stdio: 'ignore', timeout: 20000 });
+          containerExists = false;
+        }
+      } catch {}
+    }
 
     if (!containerExists) {
       status('Creating Open WebUI container…', 35);
@@ -123,7 +149,7 @@ async function startServices() {
         '-v', 'open-webui:/app/backend/data',
         '--name', 'open-webui',
         '--restart', 'unless-stopped',
-        'ghcr.io/open-webui/open-webui:main',
+        WEBUI_IMAGE,
       ]);
     } else {
       run('webui', 'docker', ['start', 'open-webui']);
@@ -138,7 +164,6 @@ async function startServices() {
     const hubJs = path.join(HUB_DIR, 'hub.js');
     if (fs.existsSync(hubJs)) {
       try {
-        // Run hub inside Electron's Node.js — no child process needed
         require(hubJs);
       } catch (e) {
         const node = findNode();
@@ -149,23 +174,30 @@ async function startServices() {
   }
 
   // 4 ── OpenClaw (optional)
-  status('Connecting AI agents…', 78);
+  status('Connecting AI agents…', 75);
   if (!(await portOpen(CLAW_PORT))) {
-    const cfgPath = path.join(os.homedir(), '.openclaw', 'openclaw.json');
-    if (fs.existsSync(cfgPath)) {
-      const node = findNode();
-      if (node) {
-        try {
-          const npmRoot = execSync(`"${node}" -e "console.log(require('path').join(process.env.APPDATA||'','..','..','..',process.platform==='win32'?'Roaming':'',process.platform==='win32'?'npm':''))"`,
-            { shell:true, encoding:'utf8', timeout:3000 }).trim();
-          const clawBin = path.join(process.env['APPDATA'] || '', 'npm', 'openclaw.cmd');
-          if (fs.existsSync(clawBin)) run('openclaw', clawBin, ['gateway', '--config', cfgPath]);
-        } catch {}
-      }
+    const clawBin = path.join(process.env['APPDATA'] || '', 'npm', 'openclaw.cmd');
+    if (fs.existsSync(clawBin)) {
+      run('openclaw', clawBin, ['gateway', '--allow-unconfigured']);
     }
   }
 
-  status('Almost ready…', 90);
+  // 5 ── Update Server (same runtime as batch launcher)
+  status('Starting update service…', 88);
+  if (!(await portOpen(UPDATE_PORT))) {
+    const updateScript = path.join(ENGINE_DIR, 'scripts', 'update-server.ps1');
+    const projectRoot  = IS_DEV ? path.join(__dirname, '..') : process.resourcesPath;
+    if (fs.existsSync(updateScript)) {
+      run('update-server', 'powershell.exe', [
+        '-NoProfile', '-NonInteractive', '-ExecutionPolicy', 'Bypass',
+        '-WindowStyle', 'Hidden',
+        '-File', updateScript,
+        '-ProjectRoot', projectRoot,
+      ]);
+    }
+  }
+
+  status('Almost ready…', 93);
   await waitPort(HUB_PORT, 8000);
   status('Welcome to your AI empire.', 100);
   await new Promise(r => setTimeout(r, 900));
@@ -175,8 +207,8 @@ async function startServices() {
 function buildIcon() {
   return new Promise(resolve => {
     const w = new BrowserWindow({
-      show: false, width:64, height:64,
-      webPreferences: { preload: path.join(__dirname,'preload.js'), contextIsolation:true }
+      show: false, width: 64, height: 64,
+      webPreferences: { preload: path.join(__dirname, 'preload.js'), contextIsolation: true }
     });
     ipcMain.once('icon-ready', (_, url) => { w.destroy(); resolve(nativeImage.createFromDataURL(url)); });
     w.loadFile(path.join(__dirname, 'create-icon.html'));
@@ -186,21 +218,21 @@ function buildIcon() {
 // ── Windows ────────────────────────────────────────────────────────────────
 function createSplash() {
   splashWindow = new BrowserWindow({
-    width:480, height:300, frame:false, transparent:true,
-    alwaysOnTop:true, resizable:false, center:true, skipTaskbar:true,
+    width: 480, height: 300, frame: false, transparent: true,
+    alwaysOnTop: true, resizable: false, center: true, skipTaskbar: true,
     icon: appIcon || undefined,
-    webPreferences: { preload: path.join(__dirname,'preload.js'), contextIsolation:true }
+    webPreferences: { preload: path.join(__dirname, 'preload.js'), contextIsolation: true }
   });
-  splashWindow.loadFile(path.join(__dirname,'splash.html'));
+  splashWindow.loadFile(path.join(__dirname, 'splash.html'));
 }
 
 function createMain() {
   mainWindow = new BrowserWindow({
-    width:1300, height:880, minWidth:960, minHeight:640,
-    show:false, autoHideMenuBar:true,
-    title:'NeuralBox — Your Private AI Empire',
+    width: 1300, height: 880, minWidth: 960, minHeight: 640,
+    show: false, autoHideMenuBar: true,
+    title: 'NeuralBox — Your Private AI Empire',
     icon: appIcon || undefined,
-    webPreferences: { preload: path.join(__dirname,'preload.js'), contextIsolation:true, nodeIntegration:false }
+    webPreferences: { preload: path.join(__dirname, 'preload.js'), contextIsolation: true, nodeIntegration: false }
   });
 
   mainWindow.loadURL(`http://localhost:${HUB_PORT}`);
@@ -211,16 +243,15 @@ function createMain() {
     mainWindow.focus();
   });
 
-  // Minimize to tray on close
   mainWindow.on('close', e => {
     if (!isQuitting) {
       e.preventDefault();
       mainWindow.hide();
       if (tray && process.platform === 'win32') {
         tray.displayBalloon({
-          title:'NeuralBox is still running',
-          content:'Your AI is running in the background. Right-click the tray icon to quit.',
-          iconType:'info'
+          title:    'NeuralBox is still running',
+          content:  'Your AI is running in the background. Right-click the tray icon to quit.',
+          iconType: 'info'
         });
       }
     }
@@ -234,13 +265,13 @@ function buildTray() {
   tray = new Tray(appIcon);
   tray.setToolTip('NeuralBox — Your Private AI Empire');
   tray.setContextMenu(Menu.buildFromTemplate([
-    { label: '⚡  Open NeuralBox',  click: () => mainWindow ? (mainWindow.show(), mainWindow.focus()) : createMain() },
+    { label: '⚡  Open NeuralBox',    click: () => mainWindow ? (mainWindow.show(), mainWindow.focus()) : createMain() },
     { type: 'separator' },
-    { label: '🔁  Restart Services', click: restartServices },
-    { label: '🌐  Open WebUI Chat',  click: () => shell.openExternal('http://localhost:3000') },
-    { label: '🤖  Clawbot Agent',   click: () => shell.openExternal('http://localhost:18789/webchat') },
+    { label: '🔁  Restart Services',  click: restartServices },
+    { label: '🌐  Open WebUI Chat',   click: () => shell.openExternal('http://localhost:3000') },
+    { label: '🤖  Clawbot Agent',     click: () => shell.openExternal('http://localhost:18789/webchat') },
     { type: 'separator' },
-    { label: '✖   Quit NeuralBox',  click: () => { isQuitting = true; app.quit(); } }
+    { label: '✖   Quit NeuralBox',   click: () => { isQuitting = true; app.quit(); } }
   ]));
   tray.on('double-click', () => mainWindow ? (mainWindow.show(), mainWindow.focus()) : createMain());
 }

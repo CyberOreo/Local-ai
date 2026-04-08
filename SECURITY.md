@@ -14,12 +14,37 @@ All NeuralBox services bind exclusively to `127.0.0.1` (localhost):
 
 None of these are reachable from other machines on your network by default.
 
-## CORS Protection
+The Open WebUI Docker container port binding is enforced at every launch:
+- `docker run -p 127.0.0.1:3000:8080` — never `0.0.0.0:3000:8080`
+- Both `install.ps1` and `launch-ai.bat` detect and recreate existing containers that were created with an insecure `0.0.0.0` binding.
 
-The NeuralBox Hub (`hub.js`) enforces strict CORS:
-- Only `http://localhost:8080` and `http://127.0.0.1:8080` are allowed as request origins
-- All write endpoints (`POST /api/settings`, `POST /api/keys/test`, `POST /api/worker/start`, etc.) reject requests from any other origin with HTTP 403
-- The Update Server (`update-server.ps1`) similarly rejects non-local origins on write endpoints
+## Hub Authentication
+
+The NeuralBox Hub (`hub.js`) uses a two-layer auth model for privileged write endpoints:
+
+### Layer 1 — CORS / Origin check
+All POST, PUT, and DELETE requests must originate from `http://localhost:8080` or `http://127.0.0.1:8080`. Requests from any other Origin receive HTTP 403.
+
+### Layer 2 — Session token
+A cryptographically random 32-byte hex token is generated when the hub starts and stored in `~\.neuralbox\hub-token` (mode 0600). Privileged endpoints require this token via:
+- **Browser**: `nb_session` HttpOnly cookie set automatically when the hub page is loaded (`GET /`)
+- **Scripts / CLI**: `X-Hub-Token: <token>` header, or `Authorization: Bearer <token>`
+
+Both layers must pass for write requests from browser contexts. CLI requests (no `Origin` header) require the token header alone.
+
+**Protected endpoints** (require token):
+- `POST /api/settings`
+- `POST /api/keys/test`
+- `POST /api/generate`
+- `POST /api/worker/start`
+- `POST /api/history/save`
+- `DELETE /api/history/:id`
+- `POST /api/history/:id/favorite`
+
+**Unprotected read endpoints** (no token needed):
+- `GET /api/status`, `/api/stats`, `/api/settings`, `/api/history`, `/api/templates`, `/api/profiles`
+
+The Update Server (`update-server.ps1`) enforces origin-only validation on its write endpoints (`/api/update`, `/api/reset`).
 
 ## API Key Storage
 
@@ -27,21 +52,42 @@ The NeuralBox Hub (`hub.js`) enforces strict CORS:
 - DPAPI-encrypted values are only decryptable by the same Windows user account on the same machine
 - Keys are **never** stored in the project directory (which may be git-tracked)
 - Legacy plaintext keys are automatically migrated to DPAPI-encrypted form on first load
+- If DPAPI encryption fails on Windows, the key is **not saved** (error returned to caller — no silent plaintext fallback)
+- If DPAPI decryption fails (e.g. key created by different user), the key is treated as unavailable (`null`) — the user is prompted to re-enter it
 - The UI masks keys — only the last 4 characters are visible
 - Keys are never printed to logs or console output
+
+## Docker Image Pinning
+
+The WebUI Docker image is configured in `_engine/version.json` under `webui_image`. All scripts (`install.ps1`, `launch-ai.bat`, `update-logic.ps1`, `app/main.js`) read from this single source. Changing the tag in `version.json` propagates everywhere.
+
+For production use, pin to a specific version tag or digest:
+```json
+"webui_image": "ghcr.io/open-webui/open-webui:v0.6.5"
+```
+
+## Budget Controls
+
+Budget limits are enforced server-side in `hub.js` and `efficiency.js`:
+
+- `daily_limit_usd` — all API calls blocked once daily cap is reached
+- `per_worker_budget_usd` — each worker job has a hard per-job cap; overflow falls back to local model
+- `premium_calls_per_day` — counted server-side in `~\.neuralbox\spend.json`; blocked when limit reached
+- `ask_before_expensive` — hub returns `{confirmation_required: true}` before any paid API call if enabled
+
+The UI always reflects backend truth. Budget state is not trusted from the client.
 
 ## Open WebUI Auth
 
 `WEBUI_AUTH=False` is set for local-only convenience. Because the container port is bound to `127.0.0.1`, external access is not possible under default configuration.
 
-If you need multi-user access on the same machine, remove `WEBUI_AUTH=False` from the `docker run` command and restart the container.
+For multi-user setups on the same machine, remove `WEBUI_AUTH=False` from the `docker run` command and restart the container.
 
-## Budget Controls
+## Startup / Stop Determinism
 
-The budget system enforces hard limits:
-- `daily_limit_usd` — API calls are blocked once the daily cap is hit
-- `per_worker_budget_usd` — each worker job is capped; excess falls back to local
-- `premium_calls_per_day` — counted and enforced server-side
+- `start.bat` uses a single `config\.installed` flag file as the install detector. No multi-condition inference.
+- The flag is written by `install.ps1` only on successful completion.
+- `stop-ai.bat` verifies each service actually stopped; reports errors if a process survives the kill.
 
 ## Reporting a Vulnerability
 
@@ -52,9 +98,10 @@ We aim to acknowledge within 72 hours and release a fix within 14 days for criti
 
 ## In Scope
 
-- Cross-origin request bypass on hub or update server endpoints
+- Hub session token bypass
+- CORS / origin guard bypass (DNS rebinding, header injection)
 - DPAPI migration or key exposure bugs
-- Remote code execution via hub server endpoints
+- Docker port exposure to non-localhost
 - Budget enforcement bypass
 
 ## Out of Scope

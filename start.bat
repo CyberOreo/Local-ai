@@ -6,47 +6,27 @@ set "ROOT=%~dp0"
 set "FLAG=%ROOT%config\.installed"
 
 :: ============================================================
-:: Detect whether this is a first-time install or a normal launch.
-:: Checks: flag file, Ollama installed, Docker installed, container exists.
+:: NeuralBox - chooses install or launch.
+:: config\.installed is written by the installer on success.
+:: This file does NO work itself — just routes.
 :: ============================================================
 
-set "ALREADY_INSTALLED=0"
+if exist "%FLAG%" goto :launch
 
-:: Check 1: flag file
-if exist "%FLAG%" set "ALREADY_INSTALLED=1"
+:: ── First run ─────────────────────────────────────────────────
+echo.
+echo  First-time setup detected.
+echo  Launching installer. You will see a UAC prompt - click Yes.
+echo.
 
-:: Check 2: Ollama binary on PATH
-if "%ALREADY_INSTALLED%"=="0" (
-    where ollama >nul 2>&1
-    if not errorlevel 1 (
-        :: Also need Docker to consider installed
-        where docker >nul 2>&1
-        if not errorlevel 1 (
-            :: Also need container to exist
-            docker ps -a --filter "name=^open-webui$" --format "{{.Names}}" 2>nul | findstr /i "open-webui" >nul 2>&1
-            if not errorlevel 1 set "ALREADY_INSTALLED=1"
-        )
-    )
-)
+:: install.bat handles its own admin elevation via Start-Process RunAs.
+call "%ROOT%_engine\install.bat"
+exit /b
 
-if "%ALREADY_INSTALLED%"=="0" (
-    echo.
-    echo  First-time setup detected. Launching installer...
-    echo  The installer requires administrator access.
-    echo.
-    powershell -Command "Start-Process cmd.exe -ArgumentList '/c \"%~dp0_engine\install.bat\"' -Verb RunAs"
-    exit /b
-)
-
-:: Write flag file for future fast detection
-if not exist "%FLAG%" (
-    if not exist "%ROOT%config" mkdir "%ROOT%config"
-    echo installed > "%FLAG%"
-)
-
-:: ---- Already installed: launch WITHOUT admin elevation -------
-cls
+:: ── Already installed: launch without admin ───────────────────
+:launch
 color 0A
+cls
 echo.
 echo  ============================================================
 echo    NeuralBox  -  Starting...
@@ -57,10 +37,9 @@ call "%ROOT%_engine\launcher\launch-ai.bat"
 
 if errorlevel 1 (
     echo.
-    echo  [ERROR] Something went wrong. Read the message above.
+    echo  [ERROR] Something went wrong. Check the message above.
+    echo  [INFO]  To reinstall: delete config\.installed then run start.bat again.
     echo.
+    pause
 )
-
-echo  Press any key to close this window.
-echo  (All services keep running in the background)
-pause >nul
+exit /b
