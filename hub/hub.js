@@ -297,6 +297,39 @@ async function getHardwareInfo() {
   };
 }
 
+// ── Update-server proxy helper ────────────────────────────────────────────────
+// Forwards requests to localhost:9999 with the hub token as X-Hub-Token.
+// Uses built-in http module — no external deps.
+
+const UPDATE_SERVER_PORT = 9999;
+
+function proxyToUpdateServer(method, path) {
+  return new Promise((resolve, reject) => {
+    const options = {
+      hostname: 'localhost',
+      port:     UPDATE_SERVER_PORT,
+      path,
+      method,
+      headers: {
+        'Content-Type':  'application/json',
+        'X-Hub-Token':   HUB_TOKEN,
+      },
+    };
+    const req = http.request(options, (upRes) => {
+      let data = '';
+      upRes.on('data', chunk => data += chunk);
+      upRes.on('end', () => {
+        try   { resolve({ status: upRes.statusCode, body: JSON.parse(data) }); }
+        catch { resolve({ status: upRes.statusCode, body: { raw: data } }); }
+      });
+    });
+    req.on('error', reject);
+    req.setTimeout(12000, () => { req.destroy(); reject(new Error('update server timeout')); });
+    if (method === 'POST') req.write('{}');
+    req.end();
+  });
+}
+
 // ── Request handler ────────────────────────────────────────────────────────────
 
 const server = http.createServer(async (req, res) => {
@@ -608,6 +641,48 @@ const server = http.createServer(async (req, res) => {
   // ── GET /api/profiles ─────────────────────────────────────────────────────
   if (url === '/api/profiles' && method === 'GET') {
     return json(res, 200, listProfiles());
+  }
+
+  // ── Updater proxy (/api/updater/*) ────────────────────────────────────────
+  // Proxies requests to the update server (localhost:9999) with the hub token.
+  // Read-only endpoints (status, health) are open; write endpoints are protected.
+
+  if (url === '/api/updater/status' && method === 'GET') {
+    try {
+      const r = await proxyToUpdateServer('GET', '/api/status');
+      return json(res, r.status, r.body);
+    } catch (err) {
+      return json(res, 503, { error: 'Update server not reachable', detail: err.message });
+    }
+  }
+
+  if (url === '/api/updater/health' && method === 'GET') {
+    try {
+      const r = await proxyToUpdateServer('GET', '/api/health');
+      return json(res, r.status, r.body);
+    } catch (err) {
+      return json(res, 503, { error: 'Update server not reachable', detail: err.message });
+    }
+  }
+
+  if (url === '/api/updater/trigger' && method === 'POST') {
+    // isAuthorizedWrite already enforced above for all POST requests
+    try {
+      const r = await proxyToUpdateServer('POST', '/api/update');
+      return json(res, r.status, r.body);
+    } catch (err) {
+      return json(res, 503, { error: 'Update server not reachable', detail: err.message });
+    }
+  }
+
+  if (url === '/api/updater/reset' && method === 'POST') {
+    // isAuthorizedWrite already enforced above for all POST requests
+    try {
+      const r = await proxyToUpdateServer('POST', '/api/reset');
+      return json(res, r.status, r.body);
+    } catch (err) {
+      return json(res, 503, { error: 'Update server not reachable', detail: err.message });
+    }
   }
 
   // 404

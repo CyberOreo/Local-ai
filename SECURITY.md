@@ -44,7 +44,21 @@ Both layers must pass for write requests from browser contexts. CLI requests (no
 **Unprotected read endpoints** (no token needed):
 - `GET /api/status`, `/api/stats`, `/api/settings`, `/api/history`, `/api/templates`, `/api/profiles`
 
-The Update Server (`update-server.ps1`) enforces origin-only validation on its write endpoints (`/api/update`, `/api/reset`).
+**Update Server proxy architecture**: The Update Server (`update-server.ps1`) is never called directly by the browser or Open WebUI tool. All update calls go through the NeuralBox Hub (`hub.js`), which acts as the authenticated gateway:
+
+- Open WebUI tool (`webui-update-tool.py`) calls `http://host.docker.internal:8080/api/updater/*`
+- Hub validates the hub session token, then proxies the request to `localhost:9999` with `X-Hub-Token` automatically
+- The Update Server also validates the hub token on its own write endpoints (`/api/update`, `/api/reset`) as defense-in-depth
+
+This means update triggers require valid authentication at **both** the hub layer and the update server layer. Direct requests to port 9999 without a valid hub token are rejected.
+
+**Protected update endpoints** (require local origin + hub token):
+- `POST /api/update` — starts background update job
+- `POST /api/reset` — resets status to idle
+
+**Unprotected update endpoints** (read-only, no auth):
+- `GET /api/health` — liveness check
+- `GET /api/status` — update progress (read-only)
 
 ## API Key Storage
 

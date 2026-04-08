@@ -3,8 +3,18 @@
 # A tiny HTTP server that listens on localhost:9999
 # and lets the NeuralBox hub trigger updates via API calls.
 #
-# Started automatically by launch-ai.bat
-# Stopped automatically by stop-ai.bat
+# Started automatically by launch-ai.bat and app/main.js.
+# Stopped automatically by stop-ai.bat.
+#
+# AUTH MODEL:
+#   /api/health  - read-only, no auth required
+#   /api/status  - read-only, no auth required
+#   /api/update  - write: requires local origin AND hub token
+#   /api/reset   - write: requires local origin AND hub token
+#
+# The hub token is read from ~/.neuralbox/hub-token (same file hub.js uses).
+# Calls from hub.js proxy include X-Hub-Token automatically.
+# Direct script access: pass X-Hub-Token or Authorization: Bearer <token>.
 # ============================================================
 
 param(
@@ -26,31 +36,60 @@ function Set-StatusIdle {
         ConvertTo-Json | Set-Content -Path $StatusFile -Encoding UTF8
 }
 
+# ── Auth: shared token with hub.js ───────────────────────────
+# Hub writes the token at ~/.neuralbox/hub-token on startup.
+# We read it here; if the file is missing, privileged endpoints are locked.
+$TokenFile     = Join-Path $env:USERPROFILE ".neuralbox\hub-token"
+$ExpectedToken = $null
+if (Test-Path $TokenFile) {
+    try { $ExpectedToken = (Get-Content $TokenFile -Raw -Encoding UTF8).Trim() } catch {}
+}
+if (-not $ExpectedToken) {
+    Write-Log "WARNING: hub-token file not found at $TokenFile — privileged endpoints will reject all requests until hub.js creates the token."
+}
+
 function Is-LocalOrigin($req) {
     $origin = $req.Headers["Origin"]
-    $host   = $req.Headers["Host"]
-    # Allow requests with no Origin (direct tool/script calls)
     if ([string]::IsNullOrEmpty($origin)) { return $true }
-    # Allow only localhost origins
     if ($origin -match '^https?://(localhost|127\.0\.0\.1)(:\d+)?$') { return $true }
     return $false
 }
 
+function Validate-HubToken($req) {
+    if (-not $ExpectedToken) { return $false }
+    # Check X-Hub-Token header
+    $t = $req.Headers["X-Hub-Token"]
+    if (-not [string]::IsNullOrEmpty($t) -and $t -eq $ExpectedToken) { return $true }
+    # Check Authorization: Bearer <token>
+    $auth = $req.Headers["Authorization"]
+    if (-not [string]::IsNullOrEmpty($auth) -and $auth.StartsWith("Bearer ")) {
+        $t = $auth.Substring(7).Trim()
+        if ($t -eq $ExpectedToken) { return $true }
+    }
+    return $false
+}
+
+function Is-Authorized($req) {
+    # Privileged endpoints need BOTH local origin AND valid hub token.
+    if (-not (Is-LocalOrigin $req)) { return $false }
+    return Validate-HubToken $req
+}
+
 function Send-Json($res, $obj, [int]$code = 200) {
-    $json   = $obj | ConvertTo-Json -Compress
-    $bytes  = [System.Text.Encoding]::UTF8.GetBytes($json)
+    $json  = $obj | ConvertTo-Json -Compress
+    $bytes = [System.Text.Encoding]::UTF8.GetBytes($json)
     $res.StatusCode          = $code
     $res.ContentType         = "application/json; charset=utf-8"
     $res.ContentLength64     = $bytes.Length
     $res.Headers.Add("Access-Control-Allow-Origin",  "http://localhost:8080")
     $res.Headers.Add("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
-    $res.Headers.Add("Access-Control-Allow-Headers", "Content-Type")
+    $res.Headers.Add("Access-Control-Allow-Headers", "Content-Type, X-Hub-Token, Authorization")
     $res.OutputStream.Write($bytes, 0, $bytes.Length)
     $res.OutputStream.Close()
 }
 
 function Send-Forbidden($res) {
-    $bytes = [System.Text.Encoding]::UTF8.GetBytes('{"error":"forbidden"}')
+    $bytes = [System.Text.Encoding]::UTF8.GetBytes('{"error":"forbidden: authentication required"}')
     $res.StatusCode      = 403
     $res.ContentType     = "application/json; charset=utf-8"
     $res.ContentLength64 = $bytes.Length
@@ -58,9 +97,9 @@ function Send-Forbidden($res) {
     $res.OutputStream.Close()
 }
 
-# ---- Init ---------------------------------------------------
-if (-not (Test-Path (Split-Path $LogFile)))   { New-Item -ItemType Directory -Path (Split-Path $LogFile)   -Force | Out-Null }
-if (-not (Test-Path (Split-Path $StatusFile))){ New-Item -ItemType Directory -Path (Split-Path $StatusFile) -Force | Out-Null }
+# ── Init ──────────────────────────────────────────────────────
+if (-not (Test-Path (Split-Path $LogFile)))    { New-Item -ItemType Directory -Path (Split-Path $LogFile)    -Force | Out-Null }
+if (-not (Test-Path (Split-Path $StatusFile))) { New-Item -ItemType Directory -Path (Split-Path $StatusFile) -Force | Out-Null }
 Set-StatusIdle
 
 $listener = [System.Net.HttpListener]::new()
@@ -74,9 +113,10 @@ try {
 }
 
 Write-Log "Update server started on http://localhost:$Port"
-Write-Log "Logic script path: $LogicScript"
+Write-Log "Logic script: $LogicScript"
+Write-Log "Token file:   $TokenFile  (loaded: $(-not [string]::IsNullOrEmpty($ExpectedToken)))"
 
-# ---- Main loop ----------------------------------------------
+# ── Main loop ─────────────────────────────────────────────────
 while ($listener.IsListening) {
     try {
         $ctx = $listener.GetContext()
@@ -86,7 +126,6 @@ while ($listener.IsListening) {
 
         Write-Log "$($req.HttpMethod) $path from $($req.RemoteEndPoint)"
 
-        # Handle CORS pre-flight
         if ($req.HttpMethod -eq "OPTIONS") {
             Send-Json $res @{ ok = $true }
             continue
@@ -94,7 +133,7 @@ while ($listener.IsListening) {
 
         switch ($path) {
 
-            # -- Health check (read-only, no auth required) --------
+            # ── Health (read-only, no auth) ───────────────────
             "/api/health" {
                 Send-Json $res @{
                     status  = "ok"
@@ -102,7 +141,7 @@ while ($listener.IsListening) {
                 }
             }
 
-            # -- Status (read-only) --------------------------------
+            # ── Status (read-only, no auth) ───────────────────
             "/api/status" {
                 if (Test-Path $StatusFile) {
                     $raw   = Get-Content $StatusFile -Raw -Encoding UTF8
@@ -118,10 +157,10 @@ while ($listener.IsListening) {
                 }
             }
 
-            # -- Start update (write — validate origin) ------------
+            # ── Trigger update (write — local origin + token) ─
             "/api/update" {
-                if (-not (Is-LocalOrigin $req)) {
-                    Write-Log "BLOCKED: /api/update from non-local origin: $($req.Headers['Origin'])"
+                if (-not (Is-Authorized $req)) {
+                    Write-Log "BLOCKED: /api/update - $(if (-not (Is-LocalOrigin $req)) { 'non-local origin' } else { 'missing/invalid token' })"
                     Send-Forbidden $res
                     continue
                 }
@@ -141,11 +180,13 @@ while ($listener.IsListening) {
                         message   = "Update started..."
                         timestamp = (Get-Date -Format "yyyy-MM-dd HH:mm:ss")
                         steps     = @()
+                        errors    = @()
                     } | ConvertTo-Json | Set-Content $StatusFile -Encoding UTF8
 
                     $null = Start-Job -ScriptBlock {
                         param($script, $root, $sf)
-                        powershell -ExecutionPolicy Bypass -WindowStyle Hidden `
+                        powershell -NoProfile -NonInteractive -ExecutionPolicy Bypass `
+                            -WindowStyle Hidden `
                             -File $script -ProjectRoot $root -StatusFile $sf
                     } -ArgumentList $LogicScript, $ProjectRoot, $StatusFile
 
@@ -156,10 +197,10 @@ while ($listener.IsListening) {
                 }
             }
 
-            # -- Reset status (write — validate origin) ------------
+            # ── Reset status (write — local origin + token) ───
             "/api/reset" {
-                if (-not (Is-LocalOrigin $req)) {
-                    Write-Log "BLOCKED: /api/reset from non-local origin"
+                if (-not (Is-Authorized $req)) {
+                    Write-Log "BLOCKED: /api/reset - $(if (-not (Is-LocalOrigin $req)) { 'non-local origin' } else { 'missing/invalid token' })"
                     Send-Forbidden $res
                     continue
                 }
