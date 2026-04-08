@@ -17,8 +17,8 @@ set "LOG_FILE=%LOG_DIR%\launch.log"
 :: Ensure logs directory exists
 if not exist "%LOG_DIR%" mkdir "%LOG_DIR%"
 
-:: Read webui image from version.json (falls back to :main if unavailable)
-set "WEBUI_IMAGE=ghcr.io/open-webui/open-webui:main"
+:: Read webui image from version.json (falls back to pinned version if unavailable)
+set "WEBUI_IMAGE=ghcr.io/open-webui/open-webui:v0.6.5"
 for /f "usebackq tokens=*" %%I in (`powershell -NoProfile -NonInteractive -Command "(Get-Content '%PROJECT_ROOT%\_engine\version.json' -Raw | ConvertFrom-Json).webui_image" 2^>nul`) do (
     if not "%%I"=="" set "WEBUI_IMAGE=%%I"
 )

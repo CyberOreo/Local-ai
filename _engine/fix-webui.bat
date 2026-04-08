@@ -1,10 +1,18 @@
 @echo off
+setlocal EnableDelayedExpansion
 title Fix Open WebUI
 color 0E
+
+:: Read image from version.json (single source of truth)
+set "WEBUI_IMAGE=ghcr.io/open-webui/open-webui:v0.6.5"
+for /f "usebackq tokens=*" %%I in (`powershell -NoProfile -NonInteractive -Command "(Get-Content '%~dp0version.json' -Raw | ConvertFrom-Json).webui_image" 2^>nul`) do (
+    if not "%%I"=="" set "WEBUI_IMAGE=%%I"
+)
 
 echo.
 echo  ============================================================
 echo    FIXING OPEN WEBUI - localhost:3000
+echo    Image: %WEBUI_IMAGE%
 echo  ============================================================
 echo.
 
@@ -29,14 +37,14 @@ echo.
 echo  [4/4] Creating fresh container (showing full output this time)...
 echo.
 docker run -d ^
-    -p 3000:8080 ^
+    -p 127.0.0.1:3000:8080 ^
     --add-host=host.docker.internal:host-gateway ^
     -e OLLAMA_BASE_URL=http://host.docker.internal:11434 ^
     -e WEBUI_AUTH=False ^
     -v open-webui:/app/backend/data ^
     --name open-webui ^
     --restart unless-stopped ^
-    ghcr.io/open-webui/open-webui:main
+    %WEBUI_IMAGE%
 
 if errorlevel 1 (
     echo.

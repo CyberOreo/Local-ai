@@ -168,15 +168,12 @@ All limits are enforced by the backend — UI warnings are informational only.
 The WebUI Docker image is configured in `_engine\version.json`:
 
 ```json
-"webui_image": "ghcr.io/open-webui/open-webui:main"
-```
-
-To pin to a specific version (recommended for production):
-```json
 "webui_image": "ghcr.io/open-webui/open-webui:v0.6.5"
 ```
 
-All scripts read from this one location. Changing it here changes it everywhere.
+All scripts (`install.ps1`, `launch-ai.bat`, `update.bat`, `update-logic.ps1`, `app/main.js`) read from this one location. Changing it here changes it everywhere.
+
+To upgrade to a newer version, update only `version.json` and run the updater. Never edit individual scripts.
 
 ---
 

@@ -19,7 +19,7 @@ param(
 # ── Load version config (single source of truth) ─────────────
 $PRIMARY_MODEL = "qwen3.5:9b"
 $BACKUP_MODEL  = "qwen3.5:4b"
-$WEBUI_IMAGE   = "ghcr.io/open-webui/open-webui:main"
+$WEBUI_IMAGE   = "ghcr.io/open-webui/open-webui:v0.6.5"
 
 $versionFile = Join-Path $ProjectRoot "_engine\version.json"
 if (Test-Path $versionFile) {

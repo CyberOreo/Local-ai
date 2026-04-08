@@ -1,7 +1,7 @@
 {
   "neuralbox": "1.0.0",
-  "webui_image": "ghcr.io/open-webui/open-webui:main",
-  "_webui_image_note": "Change ':main' to a specific version tag (e.g. ':v0.6.5') or digest ('@sha256:abc...') for reproducible builds. All scripts read this field.",
+  "webui_image": "ghcr.io/open-webui/open-webui:v0.6.5",
+  "_webui_image_note": "Pin to a specific version tag or digest for reproducible builds. All scripts read this field. Example: 'v0.6.5' or '@sha256:abc...'",
   "ollama_download_url": "https://ollama.com/download/OllamaSetup.exe",
   "primary_model": "qwen3.5:9b",
   "backup_model": "qwen3.5:4b"

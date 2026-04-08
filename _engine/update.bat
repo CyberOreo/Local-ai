@@ -26,10 +26,21 @@ set "LOG_DIR=%ROOT%logs"
 set "LOG_FILE=%LOG_DIR%\update.log"
 set "PRIMARY_MODEL=qwen3.5:9b"
 set "BACKUP_MODEL=qwen3.5:4b"
-set "WEBUI_IMAGE=ghcr.io/open-webui/open-webui:main"
+set "WEBUI_IMAGE=ghcr.io/open-webui/open-webui:v0.6.5"
 set "CONTAINER=open-webui"
 set "OLLAMA_PORT=11434"
 set "WEBUI_PORT=3000"
+
+:: Read image + model targets from version.json (single source of truth)
+for /f "usebackq tokens=*" %%I in (`powershell -NoProfile -NonInteractive -Command "(Get-Content '%ROOT%version.json' -Raw | ConvertFrom-Json).webui_image" 2^>nul`) do (
+    if not "%%I"=="" set "WEBUI_IMAGE=%%I"
+)
+for /f "usebackq tokens=*" %%I in (`powershell -NoProfile -NonInteractive -Command "(Get-Content '%ROOT%version.json' -Raw | ConvertFrom-Json).primary_model" 2^>nul`) do (
+    if not "%%I"=="" set "PRIMARY_MODEL=%%I"
+)
+for /f "usebackq tokens=*" %%I in (`powershell -NoProfile -NonInteractive -Command "(Get-Content '%ROOT%version.json' -Raw | ConvertFrom-Json).backup_model" 2^>nul`) do (
+    if not "%%I"=="" set "BACKUP_MODEL=%%I"
+)
 
 :: Load overrides from config if available
 if exist "%ROOT%config\.env" (
@@ -161,7 +172,7 @@ echo  Applying update (removing old container, keeping all data)...
 docker rm %CONTAINER% >nul 2>&1
 echo  Recreating container with latest image...
 docker run -d ^
-    -p %WEBUI_PORT%:8080 ^
+    -p 127.0.0.1:%WEBUI_PORT%:8080 ^
     --add-host=host.docker.internal:host-gateway ^
     -e OLLAMA_BASE_URL=http://host.docker.internal:%OLLAMA_PORT% ^
     -e WEBUI_AUTH=False ^

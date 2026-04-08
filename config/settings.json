@@ -5,7 +5,7 @@
   "ollama_port": 11434,
   "webui_port": 3000,
   "webui_container_name": "open-webui",
-  "webui_docker_image": "ghcr.io/open-webui/open-webui:main",
+  "webui_docker_image": "ghcr.io/open-webui/open-webui:v0.6.5",
   "startup_timeout_seconds": 90,
   "docker_startup_wait_seconds": 60,
   "auto_open_browser": true,

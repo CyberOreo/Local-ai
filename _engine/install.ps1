@@ -341,7 +341,17 @@ if ($existingContainer -eq $containerName) {
     }
 }
 if ($existingContainer -ne $containerName) {
-    Write-Log "Creating open-webui container..." "INFO"
+    # Read image from version.json (same source as all other scripts)
+    $webuiImage = "ghcr.io/open-webui/open-webui:v0.6.5"
+    $versionFile = Join-Path $ProjectRoot "version.json"
+    if (Test-Path $versionFile) {
+        try {
+            $vCfg = Get-Content $versionFile -Raw | ConvertFrom-Json
+            if ($vCfg.webui_image) { $webuiImage = $vCfg.webui_image }
+        } catch {}
+    }
+
+    Write-Log "Creating open-webui container ($webuiImage)..." "INFO"
     & docker run -d `
         -p "127.0.0.1:${webuiPort}:8080" `
         --add-host=host.docker.internal:host-gateway `
@@ -350,11 +360,11 @@ if ($existingContainer -ne $containerName) {
         -v open-webui:/app/backend/data `
         --name $containerName `
         --restart unless-stopped `
-        ghcr.io/open-webui/open-webui:main 2>&1
+        $webuiImage 2>&1
 
     if ($LASTEXITCODE -ne 0) {
         Write-Log "Failed to create Open WebUI container." "ERROR"
-        Write-Log "Try running manually: docker run -d -p 127.0.0.1:3000:8080 --add-host=host.docker.internal:host-gateway -e OLLAMA_BASE_URL=http://host.docker.internal:11434 -e WEBUI_AUTH=False -v open-webui:/app/backend/data --name open-webui --restart unless-stopped ghcr.io/open-webui/open-webui:main" "ERROR"
+        Write-Log "Try running manually: docker run -d -p 127.0.0.1:3000:8080 --add-host=host.docker.internal:host-gateway -e OLLAMA_BASE_URL=http://host.docker.internal:11434 -e WEBUI_AUTH=False -v open-webui:/app/backend/data --name open-webui --restart unless-stopped $webuiImage" "ERROR"
         exit 1
     }
     Write-Log "open-webui container created." "OK"

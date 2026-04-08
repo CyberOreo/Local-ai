@@ -29,7 +29,7 @@ try {
   const vf = path.join(ENGINE_DIR, 'version.json');
   versionConfig = JSON.parse(fs.readFileSync(vf, 'utf8'));
 } catch {}
-const WEBUI_IMAGE = versionConfig.webui_image || 'ghcr.io/open-webui/open-webui:main';
+const WEBUI_IMAGE = versionConfig.webui_image || 'ghcr.io/open-webui/open-webui:v0.6.5';
 
 // ── State ──────────────────────────────────────────────────────────────────
 let mainWindow   = null;
