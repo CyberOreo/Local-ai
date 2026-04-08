@@ -197,22 +197,23 @@ function buildPolishPrompt(draft, originalPrompt, stage) {
 
 /**
  * generate(options) → { result, model_used, provider, cost_label, cost_usd, tokens, reason, cheaper_alt, stages_run, spend }
+ *   OR { confirmation_required: true, cost_label, cost_usd, reason, cheaper_alt } when ask_before_expensive is on
  *
- * options: { systemPrompt, userPrompt, taskType, profileName, settings, maxStage, budgetCap, jobId }
+ * options: { systemPrompt, userPrompt, taskType, profileName, settings, maxStage, budgetCap, jobId, confirmedExpensive }
  *   budgetCap: optional per-job USD limit (overrides per_worker_budget_usd if lower)
- *   jobId: optional string for per-job spend tracking
- * maxStage: 1 | 2 | 3 (default from profile; user can override)
+ *   confirmedExpensive: true → skip ask_before_expensive gate
  */
 async function generate(options) {
   const {
     systemPrompt,
     userPrompt,
-    taskType    = 'template',
-    profileName = null,
-    settings    = {},
-    maxStage    = 2,
-    budgetCap   = null,  // hard per-job limit in USD
-    jobId       = null,
+    taskType          = 'template',
+    profileName       = null,
+    settings          = {},
+    maxStage          = 2,
+    budgetCap         = null,  // hard per-job limit in USD
+    jobId             = null,
+    confirmedExpensive = false,
   } = options;
 
   const spendInfo  = getSpend(settings);
@@ -227,6 +228,20 @@ async function generate(options) {
   const effectiveCap = budgetCap != null
     ? Math.min(budgetCap, perWorkerCap)
     : perWorkerCap;
+
+  // ask_before_expensive gate: if any stage would cost money and user hasn't confirmed, signal UI
+  if (settings.ask_before_expensive && !confirmedExpensive) {
+    const previewRouting = routeModel(taskType, profileName, settings, 'stage1');
+    if (previewRouting && previewRouting.cost_usd > 0) {
+      return {
+        confirmation_required: true,
+        cost_label:   previewRouting.cost_label,
+        cost_usd:     previewRouting.cost_usd,
+        reason:       previewRouting.reason,
+        cheaper_alt:  previewRouting.cheaper_alt,
+      };
+    }
+  }
 
   const stagesRun  = [];
   let   currentText  = '';

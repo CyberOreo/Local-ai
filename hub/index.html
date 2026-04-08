@@ -1286,7 +1286,6 @@ $('money-copy-btn').addEventListener('click',(e)=>{
   const txt=$('money-result-text').textContent;copyToClipboard(txt,e);
   hideSpinner($('money-copy-btn'),'✓ Copied!');setTimeout(()=>$('money-copy-btn').textContent='📋 Copy',1500);
 });
-$('money-save-btn').addEventListener('click',()=>{$('money-save-btn').textContent='✓ Saved';});
 
 // ── Templates ─────────────────────────────────────────────────────────────────
 function renderTemplates(cat){

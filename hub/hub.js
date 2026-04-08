@@ -64,12 +64,13 @@ async function processWorkerQueue() {
     const result = await generate({
       systemPrompt,
       userPrompt,
-      taskType:    job.type || 'worker',
-      profileName: job.profile || settings.routing_rules?.workers || 'Balanced',
+      taskType:          job.type || 'worker',
+      profileName:       job.profile || settings.routing_rules?.workers || 'Balanced',
       settings,
-      maxStage:    2,
-      budgetCap:   job.budget_cap || null,
-      jobId:       job.id,
+      maxStage:          2,
+      budgetCap:         job.budget_cap != null ? job.budget_cap : null,
+      jobId:             job.id,
+      confirmedExpensive: true, // budget pre-checked at queue time
     });
 
     job.progress   = 100;
@@ -391,11 +392,17 @@ const server = http.createServer(async (req, res) => {
       const result = await generate({
         systemPrompt,
         userPrompt,
-        taskType:    resolvedTask,
-        profileName: profile || settings.routing_rules?.[resolvedTask] || null,
+        taskType:          resolvedTask,
+        profileName:       profile || settings.routing_rules?.[resolvedTask] || null,
         settings,
-        maxStage:    max_stage || 2,
+        maxStage:          max_stage || 2,
+        confirmedExpensive: body.confirmed_expensive || false,
       });
+
+      // ask_before_expensive gate — signal UI to show confirmation dialog
+      if (result.confirmation_required) {
+        return json(res, 200, result);
+      }
 
       // Auto-save to history
       const saved = storage.saveOutput({
@@ -487,6 +494,17 @@ const server = http.createServer(async (req, res) => {
   if (url === '/api/worker/start' && method === 'POST') {
     const body     = await readBody(req);
     const { type, input, profile, budget_cap } = body;
+
+    // Pre-check budget before queuing
+    const settings    = storage.loadUserSettings();
+    const spendInfo   = storage.getSpend(settings);
+    if (spendInfo.locked) {
+      return json(res, 429, { error: `Daily budget limit ($${settings.daily_limit_usd}) reached. Reset at midnight or increase limit in Settings.` });
+    }
+    if (spendInfo.premium_locked && profile !== 'Local Only') {
+      return json(res, 429, { error: `Daily premium call limit (${settings.premium_calls_per_day}) reached. Use Local Only profile or wait until midnight.` });
+    }
+
     const template = WORKERS.find(w => w.id === type);
     const job = {
       id:         `wk_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,
@@ -494,7 +512,7 @@ const server = http.createServer(async (req, res) => {
       title:      template?.title || type,
       input:      input || {},
       profile:    profile || null,
-      budget_cap: budget_cap || null,
+      budget_cap: budget_cap != null ? budget_cap : settings.per_worker_budget_usd,
       status:     'queued',
       progress:   0,
       stage:      null,

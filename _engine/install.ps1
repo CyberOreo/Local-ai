@@ -326,13 +326,24 @@ $containerName = "open-webui"
 $existingContainer = & docker ps -a --filter "name=^${containerName}$" --format "{{.Names}}" 2>&1
 
 if ($existingContainer -eq $containerName) {
-    Write-Log "open-webui container already exists. Starting it..." "INFO"
-    & docker start $containerName 2>&1 | Out-Null
-    Write-Log "Container started." "OK"
-} else {
+    # Check if existing container has wrong port binding (0.0.0.0 instead of 127.0.0.1)
+    $hostIpLine = & docker inspect $containerName 2>&1 | Select-String "HostIp"
+    if ($hostIpLine -match '"0\.0\.0\.0"') {
+        Write-Log "Existing container bound to 0.0.0.0 - recreating with 127.0.0.1 for security..." "WARN"
+        & docker stop $containerName 2>&1 | Out-Null
+        & docker rm $containerName 2>&1 | Out-Null
+        # Fall through to creation block below
+        $existingContainer = ""
+    } else {
+        Write-Log "open-webui container already exists. Starting it..." "INFO"
+        & docker start $containerName 2>&1 | Out-Null
+        Write-Log "Container started." "OK"
+    }
+}
+if ($existingContainer -ne $containerName) {
     Write-Log "Creating open-webui container..." "INFO"
     & docker run -d `
-        -p "${webuiPort}:8080" `
+        -p "127.0.0.1:${webuiPort}:8080" `
         --add-host=host.docker.internal:host-gateway `
         -e OLLAMA_BASE_URL=http://host.docker.internal:11434 `
         -e WEBUI_AUTH=False `
@@ -343,7 +354,7 @@ if ($existingContainer -eq $containerName) {
 
     if ($LASTEXITCODE -ne 0) {
         Write-Log "Failed to create Open WebUI container." "ERROR"
-        Write-Log "Try running manually: docker run -d -p 3000:8080 --add-host=host.docker.internal:host-gateway -e OLLAMA_BASE_URL=http://host.docker.internal:11434 -e WEBUI_AUTH=False -v open-webui:/app/backend/data --name open-webui --restart unless-stopped ghcr.io/open-webui/open-webui:main" "ERROR"
+        Write-Log "Try running manually: docker run -d -p 127.0.0.1:3000:8080 --add-host=host.docker.internal:host-gateway -e OLLAMA_BASE_URL=http://host.docker.internal:11434 -e WEBUI_AUTH=False -v open-webui:/app/backend/data --name open-webui --restart unless-stopped ghcr.io/open-webui/open-webui:main" "ERROR"
         exit 1
     }
     Write-Log "open-webui container created." "OK"

@@ -252,4 +252,4 @@ function listProfiles() {
   }));
 }
 
-module.exports = { routeModel, recommendProfile, checkBudget, listProfiles, PROFILES, TASK_DEFAULTS };
+module.exports = { routeModel, recommendProfile, checkBudget, checkPremiumCallsExceeded, listProfiles, PROFILES, TASK_DEFAULTS };

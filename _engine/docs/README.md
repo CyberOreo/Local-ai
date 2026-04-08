@@ -120,9 +120,10 @@ Local-ai\
 ├── hub\
 │   ├── hub.js                   ← NeuralBox Hub server (port 8080)
 │   ├── index.html               ← Hub UI
-│   ├── storage.js               ← File-based persistence
-│   ├── efficiency.js            ← Stage-based generation + budget
-│   ├── router.js                ← Model routing logic
+│   ├── storage.js               ← File-based persistence + key encryption
+│   ├── keystore.js              ← Windows DPAPI key encryption helper
+│   ├── efficiency.js            ← Stage-based generation + budget enforcement
+│   ├── router.js                ← Model routing + budget checks
 │   └── templates.js             ← Money tools + template definitions
 ├── app\
 │   └── main.js                  ← Electron wrapper (optional desktop app)

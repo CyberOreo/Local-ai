@@ -198,6 +198,33 @@ if not defined CONTAINER_EXISTS (
     goto WaitWebUI
 )
 
+:: Check if existing container has insecure 0.0.0.0 port binding - recreate if so
+docker inspect open-webui 2>nul | findstr /i "HostIp" > "%TEMP%\webui_hostip.txt" 2>nul
+findstr /i "0.0.0.0" "%TEMP%\webui_hostip.txt" >nul 2>&1
+if not errorlevel 1 (
+    echo  [WARN] open-webui container bound to 0.0.0.0 - recreating with 127.0.0.1 for security...
+    echo [%date% %time%] Recreating container with 127.0.0.1 binding >> "%LOG_FILE%"
+    docker stop open-webui >nul 2>&1
+    docker rm open-webui >nul 2>&1
+    docker run -d ^
+        -p 127.0.0.1:%WEBUI_PORT%:8080 ^
+        --add-host=host.docker.internal:host-gateway ^
+        -e OLLAMA_BASE_URL=http://host.docker.internal:%OLLAMA_PORT% ^
+        -e WEBUI_AUTH=False ^
+        -v open-webui:/app/backend/data ^
+        --name open-webui ^
+        --restart unless-stopped ^
+        ghcr.io/open-webui/open-webui:main
+    if errorlevel 1 (
+        echo  [ERROR] Failed to recreate container.
+        echo [%date% %time%] ERROR: Failed to recreate container >> "%LOG_FILE%"
+        pause
+        exit /b 1
+    )
+    echo  [OK]   Container recreated with secure 127.0.0.1 binding.
+    goto WaitWebUI
+)
+
 :: Check if container is running
 for /f "tokens=*" %%S in ('docker ps --filter "name=^open-webui$" --format "{{.Names}}" 2^>nul') do (
     set CONTAINER_RUNNING=%%S

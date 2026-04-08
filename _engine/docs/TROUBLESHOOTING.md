@@ -16,6 +16,40 @@ It tests all services and shows exactly what is and isn't working.
 
 ---
 
+### Hub navigation doesn't work (clicking Chat / Money Mode / Workers does nothing)
+
+**Symptom:** NeuralBox Hub loads at `http://localhost:8080` but clicking any sidebar item has no effect.
+
+**Cause:** A JavaScript error in the page prevents event listeners from attaching.
+
+**Fix:** Make sure you are running the latest version. Pull the latest code and restart the Hub:
+1. Run `_engine\launcher\stop-ai.bat`
+2. `git pull` in the project folder (or re-download the zip)
+3. Run `start.bat`
+
+---
+
+### Open WebUI Docker port bound to 0.0.0.0 (security warning in smoke test)
+
+**Symptom:** `scripts\smoke-test.bat` reports "Open WebUI Docker port bound to 0.0.0.0 (should be 127.0.0.1)".
+
+**Cause:** The container was originally created before the `127.0.0.1` binding fix. The launcher now auto-detects and recreates insecure containers.
+
+**Fix:** Simply run `start.bat` — the launcher will detect the wrong binding, recreate the container with `127.0.0.1:3000:8080`, and your chat history (stored in the `open-webui` volume) will be preserved.
+
+---
+
+### Budget limit reached — API calls blocked
+
+**Symptom:** Workers or generate requests return "Daily budget limit reached".
+
+**Fix:**
+1. Open Hub → Settings → Budget → increase `Daily Limit`
+2. Or wait until midnight (limits reset daily)
+3. Or switch to `Local Only` profile to use free local models regardless of budget
+
+---
+
 ### Launcher window closes instantly
 
 **Symptom:** `launch-ai.bat` opens and immediately disappears.
