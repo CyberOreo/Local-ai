@@ -22,7 +22,8 @@ color 0B
 :: ============================================================
 
 set "ROOT=%~dp0"
-set "LOG_DIR=%ROOT%logs"
+set "PROJ=%ROOT%.."
+set "LOG_DIR=%PROJ%\logs"
 set "LOG_FILE=%LOG_DIR%\update.log"
 set "PRIMARY_MODEL=qwen3.5:9b"
 set "BACKUP_MODEL=qwen3.5:4b"
@@ -43,8 +44,8 @@ for /f "usebackq tokens=*" %%I in (`powershell -NoProfile -NonInteractive -Comma
 )
 
 :: Load overrides from config if available
-if exist "%ROOT%config\.env" (
-    for /f "usebackq tokens=1,* delims==" %%A in ("%ROOT%config\.env") do (
+if exist "%PROJ%\config\.env" (
+    for /f "usebackq tokens=1,* delims==" %%A in ("%PROJ%\config\.env") do (
         set line=%%A
         if not "!line:~0,1!"=="#" set "%%A=%%B"
     )

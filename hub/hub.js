@@ -407,7 +407,7 @@ const server = http.createServer(async (req, res) => {
       memoryCount:   (memData.facts || []).length,
       uptimeSeconds: uptime,
       requestCount,
-      toolsReady:    13,
+      toolsReady:    MONEY_TOOLS.length + QUICK_TEMPLATES.length,
       spend,
     });
   }
