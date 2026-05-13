@@ -1,1 +1,2269 @@
-FILECONTENT
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>NeuralBox — Your Private AI Empire</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@700;800&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet"/>
+<style>
+:root{
+  --bg:#04030c;--card:#09071a;--panel:#0e0c1e;--border:#16132a;--bglow:#3d2f6e;
+  --p1:#7c3aed;--p2:#a855f7;--p3:#c084fc;
+  --g1:#f59e0b;--g2:#fbbf24;--g3:#fde68a;
+  --green:#10b981;--teal:#06b6d4;--red:#ef4444;--blue:#3b82f6;
+  --t1:#f0eeff;--t2:#7a7698;--t3:#3e3b58;
+  --sidebar:230px;
+  --glass:rgba(10,8,22,.78);--glass-b:rgba(255,255,255,.06);
+  --r:10px;--r2:16px;--r3:22px;
+}
+@property --angle{syntax:'<angle>';initial-value:0deg;inherits:false}
+@property --hue{syntax:'<number>';initial-value:260;inherits:false}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;overflow:hidden}
+body{background:var(--bg);color:var(--t1);font-family:'Inter',sans-serif;display:flex}
+/* ══════════════════════════════════════════
+   NEURALBOX — PREMIUM LAUNCH DESIGN SYSTEM
+   aurora · glassmorphism · 3D · neural mesh
+   ══════════════════════════════════════════ */
+
+/* ── Background aurora layers ── */
+body::before{
+  content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
+  background:
+    radial-gradient(ellipse 90% 60% at 2% -8%,#1c0a42 0%,transparent 52%),
+    radial-gradient(ellipse 65% 55% at 95% 2%,#080f38 0%,transparent 52%),
+    radial-gradient(ellipse 55% 45% at 55% 105%,#140525 0%,transparent 55%),
+    radial-gradient(ellipse 40% 50% at 96% 70%,#03101e 0%,transparent 50%),
+    radial-gradient(ellipse 50% 40% at 0% 75%,#0c0420 0%,transparent 48%);
+  animation:auroraShift 18s ease-in-out infinite alternate;
+}
+@keyframes auroraShift{
+  0%  {filter:hue-rotate(0deg)  brightness(1)   saturate(1)}
+  40% {filter:hue-rotate(22deg) brightness(1.14) saturate(1.25)}
+  70% {filter:hue-rotate(-8deg) brightness(1.06) saturate(1.12)}
+  100%{filter:hue-rotate(32deg) brightness(.93)  saturate(.92)}
+}
+/* ── Ambient dot grid ── */
+body::after{
+  content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
+  background-image:radial-gradient(circle,rgba(124,58,237,.18) 1px,transparent 1px);
+  background-size:44px 44px;
+  mask-image:radial-gradient(ellipse 85% 85% at 50% 50%,black 30%,transparent 100%);
+  opacity:.5;
+}
+
+/* ── Animations ── */
+@keyframes statusPulse{0%,100%{box-shadow:0 0 0 0 #10b98155}50%{box-shadow:0 0 0 8px #10b98100}}
+@keyframes goldBreathe{0%,100%{text-shadow:0 0 20px #f59e0b55}50%{text-shadow:0 0 36px #f59e0bcc,0 0 70px #f59e0b44}}
+@keyframes shimmer{0%{background-position:-600% center}100%{background-position:600% center}}
+@keyframes floatUp{from{opacity:0;transform:translateY(22px)}to{opacity:1;transform:translateY(0)}}
+@keyframes scaleIn{0%{opacity:0;transform:scale(.88) translateY(10px)}100%{opacity:1;transform:scale(1) translateY(0)}}
+@keyframes glowPulse{0%,100%{box-shadow:0 0 0 1px var(--p1),0 0 24px #7c3aed22}50%{box-shadow:0 0 0 1px var(--p2),0 0 52px #a855f748}}
+@keyframes rotateBorder{to{--angle:360deg}}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes fadeOut{0%,55%{opacity:1}100%{opacity:0}}
+@keyframes popIn{0%{opacity:0;transform:scale(.8) translateY(24px)}65%{transform:scale(1.03)}100%{opacity:1;transform:scale(1) translateY(0)}}
+@keyframes textRainbow{0%{background-position:0%}100%{background-position:400%}}
+@keyframes gradientShift{0%,100%{background-position:0% 50%}50%{background-position:100% 50%}}
+@keyframes cursorBlink{0%,100%{opacity:1}50%{opacity:0}}
+@keyframes skeletonWave{0%{background-position:100% 0}100%{background-position:-100% 0}}
+@keyframes fabPulse{0%,100%{box-shadow:0 0 0 0 #7c3aed55,0 8px 44px #7c3aed66}50%{box-shadow:0 0 0 18px #7c3aed00,0 8px 44px #7c3aed66}}
+@keyframes cardGlow{0%,100%{box-shadow:0 0 30px #7c3aed18,0 12px 40px #00000066}50%{box-shadow:0 0 60px #7c3aed33,0 12px 40px #00000066}}
+@keyframes borderPulse{0%,100%{border-color:rgba(124,58,237,.15)}50%{border-color:rgba(168,85,247,.5)}}
+
+::selection{background:var(--p1);color:#fff}
+::-webkit-scrollbar{width:4px;height:4px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:linear-gradient(180deg,var(--p1),var(--g1));border-radius:3px}
+
+/* ── Sidebar ── */
+#sidebar{
+  width:var(--sidebar);flex-shrink:0;
+  background:linear-gradient(180deg,rgba(7,5,18,.98) 0%,rgba(9,7,20,.96) 100%);
+  border-right:1px solid rgba(124,58,237,.14);
+  display:flex;flex-direction:column;height:100vh;overflow:hidden;
+  backdrop-filter:blur(48px);-webkit-backdrop-filter:blur(48px);
+  box-shadow:3px 0 32px #00000077,inset -1px 0 0 rgba(255,255,255,.025);
+  position:relative;z-index:2;
+}
+#sidebar::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:240px;pointer-events:none;
+  background:radial-gradient(ellipse 140% 110% at 50% 0%,rgba(124,58,237,.1),transparent 65%);
+}
+.sb-logo{padding:24px 18px 18px;border-bottom:1px solid rgba(255,255,255,.05);position:relative}
+.sb-logo-text{font-family:'Space Grotesk',sans-serif;font-size:24px;font-weight:800;letter-spacing:-0.5px;line-height:1}
+.sb-logo-neural{color:var(--t1)}
+.sb-logo-box{
+  background:linear-gradient(135deg,var(--g1),var(--g2),var(--g3),var(--g1));
+  background-size:200% 200%;
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+  animation:goldBreathe 3s ease-in-out infinite,gradientShift 5s ease infinite;
+}
+.sb-tagline{font-size:10px;color:var(--t3);margin-top:4px;letter-spacing:.5px}
+.sb-nav{flex:1;overflow-y:auto;padding:10px 0;scrollbar-width:none}
+.sb-nav::-webkit-scrollbar{display:none}
+.nav-item{
+  display:flex;align-items:center;gap:11px;padding:10px 18px;
+  cursor:pointer;color:var(--t2);font-size:13px;font-weight:500;
+  transition:all .2s cubic-bezier(.4,0,.2,1);
+  border-left:2px solid transparent;user-select:none;position:relative;overflow:hidden;
+}
+.nav-item::before{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(90deg,rgba(124,58,237,.1),transparent);
+  opacity:0;transition:opacity .2s;
+}
+.nav-item:hover{color:var(--t1);border-left-color:rgba(124,58,237,.35);}
+.nav-item:hover::before{opacity:1}
+.nav-item.active{
+  color:var(--t1);border-left-color:var(--p2);
+  background:linear-gradient(90deg,rgba(124,58,237,.18),rgba(124,58,237,.06) 55%,transparent);
+  text-shadow:0 0 18px rgba(168,85,247,.5);
+}
+.nav-item.active .nav-icon{filter:drop-shadow(0 0 8px var(--p2))}
+.nav-icon{width:20px;text-align:center;font-size:16px;flex-shrink:0;transition:filter .2s}
+.sb-footer{padding:14px 18px;border-top:1px solid rgba(255,255,255,.05)}
+.svc-dots{display:flex;gap:10px;margin-bottom:12px}
+.svc-dot-item{display:flex;align-items:center;gap:5px;font-size:10px;color:var(--t2)}
+.dot{width:7px;height:7px;border-radius:50%;background:#222030;flex-shrink:0;transition:background .4s}
+.dot.online{background:var(--green);animation:statusPulse 2.5s ease-in-out infinite;box-shadow:0 0 8px #10b98177}
+.dot.offline{background:var(--red);box-shadow:0 0 6px #ef444477}
+.dot.checking{background:var(--g1);animation:statusPulse .9s ease-in-out infinite}
+.spend-bar-wrap{font-size:10px;color:var(--t2)}
+.spend-bar-label{display:flex;justify-content:space-between;margin-bottom:5px}
+.spend-bar-track{height:3px;background:rgba(255,255,255,.06);border-radius:2px;overflow:hidden}
+.spend-bar-fill{height:100%;background:var(--green);border-radius:2px;transition:width .5s,background .3s;width:0%;box-shadow:0 0 6px var(--green)}
+.spend-bar-fill.warn{background:var(--g1);box-shadow:0 0 6px var(--g1)}
+.spend-bar-fill.over{background:var(--red);box-shadow:0 0 6px var(--red)}
+
+/* ── Main content ── */
+#main{flex:1;overflow-y:auto;height:100vh;display:flex;flex-direction:column;position:relative;z-index:1}
+.section{display:none;padding:32px 36px 56px;min-height:100%;flex-direction:column;gap:26px}
+.section.active{display:flex;animation:floatUp .38s cubic-bezier(.4,0,.2,1) both}
+.section.active>*:nth-child(1){animation:floatUp .42s .04s both}
+.section.active>*:nth-child(2){animation:floatUp .42s .09s both}
+.section.active>*:nth-child(3){animation:floatUp .42s .15s both}
+.section.active>*:nth-child(4){animation:floatUp .42s .21s both}
+.section.active>*:nth-child(5){animation:floatUp .42s .27s both}
+
+/* ── Typography ── */
+.page-title{
+  font-family:'Space Grotesk',sans-serif;font-size:29px;font-weight:800;letter-spacing:-1px;
+  background:linear-gradient(135deg,var(--t1) 35%,var(--p2) 68%,var(--g1) 100%);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+}
+.page-sub{font-size:13px;color:var(--t2);margin-top:5px;line-height:1.5}
+.section-heading{
+  font-size:10px;font-weight:800;color:var(--t3);text-transform:uppercase;letter-spacing:1.4px;margin-bottom:14px;
+  display:flex;align-items:center;gap:10px;
+}
+.section-heading::after{content:'';flex:1;height:1px;background:linear-gradient(90deg,rgba(255,255,255,.07),transparent)}
+
+/* ── Stat cards ── */
+.stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+.stat-card{
+  background:var(--glass);border:1px solid var(--glass-b);border-radius:var(--r2);padding:20px 22px;
+  transition:all .32s cubic-bezier(.4,0,.2,1);position:relative;overflow:hidden;
+  backdrop-filter:blur(24px) saturate(1.4);-webkit-backdrop-filter:blur(24px) saturate(1.4);
+}
+.stat-card::before{
+  content:'';position:absolute;inset:-1px;border-radius:calc(var(--r2) + 1px);z-index:-1;
+  background:conic-gradient(from var(--angle),transparent 78%,rgba(124,58,237,.5) 83%,transparent 90%);
+  animation:rotateBorder 9s linear infinite;opacity:0;transition:opacity .4s;
+}
+.stat-card::after{
+  content:'';position:absolute;inset:0;border-radius:var(--r2);
+  background:radial-gradient(ellipse 80% 60% at 50% 0%,rgba(124,58,237,.07),transparent 70%);
+  opacity:0;transition:opacity .3s;
+}
+.stat-card:hover{border-color:rgba(124,58,237,.3);box-shadow:0 0 48px rgba(124,58,237,.2),0 16px 48px rgba(0,0,0,.5);transform:translateY(-5px)}
+.stat-card:hover::before,.stat-card:hover::after{opacity:1}
+.stat-label{font-size:10px;color:var(--t2);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;font-weight:700}
+.stat-value{font-family:'JetBrains Mono',monospace;font-size:28px;font-weight:500;color:var(--t1);line-height:1}
+.stat-sub{font-size:11px;color:var(--t3);margin-top:5px}
+
+/* ── Cards generic ── */
+.card{
+  background:var(--glass);border:1px solid var(--glass-b);border-radius:var(--r2);padding:22px;
+  transition:all .28s cubic-bezier(.4,0,.2,1);
+  backdrop-filter:blur(20px) saturate(1.2);-webkit-backdrop-filter:blur(20px) saturate(1.2);
+}
+.card:hover{border-color:rgba(124,58,237,.22);box-shadow:0 12px 48px rgba(0,0,0,.5),0 0 0 1px rgba(124,58,237,.1);transform:translateY(-2px)}
+
+/* ── Service pills ── */
+.svc-row{display:flex;gap:10px;flex-wrap:wrap}
+.svc-pill{
+  display:flex;align-items:center;gap:8px;
+  background:rgba(10,8,20,.8);border:1px solid rgba(255,255,255,.07);
+  border-radius:20px;padding:7px 16px;font-size:12px;font-weight:500;
+  transition:border-color .3s,box-shadow .3s;backdrop-filter:blur(12px);
+}
+.svc-pill .dot{width:8px;height:8px}
+.svc-pill.online{border-color:rgba(16,185,129,.28);box-shadow:0 0 14px rgba(16,185,129,.1)}
+.svc-pill.offline{border-color:rgba(239,68,68,.22)}
+
+/* ── Grid layouts ── */
+.grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.grid-2{display:grid;grid-template-columns:repeat(2,1fr);gap:16px}
+.grid-4{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+@media(max-width:1200px){.grid-3{grid-template-columns:repeat(2,1fr)}.stats-row{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:750px){.grid-3,.grid-4{grid-template-columns:1fr}.grid-2{grid-template-columns:1fr}.stats-row{grid-template-columns:1fr 1fr}}
+
+/* ── Buttons ── */
+.btn{
+  display:inline-flex;align-items:center;gap:7px;padding:9px 18px;
+  border-radius:var(--r);font-size:13px;font-weight:600;cursor:pointer;border:none;
+  transition:all .22s cubic-bezier(.34,1.3,.64,1);font-family:'Inter',sans-serif;
+  position:relative;overflow:hidden;white-space:nowrap;
+}
+.btn::after{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,.14),transparent);
+  background-size:600% 100%;opacity:0;transition:opacity .2s;
+}
+.btn:hover::after{opacity:1;animation:shimmer 1.1s linear infinite}
+
+.btn-primary{
+  background:linear-gradient(135deg,#5b21b6,#7c3aed,#9333ea,#a855f7);
+  background-size:200% 200%;color:#fff;
+  box-shadow:0 4px 22px rgba(124,58,237,.5),0 0 0 1px rgba(124,58,237,.28);
+  animation:gradientShift 5s ease infinite;
+}
+.btn-primary:hover{box-shadow:0 0 36px rgba(124,58,237,.8),0 8px 28px rgba(124,58,237,.5);transform:translateY(-2px) scale(1.02)}
+.btn-primary:active{transform:translateY(0) scale(.99)}
+.btn-primary:disabled{opacity:.4;cursor:not-allowed;transform:none;box-shadow:none;animation:none}
+
+.btn-gold{
+  background:linear-gradient(135deg,#b45309,#d97706,#f59e0b,#fbbf24,#f59e0b);
+  background-size:200% 200%;color:#000;font-weight:700;
+  box-shadow:0 4px 22px rgba(245,158,11,.5),0 0 0 1px rgba(245,158,11,.28);
+  animation:gradientShift 4s ease infinite;
+}
+.btn-gold:hover{box-shadow:0 0 36px rgba(245,158,11,.8),0 8px 28px rgba(245,158,11,.5);transform:translateY(-2px) scale(1.02)}
+.btn-gold:active{transform:translateY(0) scale(.99)}
+
+.btn-ghost{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);color:var(--t2)}
+.btn-ghost:hover{border-color:rgba(124,58,237,.45);color:var(--t1);background:rgba(124,58,237,.09)}
+.btn-danger{background:transparent;border:1px solid rgba(239,68,68,.3);color:var(--red)}
+.btn-danger:hover{background:rgba(239,68,68,.1);border-color:rgba(239,68,68,.55)}
+.btn-sm{padding:5px 12px;font-size:11px}
+.btn-icon{width:32px;height:32px;padding:0;justify-content:center;border-radius:var(--r);font-size:14px}
+
+/* ── Forms ── */
+.form-group{display:flex;flex-direction:column;gap:6px;margin-bottom:16px}
+.form-label{font-size:11px;font-weight:700;color:var(--t2);text-transform:uppercase;letter-spacing:.8px}
+.form-input,.form-select,.form-textarea{
+  background:rgba(14,12,26,.85);border:1px solid rgba(255,255,255,.08);
+  border-radius:var(--r);padding:10px 14px;font-size:13px;color:var(--t1);
+  font-family:'Inter',sans-serif;outline:none;
+  transition:border-color .2s,box-shadow .2s,background .2s;width:100%;
+  backdrop-filter:blur(8px);
+}
+.form-input:focus,.form-select:focus,.form-textarea:focus{
+  border-color:var(--p1);
+  box-shadow:0 0 0 3px rgba(124,58,237,.16),0 0 28px rgba(124,58,237,.08);
+  background:rgba(20,16,38,.92);
+}
+.form-input::placeholder,.form-textarea::placeholder{color:var(--t3)}
+.form-select{appearance:none;cursor:pointer}
+.form-textarea{resize:vertical;min-height:80px;line-height:1.55}
+
+/* ── Tabs ── */
+.tab-row{display:flex;gap:2px;border-bottom:1px solid rgba(255,255,255,.06);margin-bottom:20px;padding:4px 4px 0;background:rgba(10,8,20,.4);border-radius:var(--r) var(--r) 0 0}
+.tab{padding:8px 16px;font-size:13px;font-weight:500;color:var(--t2);cursor:pointer;border-bottom:2px solid transparent;transition:all .2s;margin-bottom:-1px;user-select:none;border-radius:var(--r) var(--r) 0 0}
+.tab:hover{color:var(--t1);background:rgba(124,58,237,.07)}
+.tab.active{color:var(--p2);border-bottom-color:var(--p2);background:rgba(124,58,237,.1)}
+.tab-content{display:none}
+.tab-content.active{display:block;animation:floatUp .25s both}
+
+/* ── Money Mode cards ── */
+.money-card{
+  background:rgba(10,8,20,.88);border:1px solid rgba(124,58,237,.14);
+  border-radius:var(--r2);padding:24px;cursor:pointer;
+  transition:all .32s cubic-bezier(.34,1.2,.64,1);
+  position:relative;overflow:hidden;transform-style:preserve-3d;
+  backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
+}
+.money-card::before{
+  content:'';position:absolute;inset:-1px;border-radius:calc(var(--r2)+1px);z-index:-1;
+  background:conic-gradient(from var(--angle),#7c3aed,#a855f7,#f59e0b,#10b981,#3b82f6,#7c3aed);
+  opacity:0;transition:opacity .4s;animation:rotateBorder 4.5s linear infinite;
+}
+.money-card::after{
+  content:'';position:absolute;inset:0;border-radius:var(--r2);
+  background:radial-gradient(ellipse 85% 65% at 50% -15%,rgba(124,58,237,.14),transparent 65%);
+  opacity:0;transition:opacity .3s;
+}
+.money-card:hover::before,.money-card:hover::after{opacity:1}
+.money-card:hover{
+  border-color:transparent;
+  transform:translateY(-9px) scale(1.015);
+  box-shadow:0 28px 72px rgba(124,58,237,.4),0 0 0 1px transparent;
+}
+.money-card:hover .money-card-action{color:var(--g2);letter-spacing:.5px}
+.money-card-icon{font-size:30px;margin-bottom:12px;display:block;filter:drop-shadow(0 0 10px rgba(124,58,237,.4))}
+.money-card-title{font-size:15px;font-weight:700;color:var(--t1);margin-bottom:5px}
+.money-card-tagline{font-size:11px;color:var(--t2);line-height:1.5}
+.money-card-action{margin-top:16px;font-size:11px;color:var(--p2);font-weight:700;transition:all .2s;letter-spacing:.2px}
+
+/* ── Generate panel ── */
+.gen-panel{
+  background:rgba(8,6,18,.92);border:1px solid rgba(124,58,237,.22);
+  border-radius:var(--r3);padding:28px;margin-top:16px;
+  backdrop-filter:blur(36px);
+  box-shadow:0 0 80px rgba(124,58,237,.12),0 32px 64px rgba(0,0,0,.6),inset 0 1px 0 rgba(255,255,255,.04);
+  animation:scaleIn .3s cubic-bezier(.34,1.2,.64,1);
+}
+.gen-panel-title{font-size:17px;font-weight:700;margin-bottom:20px;display:flex;align-items:center;gap:12px}
+.result-box{
+  background:rgba(6,5,14,.96);border:1px solid rgba(124,58,237,.28);
+  border-radius:var(--r2);padding:22px;white-space:pre-wrap;font-size:13px;line-height:1.78;
+  color:var(--t1);max-height:520px;overflow-y:auto;margin-top:16px;
+  animation:scaleIn .35s cubic-bezier(.34,1.3,.64,1);
+  box-shadow:0 0 36px rgba(124,58,237,.15),inset 0 1px 0 rgba(255,255,255,.04);
+  backdrop-filter:blur(8px);position:relative;
+}
+.result-box.typing::after{content:'▋';animation:cursorBlink .7s step-end infinite;color:var(--p2);margin-left:2px;font-size:13px}
+.result-actions{display:flex;align-items:center;gap:10px;margin-top:14px;flex-wrap:wrap}
+.cost-badge{display:inline-flex;align-items:center;gap:5px;padding:4px 11px;border-radius:12px;font-size:10px;font-weight:700;letter-spacing:.4px}
+.cost-badge.Free{background:rgba(16,185,129,.14);color:#34d399;border:1px solid rgba(16,185,129,.28)}
+.cost-badge.Budget{background:rgba(59,130,246,.14);color:#60a5fa;border:1px solid rgba(59,130,246,.28)}
+.cost-badge.Balanced{background:rgba(245,158,11,.14);color:var(--g1);border:1px solid rgba(245,158,11,.28)}
+.cost-badge.Premium{background:rgba(124,58,237,.14);color:var(--p2);border:1px solid rgba(124,58,237,.28)}
+
+/* ── Spinner ── */
+.spinner{width:15px;height:15px;border:2px solid rgba(255,255,255,.2);border-top-color:#fff;border-radius:50%;animation:spin .55s linear infinite;display:inline-block}
+@keyframes spin{to{transform:rotate(360deg)}}
+.spin-wrap{display:flex;align-items:center;justify-content:center;padding:48px;gap:14px;color:var(--t2);font-size:13px}
+
+/* ── Worker queue table ── */
+.queue-table{width:100%;border-collapse:collapse;font-size:12px}
+.queue-table th{text-align:left;padding:9px 14px;font-size:10px;color:var(--t3);text-transform:uppercase;letter-spacing:.8px;border-bottom:1px solid rgba(255,255,255,.05);font-weight:800}
+.queue-table td{padding:12px 14px;border-bottom:1px solid rgba(255,255,255,.04);vertical-align:middle}
+.queue-table tr:last-child td{border-bottom:none}
+.queue-table tr:hover td{background:rgba(124,58,237,.04)}
+.status-badge{display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:10px;font-size:10px;font-weight:700}
+.status-badge.queued{background:rgba(245,158,11,.14);color:var(--g1);border:1px solid rgba(245,158,11,.2)}
+.status-badge.running{background:rgba(59,130,246,.14);color:#60a5fa;border:1px solid rgba(59,130,246,.2)}
+.status-badge.done{background:rgba(16,185,129,.14);color:#34d399;border:1px solid rgba(16,185,129,.2)}
+.status-badge.error{background:rgba(239,68,68,.14);color:#f87171;border:1px solid rgba(239,68,68,.2)}
+.progress-bar{height:4px;background:rgba(255,255,255,.06);border-radius:2px;overflow:hidden;width:120px}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--p1),var(--p2),var(--g1));border-radius:2px;transition:width .4s;box-shadow:0 0 8px var(--p2)}
+
+/* ── History cards ── */
+.history-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:14px}
+.history-card{
+  background:var(--glass);border:1px solid var(--glass-b);border-radius:var(--r2);padding:18px;
+  transition:all .25s cubic-bezier(.4,0,.2,1);cursor:pointer;backdrop-filter:blur(18px);
+}
+.history-card:hover{border-color:rgba(124,58,237,.35);box-shadow:0 8px 36px rgba(124,58,237,.2),0 0 0 1px rgba(124,58,237,.18);transform:translateY(-3px)}
+.history-card-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:10px;gap:8px}
+.history-card-title{font-size:13px;font-weight:600;color:var(--t1);line-height:1.3}
+.history-card-date{font-size:10px;color:var(--t3);white-space:nowrap}
+.history-card-preview{font-size:12px;color:var(--t2);line-height:1.55;overflow:hidden;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical}
+.history-card-footer{display:flex;align-items:center;gap:8px;margin-top:14px}
+
+/* ── Toggle switch ── */
+.toggle-wrap{display:flex;align-items:center;justify-content:space-between;padding:14px 0}
+.toggle{position:relative;display:inline-block;width:44px;height:24px}
+.toggle input{opacity:0;width:0;height:0}
+.toggle-slider{position:absolute;cursor:pointer;inset:0;background:rgba(255,255,255,.1);border-radius:12px;transition:.3s;border:1px solid rgba(255,255,255,.1)}
+.toggle-slider::before{content:'';position:absolute;width:18px;height:18px;left:2px;bottom:2px;background:#fff;border-radius:50%;transition:.3s;box-shadow:0 2px 6px rgba(0,0,0,.5)}
+.toggle input:checked + .toggle-slider{background:var(--p1);border-color:var(--p1);box-shadow:0 0 14px rgba(124,58,237,.4)}
+.toggle input:checked + .toggle-slider::before{transform:translateX(20px)}
+
+/* ── Alert banners ── */
+.banner{display:none;padding:11px 18px;border-radius:var(--r);font-size:12px;font-weight:600;margin-bottom:12px;align-items:center;gap:10px;backdrop-filter:blur(12px)}
+.banner.warn{background:rgba(245,158,11,.12);border:1px solid rgba(245,158,11,.3);color:var(--g1)}
+.banner.danger{background:rgba(239,68,68,.12);border:1px solid rgba(239,68,68,.3);color:#f87171}
+.banner.show{display:flex;animation:floatUp .3s both}
+
+/* ── Hardware bars ── */
+.hw-bar-wrap{margin-bottom:18px}
+.hw-bar-label{display:flex;justify-content:space-between;font-size:12px;color:var(--t2);margin-bottom:7px}
+.hw-bar-track{height:6px;background:rgba(255,255,255,.06);border-radius:3px;overflow:hidden}
+.hw-bar-fill{height:100%;border-radius:4px;transition:width .5s}
+.hw-bar-fill.ram{background:linear-gradient(90deg,var(--p1),var(--p2))}
+.hw-bar-fill.disk{background:linear-gradient(90deg,var(--g1),var(--g2))}
+
+/* ── Onboarding modal ── */
+#onboarding{position:fixed;inset:0;background:rgba(0,0,0,.8);z-index:1000;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(14px)}
+#onboarding.hidden{display:none}
+.ob-box{
+  background:linear-gradient(160deg,rgba(14,8,30,.98),rgba(10,8,20,.97));
+  border:1px solid rgba(124,58,237,.32);border-radius:var(--r3);padding:52px;
+  max-width:500px;width:90%;text-align:center;
+  animation:popIn .5s cubic-bezier(.34,1.4,.64,1);
+  box-shadow:0 0 120px rgba(124,58,237,.28),0 0 240px rgba(124,58,237,.1),0 48px 96px rgba(0,0,0,.95),inset 0 1px 0 rgba(255,255,255,.06);
+  position:relative;overflow:hidden;
+}
+.ob-box::before{
+  content:'';position:absolute;top:-50%;left:-50%;width:200%;height:200%;
+  background:radial-gradient(ellipse at 50% 25%,rgba(124,58,237,.07),transparent 55%);
+  pointer-events:none;
+}
+@keyframes popIn{0%{opacity:0;transform:scale(.78) translateY(28px)}65%{transform:scale(1.03)}100%{opacity:1;transform:scale(1) translateY(0)}}
+.ob-step{display:none}
+.ob-step.active{display:block;animation:floatUp .35s both}
+.ob-logo{font-family:'Space Grotesk',sans-serif;font-size:42px;font-weight:800;margin-bottom:10px}
+.ob-title{font-size:22px;font-weight:700;margin-bottom:14px;color:var(--t1)}
+.ob-sub{font-size:13px;color:var(--t2);line-height:1.65;margin-bottom:26px}
+.ob-badges{display:flex;justify-content:center;gap:8px;flex-wrap:wrap;margin-bottom:26px}
+.ob-badge{padding:5px 14px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);border-radius:20px;font-size:11px;color:var(--t2)}
+.ob-hw-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:24px;text-align:left}
+.ob-hw-card{background:rgba(18,14,30,.85);border:1px solid rgba(255,255,255,.07);border-radius:var(--r2);padding:16px}
+.ob-hw-val{font-family:'JetBrains Mono',monospace;font-size:22px;font-weight:500;color:var(--t1);margin-bottom:3px}
+.ob-hw-label{font-size:11px;color:var(--t2)}
+.ob-model-pill{display:inline-flex;align-items:center;gap:10px;background:rgba(16,185,129,.1);border:1px solid rgba(16,185,129,.28);border-radius:20px;padding:9px 18px;font-size:13px;font-weight:600;margin-bottom:24px;color:#34d399}
+.ob-steps{display:flex;justify-content:center;gap:8px;margin-bottom:26px}
+.ob-step-dot{width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,.12);transition:all .38s cubic-bezier(.34,1.4,.64,1)}
+.ob-step-dot.active{background:var(--p1);width:28px;border-radius:4px;box-shadow:0 0 16px var(--p1)}
+.ob-step-dot.done{background:var(--green);box-shadow:0 0 10px var(--green)}
+
+/* ── Ambient background particles ── */
+#particles{position:fixed;inset:0;pointer-events:none;z-index:0;opacity:.45}
+#main,#sidebar{position:relative;z-index:1}
+
+/* ── Misc ── */
+.empty-state{text-align:center;padding:52px 16px;color:var(--t2);font-size:13px}
+.divider{height:1px;background:rgba(255,255,255,.06);margin:18px 0}
+.inline-err{color:#f87171;font-size:12px;margin-top:8px}
+.chip{display:inline-flex;align-items:center;padding:3px 9px;border-radius:var(--r);font-size:10px;font-weight:700;background:rgba(124,58,237,.1);border:1px solid rgba(124,58,237,.22);color:var(--p2)}
+.recent-item{display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid rgba(255,255,255,.05);font-size:12px;transition:padding-left .2s}
+.recent-item:hover{padding-left:6px}
+.recent-item:last-child{border-bottom:none}
+.quick-action-card{
+  background:var(--glass);border:1px solid var(--glass-b);border-radius:var(--r2);padding:20px;
+  cursor:pointer;transition:all .28s cubic-bezier(.34,1.3,.64,1);
+  text-align:center;position:relative;overflow:hidden;backdrop-filter:blur(20px);
+}
+.quick-action-card::before{content:'';position:absolute;bottom:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--p1),var(--p2),var(--g1));transform:scaleX(0);transition:transform .32s cubic-bezier(.34,1.4,.64,1)}
+.quick-action-card::after{content:'';position:absolute;inset:0;background:radial-gradient(circle at 50% 110%,rgba(124,58,237,.1),transparent 65%);opacity:0;transition:opacity .3s}
+.quick-action-card:hover{border-color:rgba(124,58,237,.35);transform:translateY(-7px);box-shadow:0 0 50px rgba(124,58,237,.3),0 20px 56px rgba(0,0,0,.6)}
+.quick-action-card:hover::before{transform:scaleX(1)}
+.quick-action-card:hover::after{opacity:1}
+.quick-action-icon{font-size:26px;margin-bottom:10px;display:block;filter:drop-shadow(0 0 10px rgba(124,58,237,.45))}
+.quick-action-label{font-size:13px;font-weight:700;color:var(--t1)}
+.quick-action-sub{font-size:11px;color:var(--t2);margin-top:3px;line-height:1.45}
+.copy-tooltip{position:fixed;background:var(--green);color:#fff;padding:4px 12px;border-radius:var(--r);font-size:11px;font-weight:700;pointer-events:none;z-index:9999;animation:fadeOut 1.5s forwards;box-shadow:0 4px 14px rgba(16,185,129,.4)}
+@keyframes fadeOut{0%,60%{opacity:1}100%{opacity:0}}
+
+/* ── Toast system ── */
+#toast-container{position:fixed;bottom:24px;right:24px;z-index:9999;display:flex;flex-direction:column;gap:10px;pointer-events:none}
+.toast{
+  display:flex;align-items:center;gap:10px;padding:13px 18px;border-radius:var(--r2);
+  font-size:13px;font-weight:600;min-width:260px;max-width:380px;
+  transform:translateX(130%);opacity:0;transition:all .38s cubic-bezier(.34,1.4,.64,1);
+  pointer-events:all;cursor:pointer;backdrop-filter:blur(24px);
+}
+.toast.show{transform:translateX(0);opacity:1}
+.toast-success{background:rgba(16,185,129,.18);border:1px solid rgba(16,185,129,.35);color:#34d399;box-shadow:0 8px 36px rgba(16,185,129,.15)}
+.toast-error{background:rgba(239,68,68,.18);border:1px solid rgba(239,68,68,.35);color:#f87171;box-shadow:0 8px 36px rgba(239,68,68,.15)}
+.toast-info{background:rgba(124,58,237,.18);border:1px solid rgba(124,58,237,.35);color:#c4b5fd;box-shadow:0 8px 36px rgba(124,58,237,.15)}
+.toast-warn{background:rgba(245,158,11,.18);border:1px solid rgba(245,158,11,.35);color:#fcd34d;box-shadow:0 8px 36px rgba(245,158,11,.15)}
+
+/* ── Skeleton loaders ── */
+.skeleton{background:linear-gradient(90deg,var(--card) 25%,rgba(255,255,255,.04) 50%,var(--card) 75%);background-size:400% 100%;animation:skeletonWave 1.5s ease-in-out infinite;border-radius:var(--r)}
+.skeleton-line{height:14px;margin-bottom:8px}
+.skeleton-line.wide{width:100%}
+.skeleton-line.medium{width:70%}
+.skeleton-line.short{width:40%}
+
+/* ── Floating generate button ── */
+#fab{
+  position:fixed;bottom:30px;right:30px;z-index:200;
+  width:56px;height:56px;border-radius:50%;border:none;cursor:pointer;
+  background:linear-gradient(135deg,var(--p1),var(--p2));
+  color:#fff;font-size:22px;display:flex;align-items:center;justify-content:center;
+  transition:all .35s cubic-bezier(.34,1.56,.64,1);
+  animation:fabPulse 3s ease-in-out infinite;
+  box-shadow:0 0 0 0 rgba(124,58,237,.55),0 8px 44px rgba(124,58,237,.6);
+}
+#fab:hover{transform:scale(1.18) rotate(12deg);box-shadow:0 0 0 10px rgba(124,58,237,.18),0 14px 50px rgba(124,58,237,.9);animation:none}
+
+/* ── Hotkey badges ── */
+.hotkey{display:inline-flex;align-items:center;justify-content:center;padding:2px 6px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);border-radius:5px;font-size:10px;font-family:'JetBrains Mono',monospace;color:var(--t2)}
+
+/* ── Model pill ── */
+.model-live{display:inline-flex;align-items:center;gap:8px;background:rgba(16,185,129,.08);border:1px solid rgba(16,185,129,.22);border-radius:20px;padding:6px 14px;font-size:11px;font-weight:600;color:#34d399;backdrop-filter:blur(8px)}
+.model-live .dot{animation:statusPulse 1.5s ease-in-out infinite}
+
+/* ── Char counter ── */
+.char-counter{font-size:10px;color:var(--t2);text-align:right;margin-top:3px;transition:color .2s}
+.char-counter.near{color:var(--g1)}
+.char-counter.max{color:var(--red)}
+
+/* ── Animated gradient text ── */
+.text-gradient-anim{background:linear-gradient(90deg,#c4b5fd,#f9a8d4,#fcd34d,#6ee7b7,#93c5fd,#c4b5fd);background-size:400% 100%;-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;animation:textRainbow 6s linear infinite}
+
+/* ── Status svc cards ── */
+.status-svc-card{display:flex;align-items:center;justify-content:space-between;padding:14px 18px;border-radius:var(--r2);background:rgba(14,12,26,.75);border:1px solid rgba(255,255,255,.06);transition:border-color .3s,box-shadow .3s}
+.status-svc-card.online{border-color:rgba(16,185,129,.22);box-shadow:0 0 16px rgba(16,185,129,.06)}
+.status-svc-card.offline{border-color:rgba(239,68,68,.2)}
+
+/* ── Result meta row ── */
+.result-meta{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:10px;padding-top:10px;border-top:1px solid rgba(255,255,255,.05)}
+
+</style>
+</head>
+<body>
+
+<canvas id="particles"></canvas>
+<div id="toast-container"></div>
+<button id="fab" title="Quick Generate (G)">⚡</button>
+<!-- ── Sidebar ── -->
+<div id="sidebar">
+  <div class="sb-logo">
+    <div class="sb-logo-text"><span class="sb-logo-neural">Neural</span><span class="sb-logo-box">Box</span></div>
+    <div class="sb-tagline">Your Private AI Empire</div>
+    <div id="sb-output-counter" style="display:none;margin-top:8px;font-size:11px;color:var(--p2);font-weight:700;font-family:'JetBrains Mono',monospace"></div>
+  </div>
+  <nav class="sb-nav">
+    <div style="padding:10px 0 2px">
+      <div class="nav-item active" data-section="home"><span class="nav-icon">🏠</span>Home</div>
+      <div class="nav-item" data-section="chat"><span class="nav-icon">💬</span>Chat</div>
+    </div>
+    <div style="padding:4px 18px 4px;font-size:9px;font-weight:800;color:var(--t3);text-transform:uppercase;letter-spacing:1.2px;margin-top:4px">Create</div>
+    <div class="nav-item" data-section="money"><span class="nav-icon">💰</span>Money Mode</div>
+    <div class="nav-item" data-section="templates"><span class="nav-icon">⚡</span>Templates</div>
+    <div class="nav-item" data-section="workers"><span class="nav-icon">⚙️</span>Workers</div>
+    <div style="padding:4px 18px 4px;font-size:9px;font-weight:800;color:var(--t3);text-transform:uppercase;letter-spacing:1.2px;margin-top:4px">Manage</div>
+    <div class="nav-item" data-section="history"><span class="nav-icon">📋</span>History</div>
+    <div class="nav-item" data-section="settings"><span class="nav-icon">🔧</span>Settings</div>
+    <div class="nav-item" data-section="status"><span class="nav-icon">📡</span>System Status</div>
+  </nav>
+  <div class="sb-footer">
+    <div class="svc-dots">
+      <div class="svc-dot-item"><div class="dot checking" id="dot-ollama"></div>Ollama</div>
+      <div class="svc-dot-item"><div class="dot checking" id="dot-webui"></div>Chat</div>
+      <div class="svc-dot-item"><div class="dot checking" id="dot-openclaw"></div>Claw</div>
+    </div>
+    <div class="spend-bar-wrap">
+      <div class="spend-bar-label"><span>Daily Spend</span><span id="spend-text">$0.00 / $1.00</span></div>
+      <div class="spend-bar-track"><div class="spend-bar-fill" id="spend-fill"></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ── Main ── -->
+<div id="main">
+
+  <!-- Budget banners -->
+  <div class="banner warn" id="banner-warn" style="margin:14px 28px 0">⚠️ Approaching daily spend limit — consider switching to Local Only mode.</div>
+  <div class="banner danger" id="banner-over" style="margin:14px 28px 0">🚫 Daily limit reached. API calls are locked. Switched to local model only.</div>
+
+  <!-- ═══ HOME ═══ -->
+  <section class="section active" id="sec-home">
+    <div style="display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:14px">
+      <div>
+        <div class="page-title">Welcome back</div>
+        <div class="page-sub" id="home-clock"></div>
+      </div>
+      <div class="model-live"><div class="dot online"></div><span id="home-model-name">qwen3.5:9b</span>&nbsp;<span style="color:var(--t2);font-weight:400">· local</span></div>
+    </div>
+    <!-- Hero CTA -->
+    <div style="background:linear-gradient(135deg,rgba(124,58,237,.14),rgba(245,158,11,.08),rgba(124,58,237,.1));border:1px solid rgba(124,58,237,.22);border-radius:var(--r2);padding:28px 32px;display:flex;align-items:center;justify-content:space-between;gap:24px;flex-wrap:wrap;position:relative;overflow:hidden;backdrop-filter:blur(16px)">
+      <div style="position:absolute;top:-40px;right:-40px;width:200px;height:200px;background:radial-gradient(circle,rgba(124,58,237,.12),transparent 70%);pointer-events:none"></div>
+      <div style="flex:1;min-width:260px">
+        <div style="font-family:'Space Grotesk',sans-serif;font-size:22px;font-weight:800;color:var(--t1);margin-bottom:6px;letter-spacing:-.5px">Your private AI studio.<br><span style="background:linear-gradient(90deg,var(--p2),var(--g1));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">No cloud. No fees. No limits.</span></div>
+        <div style="font-size:12px;color:var(--t2);margin-bottom:18px;line-height:1.55">Replaces Jasper ($99/mo), Copy.ai ($49/mo), Writesonic ($19/mo). Runs 100% on your machine.</div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap">
+          <button class="btn btn-gold" data-goto="money" style="font-size:13px;padding:11px 22px">⚡ Generate something free →</button>
+          <button class="btn btn-ghost" data-goto="chat" style="font-size:12px">💬 Open Chat</button>
+        </div>
+      </div>
+      <div id="home-example-preview" style="flex-shrink:0;max-width:280px;background:rgba(6,5,14,.9);border:1px solid rgba(124,58,237,.25);border-radius:var(--r2);padding:16px;font-size:11px;line-height:1.6;color:var(--t2);filter:blur(3px);transition:filter .4s;user-select:none;cursor:pointer;position:relative" title="Click to generate your own">
+        <div style="font-size:10px;font-weight:700;color:var(--p2);margin-bottom:6px;letter-spacing:.5px;filter:none">EXAMPLE OUTPUT · TIKTOK HOOK</div>
+        <div style="color:var(--t1);font-weight:600;margin-bottom:4px">"I made $4,200 last month using one AI tool nobody talks about."</div>
+        <div>POV: You discovered NeuralBox. The private AI studio that runs on your laptop, costs $0, and replaces every writing tool you're paying for...</div>
+        <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;border-radius:var(--r2)"><span style="background:rgba(124,58,237,.9);color:#fff;font-size:11px;font-weight:700;padding:6px 14px;border-radius:20px;backdrop-filter:blur(4px)">Click to create yours →</span></div>
+      </div>
+    </div>
+    <!-- Social proof strip -->
+    <div id="social-strip" style="background:linear-gradient(90deg,rgba(124,58,237,.1),rgba(245,158,11,.06),rgba(124,58,237,.1));border:1px solid rgba(124,58,237,.18);border-radius:var(--r2);padding:14px 22px;display:flex;align-items:center;gap:20px;flex-wrap:wrap;overflow:hidden;position:relative;backdrop-filter:blur(12px)">
+      <div style="font-size:10px;font-weight:800;color:var(--p2);white-space:nowrap;letter-spacing:1px">LIVE WINS</div>
+      <div id="social-ticker" style="flex:1;font-size:12px;color:var(--t2);overflow:hidden;white-space:nowrap;transition:opacity .5s"></div>
+      <div style="display:flex;align-items:center;gap:6px;font-size:10px;color:var(--t2);white-space:nowrap;font-weight:600">
+        <div class="dot online"></div>100% on your machine
+      </div>
+    </div>
+    <!-- ROI stats -->
+    <div class="stats-row">
+      <div class="stat-card" style="border-color:rgba(16,185,129,.18)">
+        <div class="stat-label" style="color:#34d399">Content Created</div>
+        <div class="stat-value" id="stat-requests" style="color:#34d399">—</div>
+        <div class="stat-sub">assets generated</div>
+      </div>
+      <div class="stat-card" style="border-color:rgba(245,158,11,.18)">
+        <div class="stat-label" style="color:var(--g1)">Copywriter Cost Saved</div>
+        <div class="stat-value" id="stat-costsaved" style="color:var(--g1)">$0</div>
+        <div class="stat-sub">vs hiring a copywriter</div>
+      </div>
+      <div class="stat-card" style="border-color:rgba(124,58,237,.18)">
+        <div class="stat-label" style="color:var(--p2)">API Spend Today</div>
+        <div class="stat-value" id="stat-spend" style="color:var(--p2)">$0.00</div>
+        <div class="stat-sub">local = free forever</div>
+      </div>
+      <div class="stat-card" style="border-color:rgba(239,68,68,.18);cursor:pointer" id="streak-card">
+        <div class="stat-label" style="color:#f87171">Daily Streak 🔥</div>
+        <div class="stat-value" id="stat-streak" style="color:#f87171">—</div>
+        <div class="stat-sub" id="stat-streak-sub">days in a row</div>
+      </div>
+    </div>
+    <div>
+      <div class="section-heading">Services</div>
+      <div class="svc-row">
+        <div class="svc-pill" id="pill-ollama"><div class="dot checking"></div><span>Ollama</span><span style="color:var(--t2);font-size:10px">:11434</span></div>
+        <div class="svc-pill" id="pill-webui"><div class="dot checking"></div><span>Open WebUI</span><span style="color:var(--t2);font-size:10px">:3000</span></div>
+        <div class="svc-pill" id="pill-openclaw"><div class="dot checking"></div><span>OpenClaw</span><span style="color:var(--t2);font-size:10px">:18789</span></div>
+      </div>
+    </div>
+    <div>
+      <div class="section-heading">Quick Actions</div>
+      <div class="grid-4">
+        <div class="quick-action-card" data-goto="money">
+          <div class="quick-action-icon">💰</div>
+          <div class="quick-action-label">Money Mode</div>
+          <div class="quick-action-sub">Turn AI into business assets in 30 sec</div>
+          <div style="margin-top:10px;font-size:10px;color:var(--p2);font-weight:700">7 TOOLS →</div>
+        </div>
+        <div class="quick-action-card" data-goto="templates">
+          <div class="quick-action-icon">⚡</div>
+          <div class="quick-action-label">Quick Templates</div>
+          <div class="quick-action-sub">Hooks, scripts, emails — 1 click</div>
+          <div style="margin-top:10px;font-size:10px;color:var(--g1);font-weight:700">8 TEMPLATES →</div>
+        </div>
+        <div class="quick-action-card" data-goto="workers">
+          <div class="quick-action-icon">⚙️</div>
+          <div class="quick-action-label">AI Workers</div>
+          <div class="quick-action-sub">Fire & forget — 30 ideas while you sleep</div>
+          <div style="margin-top:10px;font-size:10px;color:var(--green);font-weight:700">5 WORKERS →</div>
+        </div>
+        <div class="quick-action-card" data-goto="chat">
+          <div class="quick-action-icon">💬</div>
+          <div class="quick-action-label">AI Chat</div>
+          <div class="quick-action-sub">Full ChatGPT experience, 100% local</div>
+          <div style="margin-top:10px;font-size:10px;color:var(--blue);font-weight:700">OPEN →</div>
+        </div>
+      </div>
+    </div>
+    <div>
+      <div class="section-heading">Recent Outputs</div>
+      <div class="card">
+        <div id="recent-list">
+          <div id="recent-demo" style="text-align:center;padding:24px 16px">
+            <div style="font-size:32px;margin-bottom:8px">⚡</div>
+            <div style="font-weight:700;font-size:14px;margin-bottom:6px">Your first output is one click away</div>
+            <div style="font-size:12px;color:var(--t2);margin-bottom:16px">Join thousands of creators generating viral content, landing pages, and business assets with AI — for free.</div>
+            <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap">
+              <button class="btn btn-gold" data-goto="money" style="font-size:12px">💰 Try Money Mode</button>
+              <button class="btn btn-ghost" data-goto="templates" style="font-size:12px">⚡ Quick Template</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ CHAT ═══ -->
+  <section class="section" id="sec-chat" style="padding:0;position:relative;height:100%">
+    <div id="chat-offline" style="display:none;position:absolute;inset:0;background:var(--bg);z-index:10;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:16px">
+      <div style="font-size:48px">💬</div>
+      <div style="font-size:20px;font-weight:700">Chat Offline</div>
+      <div style="font-size:13px;color:var(--t2);text-align:center;max-width:320px">Open WebUI is not running.<br>Run <code style="background:var(--panel);padding:2px 6px;border-radius:4px">_engine/fix-webui.bat</code> to restart it.</div>
+    </div>
+    <iframe id="chat-frame" src="http://localhost:3000" style="width:100%;height:100%;border:none;display:block"></iframe>
+  </section>
+
+  <!-- ═══ MONEY MODE ═══ -->
+  <section class="section" id="sec-money">
+    <div>
+      <div class="page-title">💰 Money Mode</div>
+      <div class="page-sub">Turn AI into real business assets in 30 seconds. 100% free with local models.</div>
+    </div>
+    <!-- Testimonial strip -->
+    <div style="display:flex;gap:12px;overflow-x:auto;padding-bottom:4px;scrollbar-width:none">
+      <div style="flex-shrink:0;background:rgba(16,185,129,.08);border:1px solid rgba(16,185,129,.2);border-radius:12px;padding:12px 16px;max-width:220px">
+        <div style="font-size:11px;color:#34d399;font-weight:600;margin-bottom:4px">@alexcreates</div>
+        <div style="font-size:11px;color:var(--t2);line-height:1.5">"Generated 30 TikTok hooks in 2 minutes. One went to 800k views."</div>
+      </div>
+      <div style="flex-shrink:0;background:rgba(245,158,11,.08);border:1px solid rgba(245,158,11,.2);border-radius:12px;padding:12px 16px;max-width:220px">
+        <div style="font-size:11px;color:var(--g1);font-weight:600;margin-bottom:4px">@brandstudio</div>
+        <div style="font-size:11px;color:var(--t2);line-height:1.5">"Replaced Jasper ($99/mo) and Copy.ai ($49/mo). This does more."</div>
+      </div>
+      <div style="flex-shrink:0;background:rgba(124,58,237,.08);border:1px solid rgba(124,58,237,.2);border-radius:12px;padding:12px 16px;max-width:220px">
+        <div style="font-size:11px;color:var(--p2);font-weight:600;margin-bottom:4px">@agencyfounder</div>
+        <div style="font-size:11px;color:var(--t2);line-height:1.5">"Closed a $3k client using the Agency Toolkit proposal. In 4 minutes."</div>
+      </div>
+      <div style="flex-shrink:0;background:rgba(59,130,246,.08);border:1px solid rgba(59,130,246,.2);border-radius:12px;padding:12px 16px;max-width:220px">
+        <div style="font-size:11px;color:var(--blue);font-weight:600;margin-bottom:4px">@contentking</div>
+        <div style="font-size:11px;color:var(--t2);line-height:1.5">"I batch 50 pieces of content every Sunday. Took 20 minutes. Free."</div>
+      </div>
+    </div>
+    <div class="grid-3" id="money-grid">
+      <!-- filled by JS -->
+    </div>
+    <div class="gen-panel" id="money-panel" style="display:none">
+      <div class="gen-panel-title">
+        <span id="money-panel-icon">🎵</span>
+        <span id="money-panel-title">Tool</span>
+        <button class="btn btn-ghost btn-sm" id="money-panel-close" style="margin-left:auto">✕ Close</button>
+      </div>
+      <div id="money-fields"></div>
+      <div class="form-group">
+        <label class="form-label">Execution Profile</label>
+        <select class="form-select" id="money-profile">
+          <option value="">Default (Balanced)</option>
+          <option value="Local Only">Local Only — Free, private</option>
+          <option value="Cheapest Possible">Cheapest Possible</option>
+          <option value="Best Value">Best Value</option>
+          <option value="Balanced">Balanced</option>
+          <option value="Highest Quality">Highest Quality</option>
+          <option value="Premium Final Polish">Premium Final Polish</option>
+        </select>
+      </div>
+      <button class="btn btn-gold" id="money-generate-btn" style="width:100%">✨ Generate &nbsp;<span class="hotkey">⌃↵</span></button>
+      <div class="inline-err" id="money-err" style="display:none"></div>
+      <div id="money-result" style="display:none">
+        <div class="result-box" id="money-result-text"></div>
+        <div class="result-actions">
+          <button class="btn btn-ghost btn-sm" id="money-copy-btn">📋 Copy</button>
+          <button class="btn btn-ghost btn-sm" id="money-download-btn">⬇ Download</button>
+          <button class="btn btn-ghost btn-sm" id="money-share-btn">🔗 Share</button>
+          <button class="btn btn-ghost btn-sm" id="money-viral-btn" title="Copy with NeuralBox watermark for social posts">🚀 Copy & Post</button>
+          <button class="btn btn-ghost btn-sm" id="money-regen-btn">🔄 Regenerate</button>
+          <span class="cost-badge Free" id="money-cost-badge">Free</span>
+        </div>
+        <div class="result-meta">
+          <span style="font-size:11px;color:var(--t2)" id="money-reason"></span>
+          <span style="font-size:11px;color:var(--t2);margin-left:auto" id="money-wordcount"></span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ TEMPLATES ═══ -->
+  <section class="section" id="sec-templates">
+    <div>
+      <div class="page-title">⚡ Templates</div>
+      <div class="page-sub">One-click generation for common tasks.</div>
+    </div>
+    <div class="tab-row" id="template-tabs">
+      <div class="tab active" data-cat="All">All</div>
+      <div class="tab" data-cat="TikTok">TikTok</div>
+      <div class="tab" data-cat="Business">Business</div>
+      <div class="tab" data-cat="Creator">Creator</div>
+    </div>
+    <div class="grid-3" id="template-grid"></div>
+    <div class="gen-panel" id="tpl-panel" style="display:none">
+      <div class="gen-panel-title">
+        <span id="tpl-panel-icon">⚡</span>
+        <span id="tpl-panel-title">Template</span>
+        <button class="btn btn-ghost btn-sm" id="tpl-panel-close" style="margin-left:auto">✕</button>
+      </div>
+      <div class="form-group">
+        <label class="form-label" id="tpl-field-label">Input</label>
+        <textarea class="form-textarea" id="tpl-field-input" rows="3"></textarea>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Profile</label>
+        <select class="form-select" id="tpl-profile">
+          <option value="">Default (Local Only)</option>
+          <option value="Local Only">Local Only</option>
+          <option value="Best Value">Best Value</option>
+          <option value="Balanced">Balanced</option>
+        </select>
+      </div>
+      <button class="btn btn-primary" id="tpl-generate-btn" style="width:100%">⚡ Generate &nbsp;<span class="hotkey">⌃↵</span></button>
+      <div class="inline-err" id="tpl-err" style="display:none"></div>
+      <div id="tpl-result" style="display:none">
+        <div class="result-box" id="tpl-result-text"></div>
+        <div class="result-actions">
+          <button class="btn btn-ghost btn-sm" id="tpl-copy-btn">📋 Copy</button>
+          <span class="cost-badge Free" id="tpl-cost-badge">Free</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ WORKERS ═══ -->
+  <section class="section" id="sec-workers">
+    <div>
+      <div class="page-title">⚙️ Workers</div>
+      <div class="page-sub">Background AI jobs — fire and forget.</div>
+    </div>
+    <div class="card">
+      <div class="section-heading">Start a Worker</div>
+      <div class="form-group">
+        <label class="form-label">Worker Type</label>
+        <select class="form-select" id="worker-type-select">
+          <option value="idea_worker">💡 Idea Worker — 30 content ideas</option>
+          <option value="script_worker">📝 Script Worker — 5 full scripts</option>
+          <option value="repurpose_worker">♻️ Repurpose Worker — 10 formats</option>
+          <option value="offer_worker">💎 Offer Worker — full offer stack</option>
+          <option value="planner_worker">🗓️ Planner Worker — 30-day plan</option>
+        </select>
+      </div>
+      <div id="worker-fields"></div>
+      <div class="form-group">
+        <label class="form-label">Execution Mode</label>
+        <select class="form-select" id="worker-profile">
+          <option value="">Default (Balanced)</option>
+          <option value="Local Only">Local Only — Free, private</option>
+          <option value="Cheapest Possible">Cheapest Possible — fastest local model</option>
+          <option value="Best Value">Best Value</option>
+          <option value="Balanced">Balanced</option>
+          <option value="Highest Quality">Highest Quality</option>
+          <option value="Premium Final Polish">Premium Final Polish</option>
+        </select>
+      </div>
+      <button class="btn btn-primary" id="worker-start-btn">▶ Start Worker</button>
+      <div class="inline-err" id="worker-err" style="display:none"></div>
+    </div>
+    <div class="card">
+      <div class="section-heading">Worker Queue</div>
+      <div id="worker-queue-wrap">
+        <div id="worker-empty" style="text-align:center;padding:32px">
+  <div style="font-size:32px;margin-bottom:8px">⚙️</div>
+  <div style="font-weight:600;margin-bottom:6px">Fire-and-forget AI jobs</div>
+  <div style="font-size:12px;color:var(--t2)">Start a worker above — get 30 ideas, 5 scripts, or a full 30-day plan while you do other things.</div>
+</div>
+        <table class="queue-table" id="worker-table" style="display:none">
+          <thead><tr>
+            <th>Job</th><th>Mode</th><th>Stage/Provider</th><th>Cost</th><th>Status</th><th>Action</th>
+          </tr></thead>
+          <tbody id="worker-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ HISTORY ═══ -->
+  <section class="section" id="sec-history">
+    <div>
+      <div class="page-title">📋 History</div>
+      <div class="page-sub">All your saved AI outputs.</div>
+    </div>
+    <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap">
+      <input class="form-input" id="history-search" placeholder="🔍  Search outputs..." style="max-width:300px"/>
+      <div class="tab-row" style="margin-bottom:0;border-bottom:none;gap:2px">
+        <div class="tab active" data-hfilter="all">All</div>
+        <div class="tab" data-hfilter="favorites">Favorites</div>
+        <div class="tab" data-hfilter="today">Today</div>
+      </div>
+    </div>
+    <div class="history-grid" id="history-grid">
+      <div id="history-empty" style="text-align:center;padding:40px 20px">
+  <div style="font-size:40px;margin-bottom:12px">📋</div>
+  <div style="font-weight:700;font-size:15px;margin-bottom:8px">Your content library starts here</div>
+  <div style="font-size:12px;color:var(--t2);max-width:320px;margin:0 auto 20px">Every piece of AI-generated content is automatically saved here. Search, copy, and reuse anything you create.</div>
+  <button class="btn btn-primary" data-goto="money" style="font-size:12px">💰 Create your first asset</button>
+</div>
+    </div>
+    <!-- expanded view -->
+    <div id="history-expanded" style="display:none;position:fixed;inset:0;background:#00000088;z-index:500;display:none;align-items:center;justify-content:center;backdrop-filter:blur(6px)">
+      <div style="background:var(--card);border:1px solid var(--border);border-radius:20px;padding:32px;max-width:700px;width:90%;max-height:80vh;display:flex;flex-direction:column;gap:16px">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <div id="hexp-title" style="font-size:16px;font-weight:700"></div>
+          <button class="btn btn-ghost btn-sm" id="hexp-close">✕ Close</button>
+        </div>
+        <div id="hexp-content" class="result-box" style="flex:1"></div>
+        <div style="display:flex;gap:10px">
+          <button class="btn btn-ghost btn-sm" id="hexp-copy">📋 Copy</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ SETTINGS ═══ -->
+  <section class="section" id="sec-settings">
+    <div>
+      <div class="page-title">🔧 Settings</div>
+      <div class="page-sub">Configure NeuralBox to match your needs.</div>
+    </div>
+    <div class="tab-row" id="settings-tabs">
+      <div class="tab active" data-stab="models">Models</div>
+      <div class="tab" data-stab="apikeys">API Keys</div>
+      <div class="tab" data-stab="budget">Budget</div>
+      <div class="tab" data-stab="routing">Routing</div>
+    </div>
+
+    <!-- Models -->
+    <div class="tab-content active" id="stab-models">
+      <div class="card">
+        <div class="form-group">
+          <label class="form-label">Primary Model (high quality tasks)</label>
+          <input class="form-input" id="set-primary-model" placeholder="e.g. qwen3.5:9b"/>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Backup Model (fast / cheap tasks)</label>
+          <input class="form-input" id="set-backup-model" placeholder="e.g. qwen3.5:4b"/>
+        </div>
+        <button class="btn btn-primary" id="save-models-btn">Save Models</button>
+        <div class="inline-err" id="models-saved" style="display:none;color:var(--green)">✓ Saved</div>
+      </div>
+    </div>
+
+    <!-- API Keys -->
+    <div class="tab-content" id="stab-apikeys">
+      <div class="card" style="margin-bottom:12px">
+        <div style="font-size:13px;color:var(--t2);line-height:1.6;margin-bottom:16px">
+          <strong style="color:var(--t1)">Local by default.</strong> API keys are optional — they unlock higher quality output for tasks that benefit from it. Keys are stored only in <code style="background:var(--panel);padding:2px 6px;border-radius:4px">~/.neuralbox/settings.json</code> on your machine.
+        </div>
+        <div id="apikey-cards" style="display:flex;flex-direction:column;gap:14px">
+          <!-- filled by JS -->
+        </div>
+      </div>
+    </div>
+
+    <!-- Budget -->
+    <div class="tab-content" id="stab-budget">
+      <div class="card">
+        <div class="form-group">
+          <label class="form-label">Daily Spend Limit</label>
+          <div style="display:flex;align-items:center;gap:12px">
+            <input type="range" id="set-daily-limit" min="0" max="10" step="0.1" value="1" style="flex:1">
+            <span style="font-family:'JetBrains Mono',monospace;font-size:14px;min-width:50px" id="daily-limit-val">$1.00</span>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Per-Worker Budget Cap</label>
+          <div style="display:flex;align-items:center;gap:12px">
+            <input type="range" id="set-worker-budget" min="0" max="1" step="0.05" value="0.1" style="flex:1">
+            <span style="font-family:'JetBrains Mono',monospace;font-size:14px;min-width:50px" id="worker-budget-val">$0.10</span>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Premium API Calls / Day</label>
+          <input type="number" class="form-input" id="set-premium-calls" value="5" min="0" max="100" style="max-width:120px"/>
+        </div>
+        <div class="toggle-wrap">
+          <span style="font-size:13px;font-weight:600">Ask before expensive API call</span>
+          <label class="toggle"><input type="checkbox" id="set-ask-expensive" checked><span class="toggle-slider"></span></label>
+        </div>
+        <div class="divider"></div>
+        <button class="btn btn-primary" id="save-budget-btn">Save Budget Settings</button>
+        <div class="inline-err" id="budget-saved" style="display:none;color:var(--green)">✓ Saved</div>
+      </div>
+    </div>
+
+    <!-- Routing -->
+    <div class="tab-content" id="stab-routing">
+      <div class="card">
+        <div class="form-group">
+          <label class="form-label">Templates default profile</label>
+          <select class="form-select" id="route-templates">
+            <option value="Local Only">Local Only</option>
+            <option value="Cheapest Possible">Cheapest Possible</option>
+            <option value="Best Value">Best Value</option>
+            <option value="Balanced">Balanced</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Workers default profile</label>
+          <select class="form-select" id="route-workers">
+            <option value="Local Only">Local Only</option>
+            <option value="Best Value">Best Value</option>
+            <option value="Balanced" selected>Balanced</option>
+            <option value="Highest Quality">Highest Quality</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Money Mode default profile</label>
+          <select class="form-select" id="route-money">
+            <option value="Local Only">Local Only</option>
+            <option value="Best Value">Best Value</option>
+            <option value="Balanced" selected>Balanced</option>
+            <option value="Highest Quality">Highest Quality</option>
+          </select>
+        </div>
+        <button class="btn btn-primary" id="save-routing-btn">Save Routing</button>
+        <div class="inline-err" id="routing-saved" style="display:none;color:var(--green)">✓ Saved</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ STATUS ═══ -->
+  <section class="section" id="sec-status">
+    <div>
+      <div class="page-title">📡 System Status</div>
+      <div class="page-sub">Hardware, services, and diagnostics.</div>
+    </div>
+    <div class="grid-2">
+      <div class="card">
+        <div class="section-heading">Hardware</div>
+        <div class="hw-bar-wrap">
+          <div class="hw-bar-label"><span>RAM Usage</span><span id="hw-ram-label">—</span></div>
+          <div class="hw-bar-track"><div class="hw-bar-fill ram" id="hw-ram-fill" style="width:0%"></div></div>
+        </div>
+        <div class="hw-bar-wrap">
+          <div class="hw-bar-label"><span>Disk Usage</span><span id="hw-disk-label">—</span></div>
+          <div class="hw-bar-track"><div class="hw-bar-fill disk" id="hw-disk-fill" style="width:0%"></div></div>
+        </div>
+        <div style="font-size:12px;color:var(--t2);margin-top:4px" id="hw-platform"></div>
+      </div>
+      <div class="card">
+        <div class="section-heading">Services</div>
+        <div id="status-svc-list" style="display:flex;flex-direction:column;gap:10px"></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="section-heading">Installed Models</div>
+      <div id="status-models-wrap">
+        <div class="empty-state">Loading models...</div>
+      </div>
+    </div>
+    <div style="display:flex;gap:12px">
+      <button class="btn btn-ghost" id="status-refresh-btn">🔄 Refresh</button>
+      <button class="btn btn-ghost" id="status-copy-diag-btn">📋 Copy Diagnostics</button>
+    </div>
+  </section>
+
+</div><!-- #main -->
+
+<!-- ── Onboarding Modal ── -->
+<div id="onboarding" class="hidden">
+  <div class="ob-box">
+    <!-- Step 1 -->
+    <div class="ob-step active" id="ob-step1">
+      <div class="ob-steps"><div class="ob-step-dot active" id="obd1"></div><div class="ob-step-dot" id="obd2"></div><div class="ob-step-dot" id="obd3"></div></div>
+      <div class="ob-logo"><span class="sb-logo-neural">Neural</span><span class="sb-logo-box">Box</span></div>
+      <div class="ob-title">Your Private AI Empire</div>
+      <div class="ob-sub">The private AI studio that replaces $167/mo in SaaS tools. Runs entirely on your PC. Nothing in the cloud. Nothing tracked.</div>
+      <div class="ob-badges">
+        <span class="ob-badge">🔒 100% Local</span>
+        <span class="ob-badge">🚫 No Telemetry</span>
+        <span class="ob-badge">💾 No Cloud Storage</span>
+        <span class="ob-badge">🆓 No Account Needed</span>
+      </div>
+      <button class="btn btn-primary" style="width:100%" id="ob-next1">Check My Hardware →</button>
+    </div>
+    <!-- Step 2 -->
+    <div class="ob-step" id="ob-step2">
+      <div class="ob-title">Hardware Check</div>
+      <div class="ob-sub">NeuralBox will use your machine's resources to run AI locally.</div>
+      <div class="ob-hw-grid">
+        <div class="ob-hw-card"><div class="ob-hw-val" id="ob-ram">—</div><div class="ob-hw-label">RAM (GB)</div></div>
+        <div class="ob-hw-card"><div class="ob-hw-val" id="ob-disk">—</div><div class="ob-hw-label">Free Disk (GB)</div></div>
+      </div>
+      <div style="font-size:12px;color:var(--t2);margin-bottom:12px">Recommended model for your system:</div>
+      <div class="ob-model-pill"><span style="color:var(--green)">●</span> <span id="ob-model">qwen3.5:9b</span></div>
+      <button class="btn btn-primary" style="width:100%" id="ob-next2">Continue →</button>
+    </div>
+    <!-- Step 3 -->
+    <div class="ob-step" id="ob-step3">
+      <div style="font-size:48px;margin-bottom:12px">🚀</div>
+      <div class="ob-title">Ready to make money</div>
+      <div class="ob-sub">Your AI empire is online. Generate your first TikTok hook, landing page, or offer in the next 60 seconds — 100% free.</div>
+      <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:20px;text-align:left">
+        <div style="display:flex;align-items:center;gap:8px;font-size:12px;color:var(--t2)"><span style="color:var(--green)">✓</span> Replaces Jasper ($99/mo), Copy.ai ($49/mo), Writesonic ($19/mo)</div>
+        <div style="display:flex;align-items:center;gap:8px;font-size:12px;color:var(--t2)"><span style="color:var(--green)">✓</span> Everything runs locally — your data never leaves your machine</div>
+        <div style="display:flex;align-items:center;gap:8px;font-size:12px;color:var(--t2)"><span style="color:var(--green)">✓</span> No API key needed to start — first results in 30 seconds</div>
+      </div>
+      <button class="btn btn-gold" style="width:100%;font-size:15px;padding:16px;letter-spacing:.3px" id="ob-start">⚡ Generate My First Content →</button>
+      <div style="font-size:10px;color:var(--t2);margin-top:10px">No account. No credit card. No cloud. Just results.</div>
+    </div>
+  </div>
+</div>
+
+<script>
+'use strict';
+// ── Inline data (mirrors templates.js for browser) ──────────────────────────
+const MONEY_TOOLS=[
+  {id:'tiktok_engine',title:'TikTok Engine',icon:'🎵',tagline:'Hooks that stop the scroll and go viral',outcome:'30-sec hook · full script · caption · hashtags',example:'"I made $4k last month using one AI tool nobody talks about."',task_type:'tiktok_hook',fields:[{id:'niche',label:'Your Niche',placeholder:'e.g. personal finance'},{id:'target',label:'Target Audience',placeholder:'e.g. broke college students'},{id:'angle',label:'Hook Angle',placeholder:'e.g. shocking stat, personal story'}]},
+  {id:'youtube_starter',title:'YouTube Starter',icon:'▶️',tagline:'Videos that rank, retain, and convert',outcome:'viral title · full description · script outline · thumbnail idea',example:'"How I Replaced $167/mo in SaaS Tools With One Free App"',task_type:'youtube_starter',fields:[{id:'topic',label:'Video Topic',placeholder:'e.g. How I made $5k with AI tools'},{id:'style',label:'Video Style',placeholder:'e.g. tutorial, vlog, story-time'}]},
+  {id:'brand_builder',title:'AI Brand Builder',icon:'✨',tagline:'A brand identity a designer would charge $2k for',outcome:'tagline · brand voice · content pillars · full bio',example:'"Bold. Unapologetic. Built different." — your new brand voice',task_type:'brand_builder',fields:[{id:'biz_type',label:'Business / Creator Type',placeholder:'e.g. fitness coach, SaaS founder'},{id:'vibe',label:'Brand Vibe',placeholder:'e.g. bold and no-BS, warm and motivating'}]},
+  {id:'agency_toolkit',title:'Agency Toolkit',icon:'💼',tagline:'Close $3k clients with a proposal in 4 minutes',outcome:'client proposal · onboarding doc · pitch one-liners',example:'"Closed a $3,200 retainer using the proposal it generated verbatim."',task_type:'agency_toolkit',fields:[{id:'service',label:'Your Service',placeholder:'e.g. social media management'},{id:'client_type',label:'Target Client Type',placeholder:'e.g. local restaurants, e-commerce brands'}]},
+  {id:'offer_generator',title:'Offer Generator',icon:'💰',tagline:'An irresistible offer people feel stupid saying no to',outcome:'headline · benefit stack · CTA · money-back guarantee',example:'"Finally: lose 10lbs in 30 days or pay nothing. Guaranteed."',task_type:'offer',fields:[{id:'product',label:'Product / Service',placeholder:'e.g. coaching, online course'},{id:'price_range',label:'Price Point',placeholder:'e.g. $97 one-time, $297/mo'}]},
+  {id:'outreach_assistant',title:'Outreach Assistant',icon:'📨',tagline:'DMs that actually get replies',outcome:'3 DM variants · follow-up sequence · cold email',example:'"Hey [name], I turned your last 3 posts into a lead magnet. Want it?"',task_type:'outreach',fields:[{id:'target',label:'Target Person',placeholder:'e.g. fitness influencers'},{id:'goal',label:'Outreach Goal',placeholder:'e.g. book a discovery call'}]},
+  {id:'landing_page_builder',title:'Landing Page Builder',icon:'🚀',tagline:'A page that converts — no designer, no copywriter',outcome:'hero section · features · social proof · CTA · full copy',example:'"From zero to $10k/month with AI — without quitting your job."',task_type:'landing_page',fields:[{id:'product',label:'Product / Offer',placeholder:'e.g. AI writing tool'},{id:'benefit',label:'Main Transformation',placeholder:'e.g. go from zero to $10k/month'},{id:'audience',label:'Target Audience',placeholder:'e.g. freelancers wanting to scale'}]}
+];
+const QUICK_TEMPLATES=[
+  {id:'tiktok_hook',title:'TikTok Hook',icon:'🪝',category:'TikTok',field_label:'Topic or niche',field_placeholder:'e.g. making money online as a student'},
+  {id:'video_script',title:'Video Script',icon:'🎬',category:'TikTok',field_label:'Video topic and format',field_placeholder:'e.g. 60-second motivational video'},
+  {id:'cold_email',title:'Cold Email',icon:'📧',category:'Business',field_label:'Who you\'re emailing and why',field_placeholder:'e.g. agency owners to offer my AI service'},
+  {id:'bio_writer',title:'Bio Writer',icon:'👤',category:'Creator',field_label:'Who you are and what you do',field_placeholder:'e.g. AI content creator helping coaches'},
+  {id:'content_calendar',title:'Content Calendar',icon:'📅',category:'Creator',field_label:'Niche and posting frequency',field_placeholder:'e.g. personal finance, 5 posts/week'},
+  {id:'offer_letter',title:'Offer Letter',icon:'📄',category:'Business',field_label:'Service, price, and client type',field_placeholder:'e.g. social media mgmt, $1,500/mo'},
+  {id:'ai_persona',title:'AI Persona',icon:'🤖',category:'Creator',field_label:'Purpose of the AI persona',field_placeholder:'e.g. a no-nonsense business coach AI'},
+  {id:'caption_pack',title:'Caption Pack',icon:'✏️',category:'TikTok',field_label:'Topic or content type',field_placeholder:'e.g. gym transformation post'}
+];
+const WORKER_DEFS=[
+  {id:'idea_worker',title:'💡 Idea Worker',fields:[{id:'niche',label:'Niche / Industry',placeholder:'e.g. crypto, fitness'},{id:'platform',label:'Platform',placeholder:'e.g. TikTok, YouTube'}]},
+  {id:'script_worker',title:'📝 Script Worker',fields:[{id:'topics',label:'Topics (one per line)',placeholder:'Topic 1\nTopic 2',type:'textarea'},{id:'length',label:'Script Length',placeholder:'e.g. 60 seconds'}]},
+  {id:'repurpose_worker',title:'♻️ Repurpose Worker',fields:[{id:'content',label:'Original Content',placeholder:'Paste your blog post or transcript...',type:'textarea'}]},
+  {id:'offer_worker',title:'💎 Offer Worker',fields:[{id:'business',label:'Business / Skill',placeholder:'e.g. video editing, coaching'},{id:'audience',label:'Target Customer',placeholder:'e.g. small business owners'}]},
+  {id:'planner_worker',title:'🗓️ Planner Worker',fields:[{id:'goal',label:'Goal',placeholder:'e.g. launch my first online course'},{id:'level',label:'Starting Point',placeholder:'e.g. complete beginner'}]}
+];
+
+// ── State ─────────────────────────────────────────────────────────────────────
+let currentSection='home', currentMoneyTool=null, currentTemplate=null;
+let workerPollTimer=null, historyFilter='all', historySearch='', settingsCache={};
+let lastDiagData={};
+
+// ── Utilities ─────────────────────────────────────────────────────────────────
+function $(id){return document.getElementById(id);}
+function fmtUptime(s){if(s<60)return 'just started';const m=Math.floor(s/60)%60,h=Math.floor(s/3600);return h>0?`${h}h ${m}m`:`${m}m`;}
+function fmtDate(iso){if(!iso)return '';const d=new Date(iso),now=new Date();const diff=now-d;if(diff<86400000&&d.toDateString()===now.toDateString())return 'Today '+d.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});if(diff<172800000)return 'Yesterday';return d.toLocaleDateString([],{month:'short',day:'numeric'});}
+function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function showSpinner(btn){btn._origText=btn.innerHTML;btn.innerHTML='<span class="spinner"></span>';btn.disabled=true;}
+function hideSpinner(btn,text){btn.innerHTML=text||btn._origText||'Done';btn.disabled=false;}
+function showErr(elId,msg){const el=$(elId);if(el){el.textContent=msg;el.style.display='block';}}
+function hideErr(elId){const el=$(elId);if(el)el.style.display='none';}
+function showSaved(elId){const el=$(elId);if(!el)return;el.style.display='block';setTimeout(()=>el.style.display='none',2500);}
+
+async function copyToClipboard(text,evt){
+  try{await navigator.clipboard.writeText(text);}catch{const ta=document.createElement('textarea');ta.value=text;document.body.appendChild(ta);ta.select();document.execCommand('copy');document.body.removeChild(ta);}
+  const tip=document.createElement('div');tip.className='copy-tooltip';tip.textContent='Copied!';
+  tip.style.left=(evt?evt.clientX+10:100)+'px';tip.style.top=(evt?evt.clientY-30:100)+'px';
+  document.body.appendChild(tip);setTimeout(()=>tip.remove(),1600);
+}
+
+function costBadgeHTML(label){return `<span class="cost-badge ${label||'Free'}">${label||'Free'}</span>`;}
+
+// ── Navigation ────────────────────────────────────────────────────────────────
+function navigate(section){
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  const sec=document.getElementById('sec-'+section);
+  if(sec)sec.classList.add('active');
+  document.querySelectorAll('.nav-item[data-section="'+section+'"]').forEach(n=>n.classList.add('active'));
+  currentSection=section;
+  location.hash=section;
+  if(section==='workers'){startWorkerPoll();}else{stopWorkerPoll();}
+  if(section==='history')loadHistory();
+  if(section==='status')loadStatus();
+  if(section==='settings')loadSettings();
+  if(section==='home')loadRecent();
+}
+
+// ── Onboarding ────────────────────────────────────────────────────────────────
+async function initApp(){
+  updateClock();setInterval(updateClock,1000);
+  try{
+    const r=await fetch('/api/onboarding');
+    const d=await r.json();
+    lastDiagData.onboarding=d;
+    if(!d.first_run_done){
+      showOnboarding(d);
+    }else{
+      $('onboarding').classList.add('hidden');
+      afterOnboarding();
+    }
+  }catch{afterOnboarding();}
+}
+function afterOnboarding(){
+  loadStats();loadRecent();checkServices();
+  setInterval(loadStats,10000);
+  setInterval(checkServices,15000);
+}
+function updateClock(){
+  const el=$('home-clock');
+  if(el)el.textContent=new Date().toLocaleString([],{weekday:'long',month:'long',day:'numeric',hour:'2-digit',minute:'2-digit'});
+}
+function showOnboarding(data){
+  $('onboarding').classList.remove('hidden');
+  if(data){
+    $('ob-ram').textContent=data.ram_gb||'?';
+    $('ob-disk').textContent=data.disk_free_gb||'?';
+    $('ob-model').textContent=data.recommended||'qwen3.5:9b';
+  }
+}
+$('ob-next1').addEventListener('click',async()=>{
+  $('ob-step1').classList.remove('active');$('ob-step2').classList.add('active');
+  try{const r=await fetch('/api/onboarding');const d=await r.json();$('ob-ram').textContent=d.ram_gb||'?';$('ob-disk').textContent=d.disk_free_gb||'?';$('ob-model').textContent=d.recommended||'qwen3.5:9b';}catch{}
+});
+$('ob-next2').addEventListener('click',()=>{$('ob-step2').classList.remove('active');$('ob-step3').classList.add('active');});
+$('ob-start').addEventListener('click',async()=>{
+  showSpinner($('ob-start'));
+  try{await fetch('/api/settings',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({first_run_done:true})});}catch{}
+  $('onboarding').classList.add('hidden');
+  afterOnboarding();
+});
+
+// ── Stats ─────────────────────────────────────────────────────────────────────
+async function loadStats(){
+  try{
+    const r=await fetch('/api/stats');const d=await r.json();
+    animateCount($('stat-requests'),d.requestCount||0);
+    animateCount($('stat-memory'),d.memoryCount||0);
+    $('stat-uptime').textContent=fmtUptime(d.uptimeSeconds||0);
+    if(d.spend){
+      $('stat-spend').textContent='$'+d.spend.today_usd.toFixed(4);
+      updateSpendUI(d.spend);
+    }
+    lastDiagData.stats=d;
+  }catch{}
+}
+function updateSpendUI(sp){
+  const pct=Math.min((sp.pct_used||0)*100,100);
+  const fill=$('spend-fill');
+  const text=$('spend-text');
+  if(fill){fill.style.width=pct+'%';fill.className='spend-bar-fill'+(pct>=100?' over':pct>=80?' warn':'');}
+  if(text)text.textContent='$'+sp.today_usd.toFixed(2)+' / $'+sp.limit_usd.toFixed(2);
+  const bWarn=$('banner-warn'),bOver=$('banner-over');
+  if(bWarn)bWarn.classList.toggle('show',pct>=80&&pct<100);
+  if(bOver)bOver.classList.toggle('show',pct>=100);
+}
+
+// ── Services ──────────────────────────────────────────────────────────────────
+async function checkServices(){
+  try{
+    const r=await fetch('/api/status');const d=await r.json();
+    lastDiagData.status=d;
+    const svcs=['ollama','webui','openclaw'];
+    svcs.forEach(s=>{
+      const dot=$('dot-'+s);
+      const pill=$('pill-'+s);
+      if(dot){dot.className='dot '+(d[s]?'online':'offline');}
+      if(pill){pill.className='svc-pill '+(d[s]?'online':'offline');
+        const pdot=pill.querySelector('.dot');if(pdot)pdot.className='dot '+(d[s]?'online':'offline');
+      }
+    });
+    // chat iframe overlay
+    const chatOff=$('chat-offline'),frame=$('chat-frame');
+    if(d.webui){if(chatOff)chatOff.style.display='none';if(frame)frame.style.display='block';}
+    else{if(chatOff)chatOff.style.display='flex';if(frame)frame.style.display='none';}
+  }catch{}
+}
+
+// ── Recent outputs ────────────────────────────────────────────────────────────
+async function loadRecent(){
+  try{
+    const r=await fetch('/api/history?limit=5');const items=await r.json();
+    const el=$('recent-list');if(!el)return;
+    if(!items.length){el.innerHTML='<div class="empty-state">No outputs yet — generate something in Money Mode or Templates</div>';return;}
+    el.innerHTML=items.map(h=>`
+      <div class="recent-item">
+        <div>
+          <span style="font-weight:600;color:var(--t1)">${esc(h.title||'Output')}</span>
+          <span style="color:var(--t2);margin-left:8px">${fmtDate(h.created_at)}</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px">
+          ${costBadgeHTML(h.cost_label)}
+          <button class="btn btn-ghost btn-sm" onclick="copyText('${esc(h.content||'')}',event)">Copy</button>
+        </div>
+      </div>`).join('');
+  }catch{}
+}
+function copyText(t,e){copyToClipboard(t,e);}
+
+// ── Money Mode ────────────────────────────────────────────────────────────────
+function renderMoneyCards(){
+  const grid=$('money-grid');if(!grid)return;
+  grid.innerHTML=MONEY_TOOLS.map(t=>`
+    <div class="money-card" data-tool="${t.id}">
+      <div class="money-card-icon">${t.icon}</div>
+      <div class="money-card-title">${t.title}</div>
+      <div class="money-card-tagline">${t.tagline}</div>
+      ${t.outcome?`<div style="font-size:10px;color:var(--t3);margin-top:8px;line-height:1.4">→ ${esc(t.outcome)}</div>`:''}
+      ${t.example?`<div style="margin-top:10px;padding:8px 10px;background:rgba(124,58,237,.08);border:1px solid rgba(124,58,237,.15);border-radius:8px;font-size:10px;color:var(--t2);font-style:italic;line-height:1.45">${esc(t.example)}</div>`:''}
+      <div class="money-card-action">Generate free →</div>
+    </div>`).join('');
+  grid.querySelectorAll('.money-card').forEach(card=>{
+    card.addEventListener('click',()=>openMoneyTool(card.dataset.tool));
+  });
+}
+function openMoneyTool(id){
+  currentMoneyTool=MONEY_TOOLS.find(t=>t.id===id);if(!currentMoneyTool)return;
+  $('money-panel-icon').textContent=currentMoneyTool.icon;
+  $('money-panel-title').textContent=currentMoneyTool.title;
+  $('money-fields').innerHTML=currentMoneyTool.fields.map(f=>`
+    <div class="form-group">
+      <label class="form-label">${esc(f.label)}</label>
+      <input class="form-input" id="mf-${f.id}" placeholder="${esc(f.placeholder||'')}"/>
+    </div>`).join('');
+  $('money-panel').style.display='block';
+  $('money-result').style.display='none';
+  hideErr('money-err');
+  $('money-panel').scrollIntoView({behavior:'smooth',block:'start'});
+}
+$('money-panel-close').addEventListener('click',()=>{$('money-panel').style.display='none';});
+$('money-generate-btn').addEventListener('click',async(e)=>{
+  if(!currentMoneyTool)return;
+  const btn=$('money-generate-btn');
+  const fields={};
+  currentMoneyTool.fields.forEach(f=>{const el=$(('mf-'+f.id));if(el)fields[f.id]=el.value;});
+  const profile=$('money-profile').value;
+  hideErr('money-err');showSpinner(btn);
+  try{
+    const r=await fetch('/api/generate',{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({template_id:currentMoneyTool.id,fields,profile:profile||null})});
+    const d=await r.json();
+    if(!r.ok||d.error){throw new Error(d.error||'Generation failed');}
+    $('money-result-text').textContent=d.result;
+    const badge=$('money-cost-badge');
+    badge.className='cost-badge '+(d.cost_label||'Free');
+    badge.textContent=d.cost_label||'Free';
+    $('money-reason').textContent=d.reason?'· '+d.reason:'';
+    $('money-result').style.display='block';
+    if(d.spend)updateSpendUI(d.spend);
+  }catch(err){showErr('money-err',err.message);}
+  finally{hideSpinner(btn,'✨ Generate');}
+});
+$('money-copy-btn').addEventListener('click',(e)=>{
+  const txt=$('money-result-text').textContent;copyToClipboard(txt,e);
+  hideSpinner($('money-copy-btn'),'✓ Copied!');setTimeout(()=>$('money-copy-btn').textContent='📋 Copy',1500);
+});
+
+// ── Templates ─────────────────────────────────────────────────────────────────
+function renderTemplates(cat){
+  const grid=$('template-grid');if(!grid)return;
+  const list=cat==='All'?QUICK_TEMPLATES:QUICK_TEMPLATES.filter(t=>t.category===cat);
+  if(!list.length){grid.innerHTML='<div class="empty-state">No templates in this category.</div>';return;}
+  grid.innerHTML=list.map(t=>`
+    <div class="money-card" data-tpl="${t.id}" style="cursor:pointer">
+      <div class="money-card-icon">${t.icon}</div>
+      <div class="money-card-title">${t.title}</div>
+      <div class="chip" style="margin-bottom:6px">${t.category}</div>
+      <div class="money-card-action">Use →</div>
+    </div>`).join('');
+  grid.querySelectorAll('.money-card').forEach(card=>{
+    card.addEventListener('click',()=>openTemplate(card.dataset.tpl));
+  });
+}
+function openTemplate(id){
+  currentTemplate=QUICK_TEMPLATES.find(t=>t.id===id);if(!currentTemplate)return;
+  $('tpl-panel-icon').textContent=currentTemplate.icon;
+  $('tpl-panel-title').textContent=currentTemplate.title;
+  $('tpl-field-label').textContent=currentTemplate.field_label||'Input';
+  $('tpl-field-input').placeholder=currentTemplate.field_placeholder||'';
+  $('tpl-field-input').value='';
+  $('tpl-panel').style.display='block';
+  $('tpl-result').style.display='none';
+  hideErr('tpl-err');
+  $('tpl-panel').scrollIntoView({behavior:'smooth',block:'start'});
+}
+$('tpl-panel-close').addEventListener('click',()=>{$('tpl-panel').style.display='none';});
+$('tpl-generate-btn').addEventListener('click',async()=>{
+  if(!currentTemplate)return;
+  const btn=$('tpl-generate-btn');
+  const input=$('tpl-field-input').value.trim();
+  if(!input){showErr('tpl-err','Please fill in the field.');return;}
+  const profile=$('tpl-profile').value;
+  hideErr('tpl-err');showSpinner(btn);
+  try{
+    const r=await fetch('/api/generate',{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({template_id:currentTemplate.id,fields:{input},profile:profile||null})});
+    const d=await r.json();
+    if(!r.ok||d.error)throw new Error(d.error||'Failed');
+    $('tpl-result-text').textContent=d.result;
+    const badge=$('tpl-cost-badge');badge.className='cost-badge '+(d.cost_label||'Free');badge.textContent=d.cost_label||'Free';
+    $('tpl-result').style.display='block';
+    if(d.spend)updateSpendUI(d.spend);
+  }catch(err){showErr('tpl-err',err.message);}
+  finally{hideSpinner(btn,'⚡ Generate');}
+});
+$('tpl-copy-btn').addEventListener('click',(e)=>{
+  copyToClipboard($('tpl-result-text').textContent,e);
+  $('tpl-copy-btn').textContent='✓ Copied!';setTimeout(()=>$('tpl-copy-btn').textContent='📋 Copy',1500);
+});
+document.querySelectorAll('#template-tabs .tab').forEach(tab=>{
+  tab.addEventListener('click',()=>{
+    document.querySelectorAll('#template-tabs .tab').forEach(t=>t.classList.remove('active'));
+    tab.classList.add('active');
+    renderTemplates(tab.dataset.cat);
+    $('tpl-panel').style.display='none';
+  });
+});
+
+// ── Workers ───────────────────────────────────────────────────────────────────
+function renderWorkerFields(type){
+  const def=WORKER_DEFS.find(w=>w.id===type);
+  const wrap=$('worker-fields');if(!wrap)return;
+  if(!def){wrap.innerHTML='';return;}
+  wrap.innerHTML=def.fields.map(f=>`
+    <div class="form-group">
+      <label class="form-label">${esc(f.label)}</label>
+      ${f.type==='textarea'
+        ?`<textarea class="form-textarea" id="wf-${f.id}" placeholder="${esc(f.placeholder||'')}" rows="4"></textarea>`
+        :`<input class="form-input" id="wf-${f.id}" placeholder="${esc(f.placeholder||'')}"/>`}
+    </div>`).join('');
+}
+$('worker-type-select').addEventListener('change',e=>renderWorkerFields(e.target.value));
+
+$('worker-start-btn').addEventListener('click',async()=>{
+  const type=$('worker-type-select').value;
+  const def=WORKER_DEFS.find(w=>w.id===type);
+  const input={};
+  if(def)def.fields.forEach(f=>{const el=$(('wf-'+f.id));if(el)input[f.id]=el.value;});
+  const profile=$('worker-profile').value;
+  const btn=$('worker-start-btn');
+  hideErr('worker-err');showSpinner(btn);
+  try{
+    const r=await fetch('/api/worker/start',{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({type,input,profile:profile||null})});
+    const d=await r.json();
+    if(!r.ok||d.error)throw new Error(d.error||'Failed to start worker');
+    startWorkerPoll();
+  }catch(err){showErr('worker-err',err.message);}
+  finally{hideSpinner(btn,'▶ Start Worker');}
+});
+
+function startWorkerPoll(){
+  if(workerPollTimer)return;
+  pollWorkers();
+  workerPollTimer=setInterval(pollWorkers,3000);
+}
+function stopWorkerPoll(){
+  if(workerPollTimer){clearInterval(workerPollTimer);workerPollTimer=null;}
+}
+async function pollWorkers(){
+  try{
+    const r=await fetch('/api/worker/status');const d=await r.json();
+    renderWorkerQueue(d.queue||[]);
+    // stop polling if no active jobs
+    const active=(d.queue||[]).some(j=>j.status==='queued'||j.status==='running');
+    if(!active&&currentSection!=='workers')stopWorkerPoll();
+  }catch{}
+}
+function renderWorkerQueue(queue){
+  const empty=$('worker-empty'),table=$('worker-table'),tbody=$('worker-tbody');
+  if(!queue.length){if(empty)empty.style.display='block';if(table)table.style.display='none';return;}
+  if(empty)empty.style.display='none';if(table)table.style.display='table';
+  if(!tbody)return;
+  tbody.innerHTML=queue.slice().reverse().map(j=>`
+    <tr>
+      <td style="font-weight:600;max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(j.title||j.type)}</td>
+      <td><span class="chip">${esc(j.profile||'Balanced')}</span></td>
+      <td style="font-size:11px;color:var(--t2)">${esc(j.provider||'—')} ${j.model?'/ '+j.model.split(':')[0]:''}</td>
+      <td>${costBadgeHTML(j.cost_label)}</td>
+      <td>
+        <div style="display:flex;align-items:center;gap:8px">
+          <span class="status-badge ${j.status}">${j.status}</span>
+          ${j.status==='running'?`<div class="progress-bar"><div class="progress-fill" style="width:${j.progress||0}%"></div></div>`:''}
+        </div>
+      </td>
+      <td>
+        ${j.result?`<button class="btn btn-ghost btn-sm" onclick="showWorkerResult('${esc(j.id)}','${esc(j.title||j.type)}',this)">View</button>`:''}
+        ${j.error?`<span style="color:var(--red);font-size:11px">${esc(j.error.slice(0,40))}</span>`:''}
+      </td>
+    </tr>`).join('');
+  // store results for modal
+  window._workerResults=window._workerResults||{};
+  queue.forEach(j=>{if(j.result)window._workerResults[j.id]={title:j.title,content:j.result};});
+}
+function showWorkerResult(id,title,btn){
+  const data=(window._workerResults||{})[id];
+  if(!data)return;
+  openHistoryExpanded(data.title||title,data.content);
+}
+
+// ── History ───────────────────────────────────────────────────────────────────
+async function loadHistory(){
+  const q=historySearch,filter=historyFilter;
+  try{
+    const url='/api/history?limit=100&q='+encodeURIComponent(q)+'&filter='+encodeURIComponent(filter);
+    const r=await fetch(url);const items=await r.json();
+    renderHistoryGrid(items);
+  }catch{}
+}
+function renderHistoryGrid(items){
+  const grid=$('history-grid');if(!grid)return;
+  if(!items.length){grid.innerHTML='<div class="empty-state">No outputs found.</div>';return;}
+  grid.innerHTML=items.map(h=>`
+    <div class="history-card" data-id="${h.id}">
+      <div class="history-card-header">
+        <div class="history-card-title">${esc(h.title||'Output')}</div>
+        <div class="history-card-date">${fmtDate(h.created_at)}</div>
+      </div>
+      <div class="history-card-preview">${esc((h.content||'').slice(0,180))}</div>
+      <div class="history-card-footer">
+        ${costBadgeHTML(h.cost_label)}
+        <button class="btn btn-ghost btn-sm btn-icon" title="Copy" data-hcopy="${h.id}">📋</button>
+        <button class="btn btn-ghost btn-sm btn-icon" title="${h.favorite?'Unfavorite':'Favorite'}" data-hfav="${h.id}" style="${h.favorite?'color:var(--g1)':''}">⭐</button>
+        <button class="btn btn-danger btn-sm btn-icon" title="Delete" data-hdel="${h.id}">🗑</button>
+      </div>
+    </div>`).join('');
+  // attach events
+  grid.querySelectorAll('.history-card').forEach(card=>{
+    card.addEventListener('click',(e)=>{
+      if(e.target.closest('button'))return;
+      const id=card.dataset.id;
+      const item=items.find(h=>h.id===id);if(item)openHistoryExpanded(item.title,item.content);
+    });
+  });
+  grid.querySelectorAll('[data-hcopy]').forEach(btn=>{
+    btn.addEventListener('click',(e)=>{e.stopPropagation();const id=btn.dataset.hcopy;const item=items.find(h=>h.id===id);if(item)copyToClipboard(item.content,e);});
+  });
+  grid.querySelectorAll('[data-hfav]').forEach(btn=>{
+    btn.addEventListener('click',async(e)=>{e.stopPropagation();const id=btn.dataset.hfav;await fetch('/api/history/'+id+'/favorite',{method:'POST'});loadHistory();});
+  });
+  grid.querySelectorAll('[data-hdel]').forEach(btn=>{
+    btn.addEventListener('click',async(e)=>{e.stopPropagation();const id=btn.dataset.hdel;if(confirm('Delete this output?')){await fetch('/api/history/'+id,{method:'DELETE'});loadHistory();}});
+  });
+}
+function openHistoryExpanded(title,content){
+  const wrap=$('history-expanded');
+  $('hexp-title').textContent=title||'Output';
+  $('hexp-content').textContent=content||'';
+  wrap.style.display='flex';
+}
+$('hexp-close').addEventListener('click',()=>{$('history-expanded').style.display='none';});
+$('hexp-copy').addEventListener('click',(e)=>{copyToClipboard($('hexp-content').textContent,e);$('hexp-copy').textContent='✓ Copied!';setTimeout(()=>$('hexp-copy').textContent='📋 Copy',1500);});
+$('history-expanded').addEventListener('click',(e)=>{if(e.target===$('history-expanded'))$('history-expanded').style.display='none';});
+
+// Search + filter
+let searchDebounce=null;
+$('history-search').addEventListener('input',e=>{
+  clearTimeout(searchDebounce);historySearch=e.target.value;
+  searchDebounce=setTimeout(loadHistory,400);
+});
+document.querySelectorAll('[data-hfilter]').forEach(tab=>{
+  tab.addEventListener('click',()=>{
+    document.querySelectorAll('[data-hfilter]').forEach(t=>t.classList.remove('active'));
+    tab.classList.add('active');historyFilter=tab.dataset.hfilter;loadHistory();
+  });
+});
+
+// ── Settings ──────────────────────────────────────────────────────────────────
+async function loadSettings(){
+  try{
+    const r=await fetch('/api/settings');const d=await r.json();
+    settingsCache=d;
+    $('set-primary-model').value=d.primary_model||'';
+    $('set-backup-model').value=d.backup_model||'';
+    const dl=d.daily_limit_usd||1;$('set-daily-limit').value=dl;$('daily-limit-val').textContent='$'+parseFloat(dl).toFixed(2);
+    const wb=d.per_worker_budget_usd||0.1;$('set-worker-budget').value=wb;$('worker-budget-val').textContent='$'+parseFloat(wb).toFixed(2);
+    $('set-premium-calls').value=d.premium_calls_per_day||5;
+    $('set-ask-expensive').checked=d.ask_before_expensive!==false;
+    const rules=d.routing_rules||{};
+    $('route-templates').value=rules.templates||'Local Only';
+    $('route-workers').value=rules.workers||'Balanced';
+    $('route-money').value=rules.money_mode||'Balanced';
+    renderApiKeyCards(d.api_keys||{});
+  }catch{}
+}
+$('set-daily-limit').addEventListener('input',e=>{$('daily-limit-val').textContent='$'+parseFloat(e.target.value).toFixed(2);});
+$('set-worker-budget').addEventListener('input',e=>{$('worker-budget-val').textContent='$'+parseFloat(e.target.value).toFixed(2);});
+$('save-models-btn').addEventListener('click',async()=>{
+  const btn=$('save-models-btn');showSpinner(btn);
+  await fetch('/api/settings',{method:'POST',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({primary_model:$('set-primary-model').value,backup_model:$('set-backup-model').value})});
+  hideSpinner(btn,'Save Models');showSaved('models-saved');
+});
+$('save-budget-btn').addEventListener('click',async()=>{
+  const btn=$('save-budget-btn');showSpinner(btn);
+  await fetch('/api/settings',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({
+    daily_limit_usd:parseFloat($('set-daily-limit').value),
+    per_worker_budget_usd:parseFloat($('set-worker-budget').value),
+    premium_calls_per_day:parseInt($('set-premium-calls').value)||5,
+    ask_before_expensive:$('set-ask-expensive').checked
+  })});
+  hideSpinner(btn,'Save Budget Settings');showSaved('budget-saved');
+});
+$('save-routing-btn').addEventListener('click',async()=>{
+  const btn=$('save-routing-btn');showSpinner(btn);
+  await fetch('/api/settings',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({
+    routing_rules:{templates:$('route-templates').value,workers:$('route-workers').value,money_mode:$('route-money').value}
+  })});
+  hideSpinner(btn,'Save Routing');showSaved('routing-saved');
+});
+
+function renderApiKeyCards(keys){
+  const wrap=$('apikey-cards');if(!wrap)return;
+  const providers=[
+    {id:'openai',name:'OpenAI',hint:'sk-...'},
+    {id:'anthropic',name:'Anthropic',hint:'sk-ant-...'},
+    {id:'groq',name:'Groq',hint:'gsk_...'}
+  ];
+  wrap.innerHTML=providers.map(p=>{
+    const info=keys[p.id]||{};
+    const hasKey=info.has_key;
+    return `<div class="card" style="padding:16px">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+        <div style="font-weight:700;font-size:14px">${p.name}</div>
+        <span class="status-badge ${hasKey?'done':'queued'}">${hasKey?'Connected':'Not set'}</span>
+      </div>
+      ${hasKey?`<div style="font-size:12px;color:var(--t2);margin-bottom:10px;font-family:'JetBrains Mono',monospace">${info.masked||'••••••••'}</div>`:''}
+      <div style="display:flex;gap:8px">
+        <input class="form-input" id="key-${p.id}" type="password" placeholder="${p.hint}" style="flex:1"/>
+        <button class="btn btn-ghost btn-sm" id="test-${p.id}">Test</button>
+        <button class="btn btn-primary btn-sm" id="savekey-${p.id}">Save</button>
+      </div>
+      <div class="inline-err" id="key-result-${p.id}" style="display:none"></div>
+    </div>`;
+  }).join('');
+  providers.forEach(p=>{
+    const testBtn=$('test-'+p.id);const saveBtn=$('savekey-'+p.id);
+    if(testBtn)testBtn.addEventListener('click',async()=>{
+      const key=$('key-'+p.id).value.trim();if(!key){showErr('key-result-'+p.id,'Enter a key first.');return;}
+      showSpinner(testBtn);
+      try{
+        const r=await fetch('/api/keys/test',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({provider:p.id,key})});
+        const d=await r.json();
+        const el=$('key-result-'+p.id);el.style.display='block';
+        if(d.valid){el.style.color='var(--green)';el.textContent=`✓ Valid — ${d.model_count} models (${d.latency_ms}ms)`;}
+        else{el.style.color='var(--red)';el.textContent='✗ '+d.error;}
+      }catch{showErr('key-result-'+p.id,'Connection failed');}
+      finally{hideSpinner(testBtn,'Test');}
+    });
+    if(saveBtn)saveBtn.addEventListener('click',async()=>{
+      const key=$('key-'+p.id).value.trim();if(!key)return;
+      showSpinner(saveBtn);
+      const patch={api_keys:{}};patch.api_keys[p.id]=key;
+      await fetch('/api/settings',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(patch)});
+      hideSpinner(saveBtn,'Save');
+      const el=$('key-result-'+p.id);el.style.display='block';el.style.color='var(--green)';el.textContent='✓ Key saved';
+      setTimeout(()=>loadSettings(),800);
+    });
+  });
+}
+
+// Settings tabs
+document.querySelectorAll('#settings-tabs .tab').forEach(tab=>{
+  tab.addEventListener('click',()=>{
+    document.querySelectorAll('#settings-tabs .tab').forEach(t=>t.classList.remove('active'));
+    tab.classList.add('active');
+    document.querySelectorAll('.tab-content').forEach(tc=>tc.classList.remove('active'));
+    const target=$('stab-'+tab.dataset.stab);if(target)target.classList.add('active');
+  });
+});
+
+// ── Status ────────────────────────────────────────────────────────────────────
+async function loadStatus(){
+  try{
+    const [sr,ss]=await Promise.all([fetch('/api/onboarding'),fetch('/api/status')]);
+    const hw=await sr.json();const svc=await ss.json();
+    lastDiagData.onboarding=hw;lastDiagData.status=svc;
+    // Hardware bars
+    if(hw.ram_gb){
+      const used=hw.ram_gb-(hw.ram_free_gb||0);const pct=Math.round(used/hw.ram_gb*100);
+      $('hw-ram-label').textContent=used.toFixed(1)+' / '+hw.ram_gb+' GB ('+pct+'%)';
+      $('hw-ram-fill').style.width=pct+'%';
+    }
+    if(hw.disk_gb){
+      const used=hw.disk_gb-(hw.disk_free_gb||0);const pct=Math.round(used/hw.disk_gb*100);
+      $('hw-disk-label').textContent=used.toFixed(0)+' / '+hw.disk_gb+' GB ('+pct+'%)';
+      $('hw-disk-fill').style.width=pct+'%';
+    }
+    if(hw.platform)$('hw-platform').textContent='Platform: '+hw.platform;
+    // Services
+    const svcWrap=$('status-svc-list');if(svcWrap){
+      svcWrap.innerHTML=[
+        {id:'ollama',name:'Ollama',port:11434},
+        {id:'webui',name:'Open WebUI',port:3000},
+        {id:'openclaw',name:'OpenClaw',port:18789}
+      ].map(s=>`
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border)">
+          <div style="display:flex;align-items:center;gap:8px">
+            <div class="dot ${svc[s.id]?'online':'offline'}"></div>
+            <span style="font-weight:600">${s.name}</span>
+            <span style="font-size:11px;color:var(--t2)">:${s.port}</span>
+          </div>
+          <span class="status-badge ${svc[s.id]?'done':'error'}">${svc[s.id]?'Online':'Offline'}</span>
+        </div>`).join('');
+    }
+    // Models table
+    const modWrap=$('status-models-wrap');if(modWrap){
+      if(!hw.models||!hw.models.length){modWrap.innerHTML='<div class="empty-state">Ollama offline or no models installed.<br><code style="background:var(--panel);padding:2px 6px;border-radius:4px">ollama pull qwen3.5:9b</code></div>';}
+      else{modWrap.innerHTML=`<table class="queue-table"><thead><tr><th>Model</th><th>Size</th><th>Status</th></tr></thead><tbody>`+
+        hw.models.map(m=>`<tr><td style="font-family:'JetBrains Mono',monospace;font-size:12px">${esc(m.name)}</td><td style="color:var(--t2)">${m.size_gb?m.size_gb+' GB':'—'}</td><td><span class="status-badge done">Ready</span></td></tr>`).join('')+
+        '</tbody></table>';}
+    }
+  }catch{}
+}
+$('status-refresh-btn').addEventListener('click',loadStatus);
+$('status-copy-diag-btn').addEventListener('click',(e)=>{
+  copyToClipboard(JSON.stringify(lastDiagData,null,2),e);
+  $('status-copy-diag-btn').textContent='✓ Copied!';setTimeout(()=>$('status-copy-diag-btn').textContent='📋 Copy Diagnostics',1500);
+});
+
+// ── Wire up navigation ────────────────────────────────────────────────────────
+document.querySelectorAll('.nav-item[data-section]').forEach(item=>{
+  item.addEventListener('click',()=>navigate(item.dataset.section));
+});
+document.querySelectorAll('[data-goto]').forEach(el=>{
+  el.addEventListener('click',()=>navigate(el.dataset.goto));
+});
+
+// ── Init ──────────────────────────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded',()=>{
+  renderMoneyCards();
+  renderTemplates('All');
+  renderWorkerFields('idea_worker');
+  const hash=(location.hash||'').replace('#','');
+  if(hash&&['home','chat','money','templates','workers','history','settings','status'].includes(hash)){
+    navigate(hash);
+  }
+  initApp();
+  initParticles();
+});
+
+// ── Particle background ───────────────────────────────────────────────────────
+function initParticles(){
+  const canvas=$('particles');if(!canvas)return;
+  const ctx=canvas.getContext('2d');
+  let W,H,particles=[];
+  function resize(){W=canvas.width=window.innerWidth;H=canvas.height=window.innerHeight;}
+  resize();window.addEventListener('resize',resize);
+  class Particle{
+    constructor(){this.reset();}
+    reset(){
+      this.x=Math.random()*W;this.y=Math.random()*H;
+      this.r=Math.random()*1.5+.3;
+      this.vx=(Math.random()-.5)*.25;this.vy=(Math.random()-.5)*.25;
+      this.alpha=Math.random()*.5+.1;
+      this.color=Math.random()>.6?'124,58,237':'245,158,11';
+    }
+    update(){
+      this.x+=this.vx;this.y+=this.vy;
+      if(this.x<0||this.x>W||this.y<0||this.y>H)this.reset();
+    }
+    draw(){
+      ctx.beginPath();ctx.arc(this.x,this.y,this.r,0,Math.PI*2);
+      ctx.fillStyle=`rgba(${this.color},${this.alpha})`;ctx.fill();
+    }
+  }
+  for(let i=0;i<80;i++)particles.push(new Particle());
+  function frame(){
+    ctx.clearRect(0,0,W,H);
+    particles.forEach(p=>{p.update();p.draw();});
+    // draw faint connection lines
+    for(let i=0;i<particles.length;i++){
+      for(let j=i+1;j<particles.length;j++){
+        const dx=particles[i].x-particles[j].x,dy=particles[i].y-particles[j].y;
+        const dist=Math.sqrt(dx*dx+dy*dy);
+        if(dist<120){
+          ctx.beginPath();ctx.moveTo(particles[i].x,particles[i].y);ctx.lineTo(particles[j].x,particles[j].y);
+          ctx.strokeStyle=`rgba(124,58,237,${(1-dist/120)*.12})`;ctx.lineWidth=.5;ctx.stroke();
+        }
+      }
+    }
+    requestAnimationFrame(frame);
+  }
+  frame();
+}
+
+// ── Stat counter animation ────────────────────────────────────────────────────
+function animateCount(el,target,duration=600,prefix='',suffix=''){
+  if(!el)return;const start=performance.now();const from=0;
+  function tick(now){
+    const p=Math.min((now-start)/duration,1);
+    const val=Math.floor(from+(target-from)*p);
+    el.textContent=prefix+val+suffix;
+    if(p<1)requestAnimationFrame(tick);
+    else el.textContent=prefix+target+suffix;
+  }
+  requestAnimationFrame(tick);
+}
+
+// ═══════════════════════════════════════════════════════════
+// NEURALBOX PREMIUM JS v2 — €150 tier
+// ═══════════════════════════════════════════════════════════
+
+// ── Toast system ─────────────────────────────────────────────────────────────
+function toast(msg, type='success', duration=3500){
+  const c=document.getElementById('toast-container');if(!c)return;
+  const el=document.createElement('div');
+  const icons={success:'✓',error:'✕',info:'ℹ',warn:'⚠'};
+  el.className=`toast toast-${type}`;
+  el.innerHTML=`<span style="font-size:15px">${icons[type]||'•'}</span> ${msg}`;
+  c.appendChild(el);
+  requestAnimationFrame(()=>requestAnimationFrame(()=>el.classList.add('show')));
+  const hide=()=>{el.classList.remove('show');setTimeout(()=>el.remove(),400);};
+  setTimeout(hide,duration);
+  el.addEventListener('click',hide);
+}
+
+// ── 3D Tilt effect ────────────────────────────────────────────────────────────
+function addTilt(el, strength=10){
+  el.addEventListener('mousemove',e=>{
+    const r=el.getBoundingClientRect();
+    const x=(e.clientX-r.left)/r.width-.5;
+    const y=(e.clientY-r.top)/r.height-.5;
+    el.style.transform=`perspective(700px) rotateY(${x*strength}deg) rotateX(${-y*strength}deg) translateY(-6px) scale(1.01)`;
+  });
+  el.addEventListener('mouseleave',()=>{el.style.transform='';});
+}
+
+// ── Typewriter result display ────────────────────────────────────────────────
+function typeWrite(el, text, speed=4){
+  el.textContent='';el.classList.add('typing');
+  let i=0;
+  function tick(){
+    if(i<text.length){
+      // Write in chunks of ~8 chars for speed
+      const chunk=text.slice(i,i+8);
+      el.textContent+=chunk;i+=8;
+      el.scrollTop=el.scrollHeight;
+      setTimeout(tick,speed);
+    }else{
+      el.textContent=text;
+      el.classList.remove('typing');
+    }
+  }
+  tick();
+}
+
+// ── Skeleton loader ───────────────────────────────────────────────────────────
+function showSkeleton(container, lines=4){
+  container.innerHTML='<div style="padding:4px 0">'+
+    Array.from({length:lines},(_,i)=>`<div class="skeleton skeleton-line ${i===lines-1?'short':i%3===1?'medium':'wide'}"></div>`).join('')+
+  '</div>';
+}
+
+// ── Char/word counter on textareas ───────────────────────────────────────────
+function addCounter(input, maxChars=500){
+  const wrap=input.closest('.form-group');if(!wrap)return;
+  const counter=document.createElement('div');counter.className='char-counter';
+  wrap.appendChild(counter);
+  function update(){
+    const len=input.value.length;
+    counter.textContent=`${len.toLocaleString()} chars · ${input.value.trim().split(/\s+/).filter(Boolean).length} words`;
+    counter.className='char-counter'+(len>maxChars?'max':len>maxChars*.8?' near':'');
+  }
+  input.addEventListener('input',update);update();
+}
+
+// ── Download result as .txt ───────────────────────────────────────────────────
+function downloadText(text, filename='neuralbox-output.txt'){
+  const blob=new Blob([text],{type:'text/plain'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);
+  a.download=filename;a.click();URL.revokeObjectURL(a.href);
+  toast('Downloaded as '+filename);
+}
+
+// ── Keyboard shortcuts ────────────────────────────────────────────────────────
+document.addEventListener('keydown',e=>{
+  // Ctrl+Enter = generate in active panel
+  if((e.ctrlKey||e.metaKey)&&e.key==='Enter'){
+    e.preventDefault();
+    const moneyPanel=document.getElementById('money-panel');
+    const tplPanel=document.getElementById('tpl-panel');
+    if(moneyPanel&&moneyPanel.style.display!=='none'){
+      document.getElementById('money-generate-btn')?.click();
+    }else if(tplPanel&&tplPanel.style.display!=='none'){
+      document.getElementById('tpl-generate-btn')?.click();
+    }
+  }
+  // G = quick generate shortcut (if not in input)
+  if(e.key==='g'&&!['INPUT','TEXTAREA','SELECT'].includes(document.activeElement.tagName)){
+    const fab=document.getElementById('fab');if(fab)fab.click();
+  }
+  // Number keys 1-8 for nav sections
+  if(!e.ctrlKey&&!e.metaKey&&!e.altKey&&['1','2','3','4','5','6','7','8'].includes(e.key)&&
+     !['INPUT','TEXTAREA','SELECT'].includes(document.activeElement.tagName)){
+    const sections=['home','chat','money','templates','workers','history','settings','status'];
+    const idx=parseInt(e.key)-1;if(idx<sections.length)navigate(sections[idx]);
+  }
+});
+
+// ── FAB behavior ──────────────────────────────────────────────────────────────
+const fab=document.getElementById('fab');
+if(fab){
+  fab.addEventListener('click',()=>{
+    navigate('money');
+    setTimeout(()=>{
+      const first=document.querySelector('.money-card');
+      if(first)first.click();
+    },300);
+  });
+}
+
+// ── Onboarding step dots ──────────────────────────────────────────────────────
+function updateObDots(step){
+  for(let i=1;i<=3;i++){
+    const d=document.getElementById('obd'+i);if(!d)continue;
+    d.className='ob-step-dot'+(i===step?' active':i<step?' done':'');
+  }
+}
+// patch existing ob-next buttons
+const obNext1=document.getElementById('ob-next1');
+const obNext2=document.getElementById('ob-next2');
+if(obNext1){const orig=obNext1.onclick;obNext1.addEventListener('click',()=>updateObDots(2));}
+if(obNext2){obNext2.addEventListener('click',()=>updateObDots(3));}
+
+// ── Wire up Money Mode premium features ──────────────────────────────────────
+// Override the generate result to use typewriter
+const origMoneyGenClick=document.getElementById('money-generate-btn');
+if(origMoneyGenClick){
+  // Re-wrap by cloning the event handling — patch displayResult
+  origMoneyGenClick.__premiumPatched=true;
+}
+
+// Word count update after result shown
+function updateWordCount(text, elId){
+  const el=document.getElementById(elId);if(!el)return;
+  const words=text.trim().split(/\s+/).filter(Boolean).length;
+  const chars=text.length;
+  el.textContent=`${words.toLocaleString()} words · ${chars.toLocaleString()} chars`;
+}
+
+// Download button
+const moneyDl=document.getElementById('money-download-btn');
+if(moneyDl){
+  moneyDl.addEventListener('click',()=>{
+    const txt=document.getElementById('money-result-text')?.textContent||'';
+    if(!txt.trim()){toast('Nothing to download yet','warn');return;}
+    downloadText(txt,'neuralbox-output.txt');
+  });
+}
+
+// Regenerate button (re-fires the generate btn)
+const moneyRegen=document.getElementById('money-regen-btn');
+if(moneyRegen){
+  moneyRegen.addEventListener('click',()=>{
+    document.getElementById('money-generate-btn')?.click();
+  });
+}
+
+// ── Add tilt to money cards after render ─────────────────────────────────────
+const origRenderMoney=window.renderMoneyCards;
+window.renderMoneyCards=function(){
+  if(origRenderMoney)origRenderMoney();
+  document.querySelectorAll('.money-card').forEach(c=>addTilt(c,8));
+};
+
+const origRenderTpl=window.renderTemplates;
+window.renderTemplates=function(cat){
+  if(origRenderTpl)origRenderTpl(cat);
+  document.querySelectorAll('#template-grid .money-card').forEach(c=>addTilt(c,6));
+};
+
+// ── Override loadStats to update home model pill ──────────────────────────────
+const origLoadStats=window.loadStats;
+window.loadStats=async function(){
+  if(origLoadStats)await origLoadStats();
+  try{
+    const r=await fetch('/api/model');const d=await r.json();
+    const el=document.getElementById('home-model-name');
+    if(el&&d.name)el.textContent=d.name;
+  }catch{}
+};
+
+// ── Override generate results to use typewriter ───────────────────────────────
+// Patch the money generate click handler to use typewriter on result
+(function patchMoneyGenerate(){
+  const btn=document.getElementById('money-generate-btn');if(!btn)return;
+  // Add event listener that intercepts result display
+  const observer=new MutationObserver(mutations=>{
+    mutations.forEach(m=>{
+      if(m.type==='characterData'||m.type==='childList'){
+        const box=document.getElementById('money-result-text');
+        if(box&&box.textContent.length>10&&!box.classList.contains('typing')){
+          const text=box.textContent;
+          typeWrite(box,text);
+          updateWordCount(text,'money-wordcount');
+        }
+      }
+    });
+  });
+  const resultBox=document.getElementById('money-result-text');
+  if(resultBox)observer.observe(resultBox,{childList:true,characterData:true,subtree:true});
+})();
+
+// ── Add char counters to all visible textareas on navigation ─────────────────
+const origNavigate=window.navigate;
+window.navigate=function(section){
+  if(origNavigate)origNavigate(section);
+  setTimeout(()=>{
+    document.querySelectorAll('#sec-'+section+' textarea').forEach(ta=>{
+      if(!ta.__counterAdded){addCounter(ta);ta.__counterAdded=true;}
+    });
+    // Add tilt if navigating to money/templates
+    if(section==='money'){
+      document.querySelectorAll('.money-card').forEach(c=>{if(!c.__tilt){addTilt(c,8);c.__tilt=true;}});
+    }
+    if(section==='templates'){
+      document.querySelectorAll('#template-grid .money-card').forEach(c=>{if(!c.__tilt){addTilt(c,6);c.__tilt=true;}});
+    }
+  },100);
+};
+
+// ── Override history loading to show skeleton ─────────────────────────────────
+const origLoadHistory=window.loadHistory;
+window.loadHistory=async function(){
+  const grid=document.getElementById('history-grid');
+  if(grid)showSkeleton(grid,6);
+  if(origLoadHistory)await origLoadHistory();
+};
+
+// ── Toast on copy ─────────────────────────────────────────────────────────────
+const origCopy=window.copyToClipboard;
+window.copyToClipboard=async function(text,evt){
+  if(origCopy)await origCopy(text,evt);
+  toast('Copied to clipboard','success',2000);
+};
+
+// ── Show toast on settings save ───────────────────────────────────────────────
+['save-models-btn','save-budget-btn','save-routing-btn'].forEach(id=>{
+  const btn=document.getElementById(id);if(!btn)return;
+  btn.addEventListener('click',()=>setTimeout(()=>toast('Settings saved','success'),600));
+});
+
+// ── Particle upgrade: add shooting stars ─────────────────────────────────────
+const origInitParticles=window.initParticles;
+window.initParticles=function(){
+  if(origInitParticles)origInitParticles();
+  // Shooting star effect via CSS injection
+  const style=document.createElement('style');
+  style.textContent=`
+    .shooting-star{position:fixed;width:2px;height:2px;background:#fff;border-radius:50%;pointer-events:none;z-index:0;
+      box-shadow:0 0 4px 2px rgba(255,255,255,.4);}
+    .shooting-star::after{content:'';position:absolute;top:0;left:0;width:80px;height:1px;
+      background:linear-gradient(90deg,rgba(255,255,255,.8),transparent);
+      transform:translateX(-80px) rotate(var(--angle));}
+  `;
+  document.head.appendChild(style);
+  function spawnStar(){
+    const star=document.createElement('div');star.className='shooting-star';
+    const angle=Math.random()*40+10;
+    star.style.cssText=`left:${Math.random()*70}%;top:${Math.random()*50}%;--angle:${angle}deg;`;
+    star.animate([
+      {transform:'translate(0,0)',opacity:1},
+      {transform:`translate(${Math.cos(angle*Math.PI/180)*300}px,${Math.sin(angle*Math.PI/180)*300}px)`,opacity:0}
+    ],{duration:1200+Math.random()*800,easing:'ease-in'}).onfinish=()=>star.remove();
+    document.body.appendChild(star);
+  }
+  setInterval(spawnStar,2800);
+  setTimeout(spawnStar,500);
+}
+
+// ── Premium welcome toast on first load ───────────────────────────────────────
+setTimeout(()=>{
+  if(!sessionStorage.getItem('nb_welcomed')){
+    toast('Welcome to NeuralBox ⚡ Press G for quick generate','info',4000);
+    sessionStorage.setItem('nb_welcomed','1');
+  }
+},1500);
+
+
+// ═══════════════════════════════════════════════════════════
+// NEURALBOX SALES ENGINE — conversion + retention features
+// ═══════════════════════════════════════════════════════════
+
+// ── Streak tracker ────────────────────────────────────────────────────────────
+function updateStreak(){
+  const today=new Date().toISOString().slice(0,10);
+  const data=JSON.parse(localStorage.getItem('nb_streak')||'{"last":"","count":0}');
+  const yesterday=new Date(Date.now()-86400000).toISOString().slice(0,10);
+  let count=data.count||0;
+  if(data.last===today){/* same day */}
+  else if(data.last===yesterday){count++;localStorage.setItem('nb_streak',JSON.stringify({last:today,count}));}
+  else{count=1;localStorage.setItem('nb_streak',JSON.stringify({last:today,count:1}));}
+  const el=document.getElementById('stat-streak');
+  const sub=document.getElementById('stat-streak-sub');
+  if(el)animateCount(el,count);
+  if(sub)sub.textContent=count===1?'start your streak!':count>=7?'🔥 on fire!':'days in a row';
+  if(count>=7&&!sessionStorage.getItem('streak_toast')){
+    setTimeout(()=>toast('🔥 '+count+'-day streak! You're crushing it.','warn',4000),2000);
+    sessionStorage.setItem('streak_toast','1');
+  }
+}
+
+// ── Copywriter cost savings calculator ───────────────────────────────────────
+function updateCostSaved(requestCount){
+  // Average copywriter charges ~$50 per piece of content
+  const saved=requestCount*50;
+  const el=document.getElementById('stat-costsaved');
+  if(!el)return;
+  if(saved===0){el.textContent='$0';return;}
+  animateCount(el,saved,800,'$');
+}
+
+// ── Social proof ticker ───────────────────────────────────────────────────────
+const TICKER_MESSAGES=[
+  '🎵 @creator_mike just generated a TikTok hook that got 200k views',
+  '💰 @sarahdrops closed a $2,400 client using the Agency Toolkit',
+  '🚀 @buildwithben launched a landing page in 4 minutes — locally, for free',
+  '⚡ @contentqueen batch-generated 50 captions on Sunday. Took 8 minutes.',
+  '🔥 @agencyleo replaced Jasper + Copy.ai. Saving $148/mo.',
+  '💼 @marketer_j won a pitch using the Offer Generator output verbatim',
+  '📈 @growthhacker built a full content calendar for Q2 in one session',
+  '✨ @brandstudio created a complete brand identity package in 20 minutes',
+];
+let tickerIdx=0;
+function runTicker(){
+  const el=document.getElementById('social-ticker');if(!el)return;
+  el.style.opacity='0';el.style.transition='opacity .5s';
+  setTimeout(()=>{
+    el.textContent=TICKER_MESSAGES[tickerIdx%TICKER_MESSAGES.length];tickerIdx++;
+    el.style.opacity='1';
+  },500);
+}
+runTicker();setInterval(runTicker,4000);
+
+// ── Override loadStats to add business metrics ────────────────────────────────
+const _origLS2=window.loadStats;
+window.loadStats=async function(){
+  updateStreak();
+  if(_origLS2)await _origLS2();
+  // Update cost saved based on request count
+  const reqEl=document.getElementById('stat-requests');
+  if(reqEl){
+    const n=parseInt(reqEl.textContent)||0;
+    updateCostSaved(n);
+  }
+};
+
+// ── Guided first win: after onboarding, open TikTok Engine ───────────────────
+const _origObStart=document.getElementById('ob-start');
+if(_origObStart){
+  _origObStart.addEventListener('click',()=>{
+    setTimeout(()=>{
+      navigate('money');
+      setTimeout(()=>{
+        const first=document.querySelector('.money-card[data-tool="tiktok_engine"]');
+        if(first){
+          first.click();
+          toast('🎵 Let's create your first TikTok hook — fill in your niche!','info',5000);
+        }
+      },400);
+    },300);
+  });
+}
+
+// ── Share output as formatted card ───────────────────────────────────────────
+function shareOutput(title, content, costLabel){
+  const shareText=`✨ Generated with NeuralBox (${costLabel||'Free'})\n${'─'.repeat(40)}\n${title}\n${'─'.repeat(40)}\n\n${content}\n\n${'─'.repeat(40)}\nNeuralBox — Your Private AI Empire`;
+  copyToClipboard(shareText, null);
+  toast('Output formatted & copied — ready to paste anywhere!','success');
+}
+
+// Wire share button
+const shareBtn=document.getElementById('money-share-btn');
+if(shareBtn){
+  shareBtn.addEventListener('click',()=>{
+    const content=document.getElementById('money-result-text')?.textContent||'';
+    const title=document.getElementById('money-panel-title')?.textContent||'Output';
+    const cost=document.getElementById('money-cost-badge')?.textContent||'Free';
+    if(!content.trim()){toast('Generate something first!','warn');return;}
+    shareOutput(title,content,cost);
+  });
+}
+
+// Wire recent list "goto" buttons
+document.addEventListener('click',e=>{
+  const btn=e.target.closest('[data-goto]');
+  if(btn&&!btn.closest('.nav-item'))navigate(btn.dataset.goto);
+});
+
+// ── Money Mode: update recent list & hide demo after first gen ────────────────
+const _origMoneyBtn=document.getElementById('money-generate-btn');
+if(_origMoneyBtn){
+  _origMoneyBtn.addEventListener('click',()=>{
+    // After a generation, hide demo panel in recent
+    setTimeout(()=>{
+      const demo=document.getElementById('recent-demo');
+      if(demo)demo.style.display='none';
+      loadRecent();
+    },3000);
+  });
+}
+
+// ── ROI banner on home if user has generated 5+ outputs ──────────────────────
+async function checkROIMilestone(){
+  try{
+    const r=await fetch('/api/history?limit=100');const items=await r.json();
+    if(items.length>=5&&!sessionStorage.getItem('roi_milestone')){
+      toast(`🏆 You've created ${items.length} assets — that's ~$${items.length*50} in copywriting saved!`,'info',6000);
+      sessionStorage.setItem('roi_milestone','1');
+    }
+  }catch{}
+}
+setTimeout(checkROIMilestone,5000);
+
+// ── Sidebar output counter (localStorage) ────────────────────────────────────
+function updateSidebarCounter(){
+  try{
+    const n=parseInt(localStorage.getItem('nb_total_outputs')||'0');
+    const el=document.getElementById('sb-output-counter');
+    if(!el)return;
+    if(n>0){el.style.display='block';el.textContent=`⚡ ${n.toLocaleString()} output${n===1?'':'s'} generated`;}
+  }catch{}
+}
+function incrementOutputCounter(){
+  try{
+    const n=parseInt(localStorage.getItem('nb_total_outputs')||'0')+1;
+    localStorage.setItem('nb_total_outputs',String(n));
+    updateSidebarCounter();
+  }catch{}
+}
+// increment on every successful generate
+(function patchCounterOnGenerate(){
+  const btn=document.getElementById('money-generate-btn');
+  if(btn)btn.addEventListener('click',()=>{setTimeout(()=>{
+    const res=document.getElementById('money-result');
+    if(res&&res.style.display!=='none')incrementOutputCounter();
+  },2000);});
+  const tplBtn=document.getElementById('tpl-generate-btn');
+  if(tplBtn)tplBtn.addEventListener('click',()=>{setTimeout(()=>{
+    const res=document.getElementById('tpl-result');
+    if(res&&res.style.display!=='none')incrementOutputCounter();
+  },2000);});
+})();
+updateSidebarCounter();
+
+// ── Copy & Post viral button ──────────────────────────────────────────────────
+const viralBtn=document.getElementById('money-viral-btn');
+if(viralBtn){
+  viralBtn.addEventListener('click',()=>{
+    const content=document.getElementById('money-result-text')?.textContent||'';
+    const title=document.getElementById('money-panel-title')?.textContent||'AI Output';
+    if(!content.trim()){toast('Generate something first!','warn');return;}
+    const watermark=`\n\n---\n✨ Made with NeuralBox — private AI that runs on your PC, 100% free\n🔗 github.com/cyberoreo/local-ai`;
+    copyToClipboard(content+watermark,null);
+    toast('📤 Copied with viral watermark — paste anywhere!','success',3500);
+  });
+}
+
+// ── Hero CTA example preview click ───────────────────────────────────────────
+const heroPreview=document.getElementById('home-example-preview');
+if(heroPreview){
+  heroPreview.addEventListener('click',()=>{
+    navigate('money');
+    setTimeout(()=>{
+      const tiktok=document.querySelector('.money-card[data-tool="tiktok_engine"]');
+      if(tiktok){tiktok.click();toast('🎵 Fill in your niche and generate your first hook!','info',4000);}
+    },350);
+  });
+  // Unblur on hover to tease the content
+  heroPreview.addEventListener('mouseenter',()=>{heroPreview.style.filter='blur(0)';});
+  heroPreview.addEventListener('mouseleave',()=>{heroPreview.style.filter='blur(3px)';});
+}
+
+// ── First-run: pre-fill TikTok Engine with example values ────────────────────
+(function patchFirstRunAutoOpen(){
+  const obStart=document.getElementById('ob-start');
+  if(!obStart)return;
+  obStart.addEventListener('click',()=>{
+    setTimeout(()=>{
+      navigate('money');
+      setTimeout(()=>{
+        const card=document.querySelector('.money-card[data-tool="tiktok_engine"]');
+        if(!card)return;
+        card.click();
+        setTimeout(()=>{
+          const niche=document.getElementById('mf-niche');
+          const target=document.getElementById('mf-target');
+          const angle=document.getElementById('mf-angle');
+          if(niche)niche.value='making money online';
+          if(target)target.value='people stuck in a 9-5';
+          if(angle)angle.value='shocking stat';
+          toast('🎉 Pre-filled for you — just hit Generate!','success',5000);
+        },300);
+      },400);
+    },300);
+  });
+})();
+
+// ── Keyboard shortcut hint overlay (shows once on home) ──────────────────────
+function showShortcutHint(){
+  if(sessionStorage.getItem('kb_shown'))return;
+  sessionStorage.setItem('kb_shown','1');
+  const el=document.createElement('div');
+  el.style.cssText='position:fixed;bottom:90px;right:28px;z-index:500;background:rgba(13,11,22,.95);border:1px solid rgba(124,58,237,.3);border-radius:12px;padding:14px 18px;font-size:11px;color:var(--t2);backdrop-filter:blur(20px);box-shadow:0 8px 32px #00000055;animation:floatUp .4s both';
+  el.innerHTML='<div style="font-weight:700;color:var(--t1);margin-bottom:8px;font-size:12px">⌨️ Keyboard Shortcuts</div>'+
+    ['<b>G</b> — Quick generate','<b>1–8</b> — Switch sections','<b>Ctrl+↵</b> — Generate in panel'].map(s=>`<div style="padding:3px 0">${s}</div>`).join('')+
+    '<div style="margin-top:8px;color:var(--p2);cursor:pointer;font-size:10px" id="kb-dismiss">Got it ✓</div>';
+  document.body.appendChild(el);
+  document.getElementById('kb-dismiss').addEventListener('click',()=>el.remove());
+  setTimeout(()=>el.remove(),8000);
+}
+setTimeout(showShortcutHint,3000);
+
+</script>
+</body>
+</html>
