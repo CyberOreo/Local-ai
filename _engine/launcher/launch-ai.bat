@@ -349,21 +349,55 @@ if not errorlevel 1 (
 )
 
 set "HUB_JS=%PROJECT_ROOT%\hub\hub.js"
-if exist "%HUB_JS%" (
-    where node >nul 2>&1
-    if not errorlevel 1 (
-        start "LocalAI Hub" /min node "%HUB_JS%"
-        timeout /t 2 /nobreak >nul
-        echo  [OK]   LocalAI Hub started at localhost:8080
-    ) else if exist "%ProgramFiles%\nodejs\node.exe" (
-        start "LocalAI Hub" /min "%ProgramFiles%\nodejs\node.exe" "%HUB_JS%"
-        timeout /t 2 /nobreak >nul
-        echo  [OK]   LocalAI Hub started at localhost:8080
+if not exist "%HUB_JS%" (
+    echo  [WARN] Hub not found - skipping.
+    goto HubReady
+)
+
+:: Find node.exe
+set "NODE_EXE="
+where node >nul 2>&1
+if not errorlevel 1 (
+    set "NODE_EXE=node"
+) else if exist "%ProgramFiles%\nodejs\node.exe" (
+    set "NODE_EXE=%ProgramFiles%\nodejs\node.exe"
+) else if exist "%LOCALAPPDATA%\Programs\nodejs\node.exe" (
+    set "NODE_EXE=%LOCALAPPDATA%\Programs\nodejs\node.exe"
+)
+
+:: Auto-install Node.js if missing
+if not defined NODE_EXE (
+    echo  [INFO] Node.js not found. Downloading and installing automatically...
+    echo [%date% %time%] Installing Node.js... >> "%LOG_FILE%"
+    set "NODE_MSI=%TEMP%\NodeSetup.msi"
+    powershell -NoProfile -NonInteractive -Command ^
+        "Invoke-WebRequest -Uri 'https://nodejs.org/dist/v20.19.0/node-v20.19.0-x64.msi' -OutFile '%TEMP%\NodeSetup.msi' -UseBasicParsing"
+    if exist "%TEMP%\NodeSetup.msi" (
+        start /wait msiexec /i "%TEMP%\NodeSetup.msi" /quiet /norestart
+        :: Refresh PATH
+        for /f "tokens=*" %%P in ('powershell -NoProfile -Command "[Environment]::GetEnvironmentVariable(\"Path\",\"Machine\")"') do set "PATH=%%P;%PATH%"
+        if exist "%ProgramFiles%\nodejs\node.exe" (
+            set "NODE_EXE=%ProgramFiles%\nodejs\node.exe"
+            echo  [OK]   Node.js installed.
+            echo [%date% %time%] Node.js installed OK >> "%LOG_FILE%"
+        )
     ) else (
-        echo  [WARN] Node.js not found - hub unavailable. Run install-openclaw.bat first.
+        echo  [WARN] Could not download Node.js. Hub will not start.
+        echo         Download manually from nodejs.org then restart NeuralBox.
+        goto HubReady
     )
-) else (
-    echo  [WARN] Hub not found - skipping. Re-download the project to restore it.
+)
+
+if defined NODE_EXE (
+    start "NeuralBox Hub" /min "%NODE_EXE%" "%HUB_JS%"
+    timeout /t 3 /nobreak >nul
+    curl -s --max-time 3 http://localhost:8080 >nul 2>&1
+    if not errorlevel 1 (
+        echo  [OK]   NeuralBox Hub started at localhost:8080
+    ) else (
+        echo  [INFO] Hub starting... will be ready in a few seconds.
+    )
+    echo [%date% %time%] Hub started with %NODE_EXE% >> "%LOG_FILE%"
 )
 
 :HubReady

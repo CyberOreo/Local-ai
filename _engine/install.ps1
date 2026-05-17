@@ -126,6 +126,36 @@ if ($nvidiaSmi) {
 }
 
 # ============================================================
+# STEP 5a: Check / Install Node.js (required for NeuralBox Hub)
+# ============================================================
+Write-Log "Checking for Node.js..." "STEP"
+$nodeCmd = Get-Command node -ErrorAction SilentlyContinue
+
+if (-not $nodeCmd) {
+    Write-Log "Node.js not found. Downloading LTS installer..." "INFO"
+    Write-Host "  Downloading Node.js LTS..." -ForegroundColor Cyan
+    $nodeInstaller = Join-Path $env:TEMP "NodeSetup.msi"
+    try {
+        Invoke-WebRequest -Uri "https://nodejs.org/dist/v20.19.0/node-v20.19.0-x64.msi" `
+            -OutFile $nodeInstaller -UseBasicParsing
+        Write-Log "Running Node.js installer silently..." "INFO"
+        Start-Process -FilePath "msiexec.exe" -ArgumentList "/i `"$nodeInstaller`" /quiet /norestart" -Wait
+        $env:Path = [System.Environment]::GetEnvironmentVariable("Path","Machine") + ";" +
+                    [System.Environment]::GetEnvironmentVariable("Path","User")
+        $nodeCmd = Get-Command node -ErrorAction SilentlyContinue
+        if ($nodeCmd) {
+            Write-Log "Node.js installed: $(& node --version 2>&1)" "OK"
+        } else {
+            Write-Log "Node.js install may need a restart. Continuing..." "WARN"
+        }
+    } catch {
+        Write-Log "Failed to install Node.js: $_. Please install from nodejs.org manually." "WARN"
+    }
+} else {
+    Write-Log "Node.js found: $(& node --version 2>&1)" "OK"
+}
+
+# ============================================================
 # STEP 5: Check / Install Ollama
 # ============================================================
 Write-Log "Checking for Ollama installation..." "STEP"
