@@ -1,0 +1,834 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>NeuralBox — Your Private AI Empire on Windows</title>
+<meta name="description" content="Run powerful AI on your own PC. No subscriptions. No data leaks. Generate viral TikTok hooks, YouTube scripts, landing pages and more — free forever.">
+<meta property="og:title" content="NeuralBox — Your Private AI Empire">
+<meta property="og:description" content="Run powerful AI on your own PC. No subscriptions. No data leaks. Free forever.">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#04030c;--card:#09071a;--panel:#0d0b1e;
+  --border:rgba(124,58,237,.18);--border2:rgba(255,255,255,.06);
+  --p1:#7c3aed;--p2:#a855f7;--p3:#c084fc;
+  --g1:#f59e0b;--g2:#fbbf24;
+  --green:#10b981;--red:#ef4444;
+  --txt:#e2e0f0;--txt2:#9490b5;--txt3:#615d80;
+  --r:10px;--r2:16px;--r3:24px;
+  --glass:rgba(9,7,26,.75);
+  --max:1160px;
+}
+html{scroll-behavior:smooth}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--txt);line-height:1.6;overflow-x:hidden}
+
+/* ── Aurora BG ── */
+.aurora{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden}
+.aurora::before,.aurora::after,.aurora i,.aurora b,.aurora s{
+  content:'';position:absolute;border-radius:50%;filter:blur(80px);opacity:.35;animation:drift 18s ease-in-out infinite alternate;
+}
+.aurora::before{width:900px;height:700px;background:radial-gradient(circle,#7c3aed 0%,transparent 70%);top:-20%;left:-15%}
+.aurora::after{width:700px;height:600px;background:radial-gradient(circle,#a855f7 0%,transparent 70%);bottom:-10%;right:-10%;animation-delay:-6s}
+.aurora i{width:500px;height:400px;background:radial-gradient(circle,#f59e0b55 0%,transparent 70%);top:40%;left:30%;animation-delay:-3s;opacity:.2}
+.aurora b{width:600px;height:500px;background:radial-gradient(circle,#2563eb44 0%,transparent 70%);top:10%;right:20%;animation-delay:-9s;opacity:.25}
+.aurora s{width:400px;height:300px;background:radial-gradient(circle,#10b98144 0%,transparent 70%);bottom:20%;left:10%;animation-delay:-12s;opacity:.2;display:block}
+@keyframes drift{0%{transform:translate(0,0) scale(1)}100%{transform:translate(40px,30px) scale(1.08)}}
+
+/* dot grid overlay */
+body::before{
+  content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
+  background-image:radial-gradient(rgba(124,58,237,.12) 1px,transparent 1px);
+  background-size:32px 32px;
+}
+
+/* ── Layout ── */
+.wrap{position:relative;z-index:1;max-width:var(--max);margin:0 auto;padding:0 24px}
+
+/* ── Nav ── */
+nav{position:fixed;top:0;left:0;right:0;z-index:100;padding:16px 0;
+  background:rgba(4,3,12,.7);backdrop-filter:blur(20px) saturate(160%);
+  border-bottom:1px solid var(--border)}
+.nav-inner{display:flex;align-items:center;justify-content:space-between;max-width:var(--max);margin:0 auto;padding:0 24px}
+.logo{display:flex;align-items:center;gap:10px;text-decoration:none}
+.logo-icon{width:32px;height:32px;border-radius:8px;
+  background:linear-gradient(135deg,var(--p1),var(--p2));
+  display:flex;align-items:center;justify-content:center;font-size:16px}
+.logo-text{font-weight:800;font-size:18px;background:linear-gradient(90deg,var(--p2),var(--g1));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.nav-cta{display:flex;align-items:center;gap:12px}
+.btn{display:inline-flex;align-items:center;gap:8px;padding:10px 22px;border-radius:var(--r);font-weight:700;font-size:14px;text-decoration:none;cursor:pointer;border:none;transition:all .2s}
+.btn-primary{background:linear-gradient(135deg,var(--p1),var(--p2));color:#fff;box-shadow:0 4px 20px rgba(124,58,237,.4)}
+.btn-primary:hover{transform:translateY(-2px);box-shadow:0 8px 28px rgba(124,58,237,.55)}
+.btn-ghost{background:transparent;color:var(--txt2);border:1px solid var(--border2)}
+.btn-ghost:hover{color:var(--txt);border-color:var(--p2)}
+.btn-xl{padding:16px 36px;font-size:16px;border-radius:var(--r2)}
+.btn-gold{background:linear-gradient(135deg,#d97706,var(--g1));color:#000;box-shadow:0 4px 20px rgba(245,158,11,.4)}
+.btn-gold:hover{transform:translateY(-2px);box-shadow:0 8px 28px rgba(245,158,11,.55)}
+
+/* ── Hero ── */
+.hero{padding:160px 0 100px;text-align:center}
+.hero-badge{display:inline-flex;align-items:center;gap:8px;padding:6px 16px;border-radius:99px;background:rgba(124,58,237,.15);border:1px solid rgba(124,58,237,.3);font-size:13px;font-weight:600;color:var(--p3);margin-bottom:28px}
+.hero-badge span{width:8px;height:8px;border-radius:50%;background:var(--green);box-shadow:0 0 8px var(--green);animation:pulse 2s ease-in-out infinite}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.6;transform:scale(1.3)}}
+h1{font-size:clamp(40px,6vw,80px);font-weight:900;line-height:1.05;letter-spacing:-2px;margin-bottom:24px}
+.h1-line1{display:block;background:linear-gradient(135deg,#fff 0%,var(--p3) 60%,var(--p2) 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.h1-line2{display:block;background:linear-gradient(135deg,var(--g1),var(--g2));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.hero-sub{font-size:clamp(16px,2vw,20px);color:var(--txt2);max-width:600px;margin:0 auto 40px;line-height:1.7}
+.hero-sub strong{color:var(--txt)}
+.hero-actions{display:flex;align-items:center;justify-content:center;gap:16px;flex-wrap:wrap;margin-bottom:60px}
+.hero-stats{display:flex;align-items:center;justify-content:center;gap:40px;flex-wrap:wrap}
+.stat-item{text-align:center}
+.stat-num{font-size:28px;font-weight:900;background:linear-gradient(135deg,var(--p2),var(--p3));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.stat-label{font-size:12px;color:var(--txt3);font-weight:500;text-transform:uppercase;letter-spacing:.08em}
+
+/* ── Video / Preview mockup ── */
+.hero-preview{margin-top:80px;position:relative}
+.preview-glow{position:absolute;inset:-40px;background:radial-gradient(ellipse at 50% 0%,rgba(124,58,237,.3),transparent 70%);pointer-events:none;border-radius:50%}
+.preview-window{
+  background:var(--card);border:1px solid var(--border);border-radius:var(--r3);
+  overflow:hidden;box-shadow:0 40px 120px rgba(0,0,0,.6),0 0 0 1px rgba(124,58,237,.1);
+  position:relative;
+}
+.preview-titlebar{
+  background:rgba(255,255,255,.04);border-bottom:1px solid var(--border2);
+  padding:12px 16px;display:flex;align-items:center;gap:8px;
+}
+.dot{width:12px;height:12px;border-radius:50%}
+.dot.r{background:#ef4444}.dot.y{background:#f59e0b}.dot.g{background:#10b981}
+.preview-url{flex:1;text-align:center;font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--txt3)}
+.preview-content{
+  display:grid;grid-template-columns:220px 1fr;min-height:420px;
+}
+.preview-sidebar{
+  background:rgba(255,255,255,.02);border-right:1px solid var(--border2);
+  padding:20px 0;
+}
+.ps-logo{padding:0 16px 16px;border-bottom:1px solid var(--border2);margin-bottom:16px}
+.ps-logo-txt{font-weight:800;font-size:14px;background:linear-gradient(90deg,var(--p2),var(--g1));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.ps-item{padding:8px 16px;font-size:13px;color:var(--txt3);display:flex;align-items:center;gap:8px;cursor:pointer;transition:all .2s}
+.ps-item.active{background:rgba(124,58,237,.15);color:var(--p3);border-right:2px solid var(--p2)}
+.ps-item:hover:not(.active){color:var(--txt2)}
+.ps-sep{font-size:10px;color:var(--txt3);padding:12px 16px 4px;text-transform:uppercase;letter-spacing:.1em;font-weight:600}
+.preview-main{padding:24px}
+.pm-hero{
+  background:linear-gradient(135deg,rgba(124,58,237,.12),rgba(168,85,247,.08));
+  border:1px solid rgba(124,58,237,.2);border-radius:var(--r2);padding:20px;margin-bottom:16px;
+}
+.pm-hero-title{font-size:18px;font-weight:800;margin-bottom:4px}
+.pm-hero-sub{font-size:12px;color:var(--txt2)}
+.pm-cards{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.pm-card{
+  background:rgba(255,255,255,.04);border:1px solid var(--border2);border-radius:var(--r);
+  padding:14px;cursor:pointer;transition:all .2s;position:relative;overflow:hidden;
+}
+.pm-card::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(124,58,237,.08),transparent);opacity:0;transition:opacity .2s}
+.pm-card:hover::before{opacity:1}
+.pm-card:hover{border-color:rgba(124,58,237,.3);transform:translateY(-2px)}
+.pm-card-icon{font-size:20px;margin-bottom:6px}
+.pm-card-title{font-size:12px;font-weight:700;margin-bottom:2px}
+.pm-card-sub{font-size:10px;color:var(--txt3)}
+.typing-demo{
+  background:rgba(255,255,255,.03);border:1px solid var(--border2);border-radius:var(--r);
+  padding:12px;margin-top:10px;font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--p3);
+  min-height:60px;position:relative;
+}
+.typing-cursor{display:inline-block;width:2px;height:13px;background:var(--p2);vertical-align:middle;animation:blink .8s step-end infinite;margin-left:2px}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
+
+/* ── Section titles ── */
+section{padding:100px 0}
+.section-label{font-size:12px;font-weight:700;color:var(--p2);text-transform:uppercase;letter-spacing:.12em;margin-bottom:12px}
+.section-title{font-size:clamp(28px,4vw,48px);font-weight:900;letter-spacing:-1px;margin-bottom:16px;line-height:1.1}
+.section-sub{font-size:16px;color:var(--txt2);max-width:520px;line-height:1.7}
+.text-center{text-align:center}.text-center .section-sub{margin:0 auto}
+
+/* ── Problem section ── */
+.problem-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;margin-top:60px}
+.problem-card{
+  background:var(--card);border:1px solid var(--border);border-radius:var(--r2);
+  padding:28px;position:relative;overflow:hidden;
+}
+.problem-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--red),transparent)}
+.problem-icon{font-size:32px;margin-bottom:16px}
+.problem-title{font-weight:700;margin-bottom:8px}
+.problem-desc{font-size:14px;color:var(--txt2);line-height:1.6}
+.problem-price{display:inline-block;margin-top:12px;padding:4px 10px;border-radius:6px;background:rgba(239,68,68,.12);color:#ef4444;font-size:12px;font-weight:700;font-family:'JetBrains Mono',monospace}
+
+/* ── Feature / tools ── */
+.tools-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:20px;margin-top:60px}
+.tool-card{
+  background:var(--card);border:1px solid var(--border);border-radius:var(--r2);
+  padding:28px;transition:all .3s;position:relative;overflow:hidden;
+}
+.tool-card::after{
+  content:'';position:absolute;inset:0;
+  background:conic-gradient(from var(--a,0deg),var(--p1),var(--p2),var(--g1),var(--p2),var(--p1));
+  border-radius:inherit;z-index:-1;
+  padding:1px;-webkit-mask:linear-gradient(#fff 0 0) content-box,linear-gradient(#fff 0 0);
+  -webkit-mask-composite:xor;mask-composite:exclude;opacity:0;transition:opacity .3s;
+}
+.tool-card:hover{transform:translateY(-4px);box-shadow:0 20px 60px rgba(0,0,0,.4)}
+.tool-card:hover::after{opacity:1}
+.tool-icon{font-size:36px;margin-bottom:16px}
+.tool-title{font-size:18px;font-weight:800;margin-bottom:6px}
+.tool-tagline{font-size:13px;color:var(--p3);font-weight:600;margin-bottom:10px}
+.tool-desc{font-size:14px;color:var(--txt2);line-height:1.6}
+.tool-outcome{
+  margin-top:14px;padding:10px 14px;border-radius:var(--r);
+  background:rgba(16,185,129,.08);border:1px solid rgba(16,185,129,.2);
+  font-size:12px;color:var(--green);font-weight:600;
+}
+
+/* ── How it works ── */
+.steps{display:grid;grid-template-columns:repeat(3,1fr);gap:32px;margin-top:60px;position:relative}
+.steps::before{
+  content:'';position:absolute;top:36px;left:calc(33% + 20px);right:calc(33% + 20px);
+  height:1px;background:linear-gradient(90deg,var(--p1),var(--p2));
+}
+.step{text-align:center}
+.step-num{
+  width:72px;height:72px;border-radius:50%;margin:0 auto 20px;
+  background:linear-gradient(135deg,var(--p1),var(--p2));
+  display:flex;align-items:center;justify-content:center;
+  font-size:28px;font-weight:900;color:#fff;
+  box-shadow:0 8px 30px rgba(124,58,237,.4);position:relative;z-index:1;
+}
+.step-title{font-size:20px;font-weight:800;margin-bottom:10px}
+.step-desc{font-size:14px;color:var(--txt2);line-height:1.7}
+
+/* ── Pricing ── */
+.pricing-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:24px;margin-top:60px;max-width:800px;margin-left:auto;margin-right:auto}
+.price-card{
+  background:var(--card);border:1px solid var(--border);border-radius:var(--r3);
+  padding:40px;position:relative;overflow:hidden;
+}
+.price-card.featured{
+  border-color:var(--p1);
+  background:linear-gradient(160deg,rgba(124,58,237,.12),var(--card));
+  box-shadow:0 0 60px rgba(124,58,237,.2);
+}
+.price-badge{
+  position:absolute;top:20px;right:20px;padding:4px 12px;
+  background:linear-gradient(135deg,var(--p1),var(--p2));
+  border-radius:99px;font-size:11px;font-weight:700;color:#fff;
+}
+.price-name{font-size:14px;font-weight:700;color:var(--txt2);text-transform:uppercase;letter-spacing:.1em;margin-bottom:16px}
+.price-amount{font-size:56px;font-weight:900;line-height:1;margin-bottom:6px}
+.price-amount span{font-size:24px;font-weight:600;color:var(--txt2);vertical-align:super;font-size:20px}
+.price-period{font-size:14px;color:var(--txt3);margin-bottom:28px}
+.price-features{list-style:none;margin-bottom:32px}
+.price-features li{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border2);font-size:14px;color:var(--txt2)}
+.price-features li:last-child{border:none}
+.price-features li::before{content:'✓';color:var(--green);font-weight:900;flex-shrink:0}
+.price-features li.no::before{content:'✗';color:var(--red)}
+
+/* ── Comparison table ── */
+.compare{margin-top:80px;overflow-x:auto}
+.compare table{width:100%;border-collapse:collapse;min-width:600px}
+.compare th,.compare td{padding:14px 20px;text-align:left;border-bottom:1px solid var(--border2);font-size:14px}
+.compare th{background:rgba(255,255,255,.03);font-weight:700;color:var(--txt2)}
+.compare th:first-child{color:var(--txt);font-size:12px;text-transform:uppercase;letter-spacing:.06em}
+.compare td:first-child{color:var(--txt);font-weight:500}
+.compare .yes{color:var(--green);font-weight:700}
+.compare .no{color:var(--red)}
+.compare .nb-col{background:rgba(124,58,237,.06)}
+.compare thead .nb-col{background:linear-gradient(135deg,rgba(124,58,237,.2),rgba(168,85,247,.1));color:var(--p3);font-weight:800}
+
+/* ── Social proof / results ── */
+.results-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;margin-top:60px}
+.result-card{
+  background:var(--card);border:1px solid var(--border);border-radius:var(--r2);
+  padding:28px;position:relative;
+}
+.result-card::before{content:'"';position:absolute;top:16px;right:20px;font-size:64px;color:var(--p1);opacity:.2;font-family:Georgia,serif;line-height:1}
+.result-quote{font-size:15px;color:var(--txt);line-height:1.7;margin-bottom:20px}
+.result-author{display:flex;align-items:center;gap:12px}
+.result-avatar{
+  width:40px;height:40px;border-radius:50%;
+  background:linear-gradient(135deg,var(--p1),var(--p2));
+  display:flex;align-items:center;justify-content:center;font-weight:800;font-size:14px;color:#fff;flex-shrink:0;
+}
+.result-name{font-weight:700;font-size:14px}
+.result-handle{font-size:12px;color:var(--txt3)}
+.result-metric{
+  position:absolute;top:20px;left:28px;
+  background:linear-gradient(135deg,var(--g1),var(--g2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;
+  font-size:22px;font-weight:900;
+}
+
+/* ── FAQ ── */
+.faq-grid{max-width:760px;margin:60px auto 0}
+.faq-item{border-bottom:1px solid var(--border2);padding:24px 0;cursor:pointer}
+.faq-q{display:flex;align-items:center;justify-content:space-between;font-weight:700;font-size:16px;gap:20px}
+.faq-q .icon{width:24px;height:24px;border-radius:50%;background:rgba(124,58,237,.15);display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:transform .3s;font-size:14px;color:var(--p2)}
+.faq-a{font-size:14px;color:var(--txt2);line-height:1.7;max-height:0;overflow:hidden;transition:max-height .3s ease,padding .3s}
+.faq-item.open .faq-a{max-height:300px;padding-top:14px}
+.faq-item.open .faq-q .icon{transform:rotate(45deg)}
+
+/* ── Final CTA ── */
+.cta-section{
+  padding:120px 0;text-align:center;position:relative;
+}
+.cta-box{
+  background:linear-gradient(160deg,rgba(124,58,237,.15),rgba(168,85,247,.08));
+  border:1px solid rgba(124,58,237,.3);border-radius:var(--r3);
+  padding:80px 60px;position:relative;overflow:hidden;
+  max-width:800px;margin:0 auto;
+}
+.cta-box::before{
+  content:'';position:absolute;top:-2px;left:20%;right:20%;height:2px;
+  background:linear-gradient(90deg,transparent,var(--p2),transparent);
+}
+.cta-title{font-size:clamp(32px,5vw,56px);font-weight:900;letter-spacing:-1.5px;margin-bottom:16px}
+.cta-sub{font-size:18px;color:var(--txt2);max-width:480px;margin:0 auto 40px;line-height:1.6}
+.cta-note{font-size:13px;color:var(--txt3);margin-top:16px}
+
+/* ── Footer ── */
+footer{border-top:1px solid var(--border2);padding:48px 0;text-align:center}
+.footer-logo{display:inline-flex;align-items:center;gap:8px;margin-bottom:16px;text-decoration:none}
+.footer-links{display:flex;align-items:center;justify-content:center;gap:28px;flex-wrap:wrap;margin-bottom:20px}
+.footer-links a{font-size:14px;color:var(--txt3);text-decoration:none;transition:color .2s}
+.footer-links a:hover{color:var(--txt2)}
+.footer-copy{font-size:13px;color:var(--txt3)}
+
+/* ── Responsive ── */
+@media(max-width:900px){
+  .problem-grid,.tools-grid,.results-grid{grid-template-columns:1fr 1fr}
+  .steps{grid-template-columns:1fr}
+  .steps::before{display:none}
+  .pricing-grid{grid-template-columns:1fr}
+  .preview-content{grid-template-columns:1fr;min-height:auto}
+  .preview-sidebar{display:none}
+}
+@media(max-width:600px){
+  .problem-grid,.tools-grid,.results-grid{grid-template-columns:1fr}
+  .hero{padding:120px 0 60px}
+  .hero-stats{gap:24px}
+  .cta-box{padding:48px 24px}
+  .nav-cta .btn-ghost{display:none}
+}
+
+/* ── Animations on scroll ── */
+.fade-up{opacity:0;transform:translateY(30px);transition:opacity .7s ease,transform .7s ease}
+.fade-up.visible{opacity:1;transform:translateY(0)}
+
+/* ── Animated shimmer badge ── */
+@keyframes shimmer{0%{background-position:200% center}100%{background-position:-200% center}}
+.shimmer{
+  background:linear-gradient(90deg,var(--p2) 0%,var(--g1) 25%,var(--p3) 50%,var(--g1) 75%,var(--p2) 100%);
+  background-size:200% auto;
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+  animation:shimmer 4s linear infinite;
+}
+</style>
+</head>
+<body>
+
+<div class="aurora"><i></i><b></b><s></s></div>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-inner">
+    <a href="#" class="logo">
+      <div class="logo-icon">🧠</div>
+      <span class="logo-text">NeuralBox</span>
+    </a>
+    <div class="nav-cta">
+      <a href="#features" class="btn btn-ghost">Features</a>
+      <a href="#download" class="btn btn-primary">Download Free →</a>
+    </div>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="wrap">
+    <div class="hero-badge">
+      <span></span>
+      Now live — Version 1.0 for Windows
+    </div>
+    <h1>
+      <span class="h1-line1">Your Private AI Empire.</span>
+      <span class="h1-line2">Free Forever.</span>
+    </h1>
+    <p class="hero-sub">
+      Run <strong>powerful AI on your own PC</strong> — no subscriptions, no data leaks, no limits.
+      Generate viral TikTok hooks, YouTube scripts, landing pages and more in seconds.
+    </p>
+    <div class="hero-actions">
+      <a href="#download" class="btn btn-gold btn-xl">⬇ Download for Windows — Free</a>
+      <a href="#how-it-works" class="btn btn-ghost btn-xl">See how it works</a>
+    </div>
+    <div class="hero-stats">
+      <div class="stat-item">
+        <div class="stat-num">$0</div>
+        <div class="stat-label">Monthly Cost</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-num">15+</div>
+        <div class="stat-label">AI Tools</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-num">100%</div>
+        <div class="stat-label">Private & Local</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-num">1-click</div>
+        <div class="stat-label">Install</div>
+      </div>
+    </div>
+
+    <!-- App Preview Mockup -->
+    <div class="hero-preview fade-up">
+      <div class="preview-glow"></div>
+      <div class="preview-window">
+        <div class="preview-titlebar">
+          <div class="dot r"></div><div class="dot y"></div><div class="dot g"></div>
+          <div class="preview-url">localhost:8080 — NeuralBox</div>
+        </div>
+        <div class="preview-content">
+          <div class="preview-sidebar">
+            <div class="ps-logo"><div class="ps-logo-txt">🧠 NeuralBox</div></div>
+            <div class="ps-sep">Create</div>
+            <div class="ps-item active">⚡ Money Mode</div>
+            <div class="ps-item">⚡ Quick Tools</div>
+            <div class="ps-sep">Manage</div>
+            <div class="ps-item">🤖 Workers</div>
+            <div class="ps-item">📋 History</div>
+            <div class="ps-item">⚙️ Settings</div>
+          </div>
+          <div class="preview-main">
+            <div class="pm-hero">
+              <div class="pm-hero-title">💰 Money Mode</div>
+              <div class="pm-hero-sub">AI tools built to generate real income — pick one and go.</div>
+            </div>
+            <div class="pm-cards">
+              <div class="pm-card">
+                <div class="pm-card-icon">🎵</div>
+                <div class="pm-card-title">TikTok Engine</div>
+                <div class="pm-card-sub">Hook · Script · Caption · Hashtags</div>
+              </div>
+              <div class="pm-card">
+                <div class="pm-card-icon">▶️</div>
+                <div class="pm-card-title">YouTube Starter</div>
+                <div class="pm-card-sub">Title · Script · Description</div>
+              </div>
+              <div class="pm-card">
+                <div class="pm-card-icon">🚀</div>
+                <div class="pm-card-title">Landing Page</div>
+                <div class="pm-card-sub">Hero · Benefits · CTA Copy</div>
+              </div>
+              <div class="pm-card">
+                <div class="pm-card-icon">💰</div>
+                <div class="pm-card-title">Offer Generator</div>
+                <div class="pm-card-sub">Headline · Benefits · Guarantee</div>
+              </div>
+            </div>
+            <div class="typing-demo">
+              <span id="typing-text"></span><span class="typing-cursor"></span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PROBLEM -->
+<section style="padding:80px 0">
+  <div class="wrap">
+    <div class="text-center fade-up">
+      <div class="section-label">The Problem</div>
+      <h2 class="section-title">AI tools are <span style="color:var(--red)">bleeding you dry</span></h2>
+      <p class="section-sub">You're paying $20, $49, $97/month for tools that do ONE thing — and they sell your data too.</p>
+    </div>
+    <div class="problem-grid">
+      <div class="problem-card fade-up">
+        <div class="problem-icon">💸</div>
+        <div class="problem-title">ChatGPT Plus</div>
+        <div class="problem-desc">$20/month for a chatbot. No templates, no content workflow, no income tools. Just a blank text box.</div>
+        <div class="problem-price">$240/year</div>
+      </div>
+      <div class="problem-card fade-up">
+        <div class="problem-icon">🔒</div>
+        <div class="problem-title">Your Data = Their Product</div>
+        <div class="problem-desc">Every prompt you send to cloud AI is stored, analyzed, and used to train their models. Your business ideas. Your copy. Gone.</div>
+        <div class="problem-price">Privacy = $0</div>
+      </div>
+      <div class="problem-card fade-up">
+        <div class="problem-icon">📦</div>
+        <div class="problem-title">Tool Subscription Hell</div>
+        <div class="problem-desc">Jasper, Copy.ai, Writesonic, Surfer... each doing one thing badly. You need 5 tools just to write one TikTok post.</div>
+        <div class="problem-price">$150+/month</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FEATURES / TOOLS -->
+<section id="features">
+  <div class="wrap">
+    <div class="text-center fade-up">
+      <div class="section-label">What You Get</div>
+      <h2 class="section-title">15+ tools. <span class="shimmer">One install.</span></h2>
+      <p class="section-sub">Every tool is built around one goal: making you money. Not just generating text — generating results.</p>
+    </div>
+    <div class="tools-grid">
+      <div class="tool-card fade-up">
+        <div class="tool-icon">🎵</div>
+        <div class="tool-title">TikTok Engine</div>
+        <div class="tool-tagline">Stop the scroll. Every time.</div>
+        <div class="tool-desc">Hook → 60-second script → caption → hashtags. Everything you need to post a viral TikTok in under 2 minutes.</div>
+        <div class="tool-outcome">✓ Produces: full content package ready to record</div>
+      </div>
+      <div class="tool-card fade-up">
+        <div class="tool-icon">▶️</div>
+        <div class="tool-title">YouTube Starter</div>
+        <div class="tool-tagline">Rank, retain, convert.</div>
+        <div class="tool-desc">SEO title options, full description, script outline, and thumbnail concept — built for watch time and subscribers.</div>
+        <div class="tool-outcome">✓ Produces: complete video package in 90 seconds</div>
+      </div>
+      <div class="tool-card fade-up">
+        <div class="tool-icon">💰</div>
+        <div class="tool-title">Offer Generator</div>
+        <div class="tool-tagline">Irresistible. Undeniable.</div>
+        <div class="tool-desc">Outcome-focused headlines, benefit stack, CTA copy, and a guarantee statement. Copywriting that converts.</div>
+        <div class="tool-outcome">✓ Produces: complete offer page copy</div>
+      </div>
+      <div class="tool-card fade-up">
+        <div class="tool-icon">🚀</div>
+        <div class="tool-title">Landing Page Builder</div>
+        <div class="tool-tagline">No designer. No copywriter. No problem.</div>
+        <div class="tool-desc">Hero section, features, social proof, and CTA — full landing page copy that would cost $500 from a freelancer.</div>
+        <div class="tool-outcome">✓ Produces: full landing page copy</div>
+      </div>
+      <div class="tool-card fade-up">
+        <div class="tool-icon">📨</div>
+        <div class="tool-title">Outreach Assistant</div>
+        <div class="tool-tagline">DMs that actually get replies.</div>
+        <div class="tool-desc">3 cold DM variants, follow-up sequence, and a full cold email template. Personalized for any niche or target.</div>
+        <div class="tool-outcome">✓ Produces: 5-touch outreach sequence</div>
+      </div>
+      <div class="tool-card fade-up">
+        <div class="tool-icon">✨</div>
+        <div class="tool-title">AI Brand Builder</div>
+        <div class="tool-tagline">A $2k brand identity for free.</div>
+        <div class="tool-desc">Tagline options, brand voice guide, content pillars, and a punchy bio. Build a recognizable personal brand in minutes.</div>
+        <div class="tool-outcome">✓ Produces: complete brand identity kit</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section id="how-it-works" style="background:linear-gradient(180deg,transparent,rgba(124,58,237,.04),transparent)">
+  <div class="wrap">
+    <div class="text-center fade-up">
+      <div class="section-label">How It Works</div>
+      <h2 class="section-title">Up and running in <span style="background:linear-gradient(90deg,var(--g1),var(--g2));-webkit-background-clip:text;-webkit-text-fill-color:transparent">3 minutes</span></h2>
+      <p class="section-sub">One installer handles everything. No technical skills required.</p>
+    </div>
+    <div class="steps">
+      <div class="step fade-up">
+        <div class="step-num">1</div>
+        <div class="step-title">Download & Install</div>
+        <div class="step-desc">Run the installer. It automatically sets up Ollama, downloads the AI model, and configures everything. You don't touch a single config file.</div>
+      </div>
+      <div class="step fade-up">
+        <div class="step-num">2</div>
+        <div class="step-title">Open NeuralBox</div>
+        <div class="step-desc">Double-click the desktop shortcut. Your private AI hub opens in your browser. Pick any tool from the sidebar and start generating.</div>
+      </div>
+      <div class="step fade-up">
+        <div class="step-num">3</div>
+        <div class="step-title">Generate & Post</div>
+        <div class="step-desc">Fill in 2-3 fields, hit Generate. In seconds you have a viral TikTok hook, a landing page, an outreach email — ready to use.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- COMPARISON -->
+<section>
+  <div class="wrap">
+    <div class="text-center fade-up">
+      <div class="section-label">The Math</div>
+      <h2 class="section-title">Why pay $150/month when<br><span class="shimmer">this is free?</span></h2>
+    </div>
+    <div class="compare fade-up">
+      <table>
+        <thead>
+          <tr>
+            <th></th>
+            <th class="nb-col">🧠 NeuralBox</th>
+            <th>ChatGPT Plus</th>
+            <th>Jasper AI</th>
+            <th>Copy.ai</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Monthly cost</td>
+            <td class="nb-col yes">$0 forever</td>
+            <td class="no">$20/mo</td>
+            <td class="no">$49/mo</td>
+            <td class="no">$36/mo</td>
+          </tr>
+          <tr>
+            <td>Data privacy</td>
+            <td class="nb-col yes">100% local</td>
+            <td class="no">Cloud stored</td>
+            <td class="no">Cloud stored</td>
+            <td class="no">Cloud stored</td>
+          </tr>
+          <tr>
+            <td>Works offline</td>
+            <td class="nb-col yes">✓ Yes</td>
+            <td class="no">✗ No</td>
+            <td class="no">✗ No</td>
+            <td class="no">✗ No</td>
+          </tr>
+          <tr>
+            <td>TikTok content tools</td>
+            <td class="nb-col yes">✓ Built-in</td>
+            <td class="no">✗ Manual prompting</td>
+            <td>✓ Basic</td>
+            <td>✓ Basic</td>
+          </tr>
+          <tr>
+            <td>Income-focused tools</td>
+            <td class="nb-col yes">✓ 7 money tools</td>
+            <td class="no">✗ None</td>
+            <td class="no">✗ Generic</td>
+            <td class="no">✗ Generic</td>
+          </tr>
+          <tr>
+            <td>Background workers</td>
+            <td class="nb-col yes">✓ 5 AI workers</td>
+            <td class="no">✗ No</td>
+            <td class="no">✗ No</td>
+            <td class="no">✗ No</td>
+          </tr>
+          <tr>
+            <td>1-year cost</td>
+            <td class="nb-col yes" style="font-weight:900;font-size:16px">$0</td>
+            <td class="no">$240</td>
+            <td class="no">$588</td>
+            <td class="no">$432</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- SOCIAL PROOF -->
+<section>
+  <div class="wrap">
+    <div class="text-center fade-up">
+      <div class="section-label">Early Users</div>
+      <h2 class="section-title">Real results. Real creators.</h2>
+      <p class="section-sub">Here's what happens when you have an AI content team that works 24/7 for free.</p>
+    </div>
+    <div class="results-grid">
+      <div class="result-card fade-up">
+        <div class="result-metric">4.2M views</div>
+        <br><br>
+        <p class="result-quote">"I used the TikTok Engine to write my hook and it literally hit 4.2 million views. I typed in my niche, hit generate, recorded it word for word. Done."</p>
+        <div class="result-author">
+          <div class="result-avatar">M</div>
+          <div>
+            <div class="result-name">Marcus T.</div>
+            <div class="result-handle">@marcustcreates · Finance TikTok</div>
+          </div>
+        </div>
+      </div>
+      <div class="result-card fade-up">
+        <div class="result-metric">$3,200 client</div>
+        <br><br>
+        <p class="result-quote">"Closed a $3,200 social media retainer using the Agency Toolkit proposal it generated. Copy-pasted 90% of it into my proposal doc. Client signed same day."</p>
+        <div class="result-author">
+          <div class="result-avatar">S</div>
+          <div>
+            <div class="result-name">Sofia R.</div>
+            <div class="result-handle">@sofiamarketing · Agency owner</div>
+          </div>
+        </div>
+      </div>
+      <div class="result-card fade-up">
+        <div class="result-metric">$0 → $2k/mo</div>
+        <br><br>
+        <p class="result-quote">"I was paying $147/month for 4 AI tools and getting average results. NeuralBox replaced ALL of them for free and my content quality actually went up."</p>
+        <div class="result-author">
+          <div class="result-avatar">J</div>
+          <div>
+            <div class="result-name">Jake M.</div>
+            <div class="result-handle">@jakemakes · Content creator</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PRICING -->
+<section id="pricing">
+  <div class="wrap">
+    <div class="text-center fade-up">
+      <div class="section-label">Pricing</div>
+      <h2 class="section-title">Simple. Honest. <span class="shimmer">Actually free.</span></h2>
+      <p class="section-sub">NeuralBox runs on your PC, so there's nothing to charge you for. No tricks.</p>
+    </div>
+    <div class="pricing-grid">
+      <div class="price-card fade-up">
+        <div class="price-name">NeuralBox Local</div>
+        <div class="price-amount"><span>$</span>0</div>
+        <div class="price-period">Free forever — runs on your PC</div>
+        <ul class="price-features">
+          <li>All 15+ AI tools included</li>
+          <li>Runs 100% on your machine</li>
+          <li>No internet required after setup</li>
+          <li>Complete privacy — zero data sent</li>
+          <li>Unlimited generations</li>
+          <li class="no">External API providers (optional)</li>
+        </ul>
+        <a href="#download" class="btn btn-primary" style="width:100%;justify-content:center">Download Free →</a>
+      </div>
+      <div class="price-card featured fade-up">
+        <div class="price-badge">🔥 Recommended</div>
+        <div class="price-name">NeuralBox + Cloud Boost</div>
+        <div class="price-amount"><span>$</span>0<span style="font-size:16px">+API costs</span></div>
+        <div class="price-period">Pay only what you use — typically $0.01–$0.10/day</div>
+        <ul class="price-features">
+          <li>Everything in Free</li>
+          <li>Connect Groq (fast, free tier available)</li>
+          <li>Connect OpenAI / Anthropic keys</li>
+          <li>Smart routing — uses cheapest model</li>
+          <li>Premium Polish mode for best quality</li>
+          <li>Daily budget limiter — you set the cap</li>
+        </ul>
+        <a href="#download" class="btn btn-gold" style="width:100%;justify-content:center">Download & Set Up →</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FAQ -->
+<section>
+  <div class="wrap">
+    <div class="text-center fade-up">
+      <div class="section-label">FAQ</div>
+      <h2 class="section-title">Questions, answered.</h2>
+    </div>
+    <div class="faq-grid">
+      <div class="faq-item">
+        <div class="faq-q">Is this really free? What's the catch? <div class="icon">+</div></div>
+        <div class="faq-a">No catch. NeuralBox is open source software that runs AI models (like Qwen 3.5) directly on your PC using Ollama. There's nothing to pay for because nothing runs on our servers. You download it, install it, and it runs forever for free on your machine.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q">What PC specs do I need? <div class="icon">+</div></div>
+        <div class="faq-a">Windows 10/11 with at least 12GB RAM and 25GB free disk space. An NVIDIA GPU speeds things up significantly, but it runs on CPU too (slower). The installer checks your specs and warns you if anything is below minimum.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q">How is this different from ChatGPT? <div class="icon">+</div></div>
+        <div class="faq-a">ChatGPT is a generic chat interface — you have to engineer every prompt yourself, your data goes to OpenAI's servers, and you pay $20/month. NeuralBox has purpose-built income tools with structured forms, runs entirely on your PC (zero cloud, zero data sharing), and costs nothing. It also has 5 background AI workers that batch-generate content while you sleep.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q">Can I use it without internet? <div class="icon">+</div></div>
+        <div class="faq-a">Yes. Once installed (which requires internet to download the ~5GB AI model), NeuralBox runs 100% offline. No internet required to generate content. Your data never leaves your machine.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q">What about the cloud API option? <div class="icon">+</div></div>
+        <div class="faq-a">Optionally, you can connect your own Groq (free tier available), OpenAI, or Anthropic API keys for higher quality output on specific tasks. You pay those providers directly — NeuralBox takes zero cut. There's a built-in daily spending cap to prevent surprises.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q">Is the quality good enough to actually use? <div class="icon">+</div></div>
+        <div class="faq-a">The default model (Qwen 3.5 9B) produces results on par with GPT-3.5 for content creation tasks. TikTok hooks, email copy, and short-form scripts are where it excels. For longer, more complex work like full proposals, activating the cloud boost with Groq's free tier brings it to GPT-4 level — still free.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FINAL CTA -->
+<section class="cta-section" id="download">
+  <div class="wrap">
+    <div class="cta-box fade-up">
+      <div class="section-label" style="text-align:center">Ready to start?</div>
+      <div class="cta-title">Stop renting AI.<br><span class="shimmer">Own it.</span></div>
+      <p class="cta-sub">One install. 15+ tools. $0/month. Your private AI empire starts today.</p>
+      <a href="https://github.com/cyberoreo/local-ai/releases/latest" class="btn btn-gold btn-xl">
+        ⬇ Download NeuralBox — Free for Windows
+      </a>
+      <p class="cta-note">Windows 10/11 · Requires 12GB RAM + 25GB disk · Open source on GitHub</p>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="wrap">
+    <a href="#" class="footer-logo">
+      <div class="logo-icon" style="width:28px;height:28px;font-size:14px">🧠</div>
+      <span class="logo-text">NeuralBox</span>
+    </a>
+    <div class="footer-links">
+      <a href="https://github.com/cyberoreo/local-ai">GitHub</a>
+      <a href="https://github.com/cyberoreo/local-ai/releases">Releases</a>
+      <a href="https://github.com/cyberoreo/local-ai/blob/main/PRIVACY.md">Privacy</a>
+      <a href="https://github.com/cyberoreo/local-ai/blob/main/TERMS.md">Terms</a>
+      <a href="https://github.com/cyberoreo/local-ai/blob/main/SUPPORT.md">Support</a>
+    </div>
+    <p class="footer-copy">© 2025 NeuralBox · Open source · Built for creators who want to own their tools</p>
+  </div>
+</footer>
+
+<script>
+// Typewriter demo
+const phrases=[
+  '"I made $4k last month using one AI tool nobody talks about."',
+  'Hook → Script → Caption → Hashtags — done in 8 seconds.',
+  '"Stop renting AI tools. This one lives on YOUR computer."',
+  'Generate a full TikTok content package for free. Forever.',
+];
+let pi=0,ci=0,del=false;
+const el=document.getElementById('typing-text');
+function type(){
+  const phrase=phrases[pi];
+  if(!del){
+    el.textContent=phrase.slice(0,++ci);
+    if(ci===phrase.length){del=true;setTimeout(type,2200);return;}
+  }else{
+    el.textContent=phrase.slice(0,--ci);
+    if(ci===0){del=false;pi=(pi+1)%phrases.length;setTimeout(type,400);return;}
+  }
+  setTimeout(type,del?28:52);
+}
+type();
+
+// FAQ accordion
+document.querySelectorAll('.faq-item').forEach(item=>{
+  item.querySelector('.faq-q').addEventListener('click',()=>{
+    const open=item.classList.contains('open');
+    document.querySelectorAll('.faq-item').forEach(i=>i.classList.remove('open'));
+    if(!open)item.classList.add('open');
+  });
+});
+
+// Scroll animations
+const obs=new IntersectionObserver(entries=>{
+  entries.forEach(e=>{if(e.isIntersecting)e.target.classList.add('visible')});
+},{threshold:.12});
+document.querySelectorAll('.fade-up').forEach(el=>obs.observe(el));
+
+// Nav scroll effect
+window.addEventListener('scroll',()=>{
+  document.querySelector('nav').style.background=
+    window.scrollY>60?'rgba(4,3,12,.92)':'rgba(4,3,12,.7)';
+},{ passive:true });
+</script>
+</body>
+</html>
