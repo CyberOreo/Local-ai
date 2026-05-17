@@ -1,0 +1,78 @@
+name: Build & Release NeuralBox
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Build clean Windows ZIP
+        run: |
+          mkdir -p neuralbox_release
+
+          # Entry point — first thing user sees
+          cp "! INSTALL NEURALBOX.bat" neuralbox_release/
+          cp start.bat neuralbox_release/
+
+          # Core engine
+          cp -r _engine neuralbox_release/
+
+          # Hub (Node.js portal)
+          cp -r hub neuralbox_release/
+
+          # Config & defaults
+          cp -r config neuralbox_release/
+
+          # Assets (icons etc)
+          if [ -d assets ]; then cp -r assets neuralbox_release/; fi
+
+          # Empty logs folder
+          mkdir -p neuralbox_release/logs
+
+          # Package
+          ZIP_NAME="NeuralBox-${{ github.ref_name }}-Windows.zip"
+          cd neuralbox_release
+          zip -r "../$ZIP_NAME" .
+          cd ..
+          echo "ZIP_NAME=$ZIP_NAME" >> $GITHUB_ENV
+          echo "Built: $(du -sh $ZIP_NAME)"
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          name: "NeuralBox ${{ github.ref_name }}"
+          files: ${{ env.ZIP_NAME }}
+          body: |
+            ## NeuralBox ${{ github.ref_name }} — Your Private AI Empire
+
+            ### Install in 3 steps:
+            1. Download `${{ env.ZIP_NAME }}` below
+            2. Extract to any folder (e.g. `C:\NeuralBox\`)
+            3. Double-click **`! INSTALL NEURALBOX.bat`**
+
+            The installer handles everything automatically:
+            - Installs Ollama (AI engine)
+            - Downloads Qwen 3.5 9B model (~5 GB, one-time)
+            - Sets up Open WebUI in Docker
+            - Opens your private AI hub at `localhost:8080`
+
+            ### Requirements
+            - Windows 10 / 11
+            - 12 GB RAM minimum (16 GB recommended)
+            - 25 GB free disk space
+            - [Docker Desktop](https://www.docker.com/products/docker-desktop/) (free)
+
+            ### First launch takes 10–20 min (model download). Every launch after that: ~30 seconds.
+
+            ---
+            🌐 [Landing page](https://cyberoreo.github.io/local-ai) ·
+            ⭐ [Star on GitHub](https://github.com/cyberoreo/local-ai)

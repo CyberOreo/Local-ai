@@ -1,0 +1,14 @@
+# Files excluded from GitHub's "Download ZIP" button
+# (Use the Release ZIP instead — it's already clean)
+.gitattributes    export-ignore
+.gitignore        export-ignore
+.github/          export-ignore
+app/              export-ignore
+docs/             export-ignore
+build.bat         export-ignore
+CHANGELOG.md      export-ignore
+PRIVACY.md        export-ignore
+SECURITY.md       export-ignore
+SUPPORT.md        export-ignore
+TERMS.md          export-ignore
+THIRD_PARTY_NOTICES.md export-ignore
