@@ -32,7 +32,7 @@ echo.
 echo  Starting installer...
 echo.
 
-powershell -ExecutionPolicy Bypass -File "%~dp0install.ps1" -ProjectRoot "%~dp0"
+powershell -ExecutionPolicy Bypass -File "%~dp0install.ps1" -ProjectRoot "%~dp0.."
 
 if %errorLevel% neq 0 (
     echo.
