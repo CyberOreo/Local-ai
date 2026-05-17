@@ -7,8 +7,14 @@
 # ============================================================
 
 param(
-    [string]$ProjectRoot = $PSScriptRoot
+    [string]$ProjectRoot = (Split-Path -Parent $PSScriptRoot)
 )
+
+# Self-elevate to admin if not already
+if (-not ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)) {
+    Start-Process PowerShell -ArgumentList "-NoProfile -ExecutionPolicy Bypass -File `"$PSCommandPath`" -ProjectRoot `"$ProjectRoot`"" -Verb RunAs -Wait
+    exit
+}
 
 # Normalize project root path
 $ProjectRoot = $ProjectRoot.TrimEnd('\').TrimEnd('/')
