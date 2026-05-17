@@ -2048,7 +2048,7 @@ function updateStreak(){
   if(el)animateCount(el,count);
   if(sub)sub.textContent=count===1?'start your streak!':count>=7?'🔥 on fire!':'days in a row';
   if(count>=7&&!sessionStorage.getItem('streak_toast')){
-    setTimeout(()=>toast('🔥 '+count+'-day streak! You're crushing it.','warn',4000),2000);
+    setTimeout(()=>toast('🔥 '+count+'-day streak! You\'re crushing it.','warn',4000),2000);
     sessionStorage.setItem('streak_toast','1');
   }
 }
@@ -2108,7 +2108,7 @@ if(_origObStart){
         const first=document.querySelector('.money-card[data-tool="tiktok_engine"]');
         if(first){
           first.click();
-          toast('🎵 Let's create your first TikTok hook — fill in your niche!','info',5000);
+          toast('🎵 Let\'s create your first TikTok hook — fill in your niche!','info',5000);
         }
       },400);
     },300);
