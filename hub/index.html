@@ -1106,7 +1106,7 @@ let lastDiagData={};
 function $(id){return document.getElementById(id);}
 function fmtUptime(s){if(s<60)return 'just started';const m=Math.floor(s/60)%60,h=Math.floor(s/3600);return h>0?`${h}h ${m}m`:`${m}m`;}
 function fmtDate(iso){if(!iso)return '';const d=new Date(iso),now=new Date();const diff=now-d;if(diff<86400000&&d.toDateString()===now.toDateString())return 'Today '+d.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});if(diff<172800000)return 'Yesterday';return d.toLocaleDateString([],{month:'short',day:'numeric'});}
-function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');}
 function showSpinner(btn){btn._origText=btn.innerHTML;btn.innerHTML='<span class="spinner"></span>';btn.disabled=true;}
 function hideSpinner(btn,text){btn.innerHTML=text||btn._origText||'Done';btn.disabled=false;}
 function showErr(elId,msg){const el=$(elId);if(el){el.textContent=msg;el.style.display='block';}}
@@ -1242,7 +1242,7 @@ async function loadRecent(){
         </div>
         <div style="display:flex;align-items:center;gap:8px">
           ${costBadgeHTML(h.cost_label)}
-          <button class="btn btn-ghost btn-sm" onclick="copyText('${esc(h.content||'')}',event)">Copy</button>
+          <button class="btn btn-ghost btn-sm" data-copy="${esc(h.content||'')}" onclick="copyToClipboard(this.dataset.copy,event)">Copy</button>
         </div>
       </div>`).join('');
   }catch{}
@@ -1436,7 +1436,7 @@ function renderWorkerQueue(queue){
         </div>
       </td>
       <td>
-        ${j.result?`<button class="btn btn-ghost btn-sm" onclick="showWorkerResult('${esc(j.id)}','${esc(j.title||j.type)}',this)">View</button>`:''}
+        ${j.result?`<button class="btn btn-ghost btn-sm" data-wid="${esc(j.id)}" data-wtitle="${esc(j.title||j.type)}" onclick="showWorkerResult(this.dataset.wid,this.dataset.wtitle,this)">View</button>`:''}
         ${j.error?`<span style="color:var(--red);font-size:11px">${esc(j.error.slice(0,40))}</span>`:''}
       </td>
     </tr>`).join('');

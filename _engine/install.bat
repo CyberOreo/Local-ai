@@ -22,6 +22,8 @@ if %errorLevel% neq 0 (
     echo  [!] Restarting with elevated permissions...
     echo.
     powershell -Command "Start-Process -FilePath '%~f0' -Verb RunAs"
+    echo  Waiting for elevated installer window...
+    pause
     exit /b
 )
 
