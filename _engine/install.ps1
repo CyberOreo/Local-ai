@@ -10,14 +10,14 @@ param(
     [string]$ProjectRoot = (Split-Path -Parent $PSScriptRoot)
 )
 
+# Normalize project root path immediately so trailing \ never breaks argument re-passing
+$ProjectRoot = $ProjectRoot.TrimEnd('\').TrimEnd('/')
+
 # Self-elevate to admin if not already
 if (-not ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)) {
     Start-Process PowerShell -ArgumentList "-NoProfile -ExecutionPolicy Bypass -File `"$PSCommandPath`" -ProjectRoot `"$ProjectRoot`"" -Verb RunAs -Wait
     exit
 }
-
-# Normalize project root path
-$ProjectRoot = $ProjectRoot.TrimEnd('\').TrimEnd('/')
 $LogDir      = Join-Path $ProjectRoot "logs"
 $LogFile     = Join-Path $LogDir "install.log"
 $ConfigDir   = Join-Path $ProjectRoot "config"
